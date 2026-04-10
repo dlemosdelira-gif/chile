@@ -213,6 +213,8 @@
     }
 
     /* ── eye toggle ── */
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .weather-loading{display:inline-block;animation:spin 1s linear infinite}
     #eye-btn{
       background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.2);
       border-radius:8px;padding:5px 10px;color:#fff;font-size:12px;
@@ -239,7 +241,14 @@
       <button onclick="openSettings()" style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 10px;color:#fff;font-size:12px;cursor:pointer;font-weight:600">✏️</button>
     </div>
   </div>
-  <div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:0">03 jul → 08 jul · Santiago · Ida 10h20 · Volta 17h05</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="font-size:10px;color:rgba(255,255,255,.6)">03 jul → 08 jul · Ida 10h20 · Volta 17h05</div>
+    <div id="weather-pill" style="display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.22);border:1px solid rgba(255,255,255,0.18);border-radius:99px;padding:4px 10px;cursor:pointer" onclick="fetchWeather()" title="Atualizar temperatura">
+      <span id="weather-icon" style="font-size:14px">⏳</span>
+      <span id="weather-temp" style="font-size:12px;font-weight:700;color:#fff">--°C</span>
+      <span id="weather-desc" style="font-size:10px;color:rgba(255,255,255,.65)">Santiago</span>
+    </div>
+  </div>
 
   <div id="nomad-card">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
@@ -810,6 +819,63 @@ function renderAll(){renderHeader();renderCategories();renderExpenses();renderIt
 
 populateForm();
 renderAll();
+
+/* ── WEATHER (Open-Meteo, Santiago de Chile) ── */
+const WMO_ICONS = {
+  0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
+  45:'🌫️', 48:'🌫️',
+  51:'🌦️', 53:'🌦️', 55:'🌧️',
+  61:'🌧️', 63:'🌧️', 65:'🌧️',
+  71:'🌨️', 73:'🌨️', 75:'❄️',
+  77:'❄️', 80:'🌦️', 81:'🌧️', 82:'⛈️',
+  85:'🌨️', 86:'❄️',
+  95:'⛈️', 96:'⛈️', 99:'⛈️',
+};
+const WMO_DESC = {
+  0:'Céu limpo', 1:'Predominante limpo', 2:'Parcialmente nublado', 3:'Nublado',
+  45:'Neblina', 48:'Neblina c/ geada',
+  51:'Garoa leve', 53:'Garoa moderada', 55:'Garoa intensa',
+  61:'Chuva leve', 63:'Chuva moderada', 65:'Chuva forte',
+  71:'Neve leve', 73:'Neve moderada', 75:'Neve forte',
+  77:'Granizo', 80:'Pancadas leves', 81:'Pancadas moderadas', 82:'Pancadas fortes',
+  85:'Neve em pancadas', 86:'Neve intensa',
+  95:'Trovoada', 96:'Trovoada c/ granizo', 99:'Trovoada intensa',
+};
+
+async function fetchWeather(){
+  const icon=document.getElementById('weather-icon');
+  const temp=document.getElementById('weather-temp');
+  const desc=document.getElementById('weather-desc');
+  icon.className='weather-loading';
+  icon.textContent='⏳';
+  temp.textContent='...';
+  desc.textContent='Buscando';
+  try {
+    // Santiago de Chile: lat -33.4569, lon -70.6483
+    const url='https://api.open-meteo.com/v1/forecast?latitude=-33.4569&longitude=-70.6483&current=temperature_2m,weathercode,apparent_temperature&timezone=America%2FSantiago';
+    const res=await fetch(url);
+    const data=await res.json();
+    const t=Math.round(data.current.temperature_2m);
+    const feels=Math.round(data.current.apparent_temperature);
+    const code=data.current.weathercode;
+    icon.className='';
+    icon.textContent=WMO_ICONS[code]||'🌡️';
+    temp.textContent=t+'°C';
+    desc.textContent='Sensação '+feels+'°C';
+  } catch(e) {
+    icon.className='';
+    icon.textContent='❓';
+    temp.textContent='--°C';
+    desc.textContent='Sem conexão';
+  }
+}
+
+// Auto-fetch on load
+fetchWeather();
+// Refresh every 10 minutes
+setInterval(fetchWeather, 10*60*1000);
+
+
 </script>
 </body>
 </html>
