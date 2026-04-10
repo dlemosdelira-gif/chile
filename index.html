@@ -208,12 +208,9 @@
 
     /* ── hidden numbers ── */
     .hidden-val{
-      filter:blur(6px);
-      user-select:none;
-      transition:filter .3s;
       cursor:pointer;
+      letter-spacing:0.05em;
     }
-    .hidden-val.revealed{filter:none}
 
     /* ── eye toggle ── */
     #eye-btn{
@@ -287,7 +284,7 @@
         <div style="font-size:10px;color:#9AA0B8;margin-top:2px">Já pago — não sai da Nomad</div>
       </div>
       <div style="text-align:right">
-        <div id="decolar-val" class="hidden-val" style="font-size:15px;font-weight:800;color:#C0392B" onclick="toggleVisibility()">R$ 11.984,00</div>
+        <div id="decolar-val" class="hidden-val" data-real="R$ 11.984,00" style="font-size:15px;font-weight:800;color:#C0392B" onclick="toggleVisibility()">R$ 11.984,00</div>
         <div style="font-size:9px;background:#C0392B;color:#fff;padding:2px 8px;border-radius:99px;font-weight:700;margin-top:4px;display:inline-block">✓ PAGO</div>
       </div>
     </div>
@@ -504,39 +501,61 @@ function totals(){
   return{spent,left,pct};
 }
 
-/* ── visibility (hide/reveal numbers) ── */
+/* ── visibility (mask numbers with dots) ── */
+function mask(text){
+  // keep currency prefix, replace digits with ●
+  return text.replace(/[0-9]/g,'●');
+}
+
 function toggleVisibility(){
   S.visible=!S.visible;
   save();
   applyVisibility();
 }
+
 function applyVisibility(){
   document.querySelectorAll('.hidden-val').forEach(el=>{
-    el.classList.toggle('revealed',S.visible);
+    const stored = el.getAttribute('data-real');
+    if(!stored) return; // no real value stored yet, skip
+    if(S.visible){
+      el.textContent = stored;
+    } else {
+      el.textContent = mask(stored);
+    }
   });
   document.getElementById('eye-icon').textContent=S.visible?'🙈':'👁';
   document.getElementById('eye-label').textContent=S.visible?'Visível':'Oculto';
+}
+
+/* Store real value on element and apply masking */
+function setHiddenVal(el, text){
+  el.setAttribute('data-real', text);
+  el.textContent = S.visible ? text : mask(text);
 }
 
 function renderHeader(){
   const {spent,left,pct}=totals();
   const barColor=pct>90?'#FF5555':pct>70?'#FFDD00':'#fff';
   const el=id=>document.getElementById(id);
-  el('hd-left-usd').textContent=fUSD(Math.max(left,0));
-  el('hd-spent-usd').textContent=fUSD(spent);
-  el('hd-total-usd').textContent='de '+fUSD(S.nomadUSD);
+  setHiddenVal(el('hd-left-usd'), fUSD(Math.max(left,0)));
+  el('hd-left-usd').style.color='#fff';
+  setHiddenVal(el('hd-spent-usd'), fUSD(spent));
+  setHiddenVal(el('hd-total-usd'), 'de '+fUSD(S.nomadUSD));
   el('hd-bar').style.width=pct+'%';
   el('hd-bar').style.background=barColor;
-  el('hd-pct').textContent=pct.toFixed(1)+'% usado';
+  setHiddenVal(el('hd-pct'), pct.toFixed(1)+'% usado');
+  const saldo=(left>=0?'Saldo: ':'Excedeu: ')+fUSD(Math.abs(left));
   const se=el('hd-saldo');
-  se.textContent=(left>=0?'Saldo: ':'Excedeu: ')+fUSD(Math.abs(left));
+  setHiddenVal(se, saldo);
   se.style.color=left>=0?'#fff':'#FFD0D0';
   const lb=Math.max(left,0)*S.usdRate,lc=lb/S.clpRate;
-  el('hd-brl').textContent=fBRL(lb);
-  el('hd-brl-gasto').textContent='gasto: '+fBRL(spent*S.usdRate);
-  el('hd-clp').textContent=fCLP(lc);
-  el('hd-clp-gasto').textContent='gasto: '+fCLP(spent*S.usdRate/S.clpRate);
-  applyVisibility();
+  setHiddenVal(el('hd-brl'), fBRL(lb));
+  setHiddenVal(el('hd-brl-gasto'), 'gasto: '+fBRL(spent*S.usdRate));
+  setHiddenVal(el('hd-clp'), fCLP(lc));
+  setHiddenVal(el('hd-clp-gasto'), 'gasto: '+fCLP(spent*S.usdRate/S.clpRate));
+  // decolar
+  const dv=document.getElementById('decolar-val');
+  if(dv) setHiddenVal(dv,'R$ 11.984,00');
 }
 
 function renderCategories(){
@@ -548,6 +567,8 @@ function renderCategories(){
       ?`<div style="background:#EEF0F6;border-radius:99px;height:5px;margin-top:8px"><div style="height:100%;width:${p}%;background:${cat.color};border-radius:99px;transition:width .4s"></div></div>`:''
     const prevSub=cat.budgeted>0
       ?`${fUSD(cat.budgeted)} <span style="color:#C0C8DC">· ${fBRL(cat.budgeted*S.usdRate)}</span>`:'—';
+    const spUSD=fUSD(spent),spBRL=fBRL(spent*S.usdRate);
+    const mSpUSD=S.visible?spUSD:mask(spUSD),mSpBRL=S.visible?spBRL:mask(spBRL);
     list.innerHTML+=`
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center">
@@ -559,14 +580,13 @@ function renderCategories(){
             </div>
           </div>
           <div style="text-align:right">
-            <div class="hidden-val" style="font-size:14px;font-weight:700;color:${cat.color}" onclick="toggleVisibility()">${fUSD(spent)}</div>
-            <div class="hidden-val" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${fBRL(spent*S.usdRate)}</div>
+            <div class="hidden-val" data-real="${spUSD}" style="font-size:14px;font-weight:700;color:${cat.color}" onclick="toggleVisibility()">${mSpUSD}</div>
+            <div class="hidden-val" data-real="${spBRL}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mSpBRL}</div>
             ${cat.budgeted>0?`<div style="font-size:9px;color:#C0C8DC">${p.toFixed(0)}% do prev.</div>`:''}
           </div>
         </div>${bar}
       </div>`;
   });
-  applyVisibility();
 }
 
 function renderExpenses(){
@@ -588,15 +608,14 @@ function renderExpenses(){
           <div style="font-size:10px;color:#B0B8CC">${exp.category} · ${exp.date}/07</div>${note}
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <div class="hidden-val" style="font-size:14px;font-weight:800;color:${color}" onclick="toggleVisibility()">${fUSD(exp.usd)}</div>
-          <div class="hidden-val" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${fBRL(exp.usd*S.usdRate)}</div>
-          <div class="hidden-val" style="font-size:9px;color:#C0C8DC" onclick="toggleVisibility()">${fCLP(exp.usd*S.usdRate/S.clpRate)}</div>
+          <div class="hidden-val" data-real="${fUSD(exp.usd)}" style="font-size:14px;font-weight:800;color:${color}" onclick="toggleVisibility()">${S.visible?fUSD(exp.usd):mask(fUSD(exp.usd))}</div>
+          <div class="hidden-val" data-real="${fBRL(exp.usd*S.usdRate)}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${S.visible?fBRL(exp.usd*S.usdRate):mask(fBRL(exp.usd*S.usdRate))}</div>
+          <div class="hidden-val" data-real="${fCLP(exp.usd*S.usdRate/S.clpRate)}" style="font-size:9px;color:#C0C8DC" onclick="toggleVisibility()">${S.visible?fCLP(exp.usd*S.usdRate/S.clpRate):mask(fCLP(exp.usd*S.usdRate/S.clpRate))}</div>
           ${orig}
         </div>
         <button class="del-exp" onclick="deleteExpense(${exp.id})">×</button>
       </div>`;
   });
-  applyVisibility();
 }
 
 function deleteExpense(id){S.expenses=S.expenses.filter(e=>e.id!==id);save();renderAll();showToast('Removido 🗑️');}
@@ -606,9 +625,11 @@ function renderItin(){
   S.itinerary.forEach(day=>{
     const key=day.date.slice(4);
     const spent=S.expenses.filter(e=>e.date===key).reduce((s,e)=>s+e.usd,0);
+    const itSpUSD=fUSD(spent),itSpBRL=fBRL(spent*S.usdRate);
+    const mItUSD=S.visible?itSpUSD:mask(itSpUSD),mItBRL=S.visible?itSpBRL:mask(itSpBRL);
     const spentHtml=spent>0
-      ?`<div class="hidden-val" style="font-size:13px;font-weight:700;color:#27AE60" onclick="toggleVisibility()">${fUSD(spent)}</div>
-        <div class="hidden-val" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${fBRL(spent*S.usdRate)}</div>`
+      ?`<div class="hidden-val" data-real="${itSpUSD}" style="font-size:13px;font-weight:700;color:#27AE60" onclick="toggleVisibility()">${mItUSD}</div>
+        <div class="hidden-val" data-real="${itSpBRL}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mItBRL}</div>`
       :`<div style="font-size:13px;font-weight:600;color:#D8DAE8">${fUSD(0)}</div>`;
     const acts=day.activities.map((a,j)=>
       `<div style="font-size:12px;color:#555E80;padding:4px 0;display:flex;align-items:center;gap:7px;${j<day.activities.length-1?'border-bottom:1px solid #F0F2F8':''}">
@@ -625,7 +646,6 @@ function renderItin(){
         </div>${acts}
       </div>`;
   });
-  applyVisibility();
 }
 
 function renderTips(){
