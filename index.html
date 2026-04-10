@@ -10,6 +10,9 @@
   <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIGZpbGw9IiNDMDM5MkIiIHJ4PSIzMiIvPjxwb2x5Z29uIHBvaW50cz0iOTAsMzYgMTAyLDcyIDE0MCw3MiAxMTAsOTQgMTIxLDEzMCA5MCwxMDggNTksMTMwIDcwLDk0IDQwLDcyIDc4LDcyIiBmaWxsPSIjZmZmIi8+PHRleHQgeD0iOTAiIHk9IjE2NSIgZm9udC1zaXplPSI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+HtfCfh7w8L3RleHQ+PC9zdmc+"/>
   <meta name="theme-color" content="#C0392B"/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html,body{background:#F5F6FA}
@@ -32,17 +35,15 @@
     .sub-display .val{font-size:13px;font-weight:700;color:#fff}
     .sub-display .sub{font-size:9px;color:rgba(255,255,255,.45);margin-top:1px}
 
-    /* FAB — botão flutuante + */
-    #fab{
-      position:fixed;bottom:90px;right:calc(50% - 226px);
-      width:52px;height:52px;border-radius:50%;
-      background:linear-gradient(135deg,#C0392B,#E74C3C);
-      border:none;color:#fff;font-size:26px;line-height:1;
-      box-shadow:0 4px 16px rgba(192,57,43,.45);
-      cursor:pointer;z-index:150;
-      display:flex;align-items:center;justify-content:center;
-      transition:transform .15s;
-    }
+    /* sync badge */
+    #sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.7);margin-left:6px;vertical-align:middle}
+    #sync-dot{width:7px;height:7px;border-radius:50%;background:#4FE89B;display:inline-block;transition:background .3s}
+    #sync-dot.syncing{background:#FFDD00;animation:pulse .8s infinite}
+    #sync-dot.error{background:#FF5555}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+    /* FAB */
+    #fab{position:fixed;bottom:90px;right:calc(50% - 226px);width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;color:#fff;font-size:26px;line-height:1;box-shadow:0 4px 16px rgba(192,57,43,.45);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;transition:transform .15s}
     #fab:active{transform:scale(.92)}
     @media(max-width:480px){#fab{right:18px}}
 
@@ -70,8 +71,6 @@
     .modal-overlay.open{display:flex}
     .modal-sheet{background:#F5F6FA;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
     .modal-title{font-size:15px;font-weight:800;color:#1A1A2E;margin-bottom:18px}
-
-    /* buttons */
     .btn-primary{background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;padding:12px;width:100%}
     .btn-secondary{background:#EEF0F6;border:none;border-radius:10px;color:#555E80;font-size:14px;cursor:pointer;padding:12px;width:100%}
 
@@ -91,36 +90,31 @@
     .row2>div:first-child{flex:2}
     .sub-conv{display:flex;gap:8px;margin-top:8px}
     .sub-conv>div{flex:1;background:#F5F6FA;border-radius:8px;padding:7px 10px;font-size:11px;color:#555E80;border:1px solid #E8EAF2}
-
-    /* config */
     .sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #E8EAF2}
     .sum-row:last-child{border:none}
     .sum-label{font-size:12px;color:#9AA0B8}
     .sum-val{font-size:13px;font-weight:700;color:#1A1A2E;text-align:right}
     .sum-sub{font-size:9px;color:#B0B8CC}
-
-    /* itin edit */
     .act-text{flex:1;font-size:12px;background:#F5F6FA;border-radius:8px;padding:7px 10px;color:#333;border:1px solid #E0E4EE}
     .act-del{background:#FEF0F0;border:1px solid #FACACA;border-radius:7px;color:#C0392B;font-size:14px;cursor:pointer;padding:6px 10px;flex-shrink:0}
     .del-exp{background:none;border:none;color:#E74C3C;font-size:18px;cursor:pointer;padding:0 0 0 4px;flex-shrink:0;line-height:1}
     .edit-exp{background:none;border:none;color:#B0B8CC;font-size:15px;cursor:pointer;padding:0;flex-shrink:0;line-height:1}
     #expense-empty{text-align:center;color:#C0C8DE;padding:40px;display:none}
-
-    /* hidden numbers */
     .hidden-val{cursor:pointer;letter-spacing:.05em}
-
-    /* eye & weather */
     @keyframes spin{to{transform:rotate(360deg)}}
     .weather-loading{display:inline-block;animation:spin 1s linear infinite}
     #eye-btn{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:5px 10px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
 
-    /* cash badge */
-    .cash-badge{background:rgba(0,0,0,.18);border-radius:9px;padding:8px 10px;flex:1;border:1px solid rgba(255,255,255,.12)}
-    .cash-badge .lbl{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px;margin-bottom:2px}
-    .cash-badge .val{font-size:13px;font-weight:700;color:#fff}
-
-    /* total combined bar */
-    #total-bar-wrap{background:rgba(0,0,0,.22);border-radius:12px;padding:11px 14px;margin-top:10px;border:1px solid rgba(255,255,255,.1)}
+    /* simulador */
+    .sim-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .sim-inp-wrap{position:relative}
+    .sim-flag{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+    .sim-inp{padding-left:38px!important}
+    .sim-result{background:#F5F6FA;border-radius:10px;padding:12px 14px;margin-top:10px}
+    .sim-result-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+    .sim-result-row:not(:last-child){border-bottom:1px solid #E8EAF2}
+    .sim-cur{font-size:12px;color:#9AA0B8;display:flex;align-items:center;gap:5px}
+    .sim-val{font-size:15px;font-weight:700;color:#1A1A2E}
   </style>
 </head>
 <body>
@@ -128,10 +122,13 @@
 <!-- HEADER -->
 <div id="header">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
-    <div style="display:flex;align-items:center;gap:10px">
+    <div style="display:flex;align-items:center;gap:8px">
       <span style="font-size:26px">🇨🇱</span>
       <div>
-        <div style="font-size:10px;color:rgba(255,255,255,.75);letter-spacing:2px;text-transform:uppercase">Minha Viagem</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.75);letter-spacing:2px;text-transform:uppercase">
+          Minha Viagem
+          <span id="sync-badge"><span id="sync-dot"></span><span id="sync-label">sync</span></span>
+        </div>
         <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.1">Chile 2025</div>
       </div>
     </div>
@@ -139,7 +136,6 @@
       <button id="eye-btn" onclick="toggleVisibility()">
         <span id="eye-icon">👁</span><span id="eye-label">Oculto</span>
       </button>
-      <!-- ✏️ lápis abre modal de configurações -->
       <button onclick="openSettings()" style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 10px;color:#fff;font-size:14px;cursor:pointer;line-height:1">✏️</button>
     </div>
   </div>
@@ -154,17 +150,15 @@
     </div>
   </div>
 
-  <!-- Saldo principal: TOTAL = Nomad + Cash -->
+  <!-- SALDO PRINCIPAL -->
   <div id="nomad-card">
-
-    <!-- DESTAQUE: soma total -->
     <div style="margin-bottom:12px">
       <div style="font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1.5px;margin-bottom:4px">💰 SALDO DISPONÍVEL TOTAL</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-end">
         <div>
           <div id="hd-total-combined" class="hidden-val" style="font-size:32px;font-weight:800;line-height:1;color:#fff" onclick="toggleVisibility()">US$ 1.000,00</div>
           <div id="hd-total-brl" class="hidden-val" style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px" onclick="toggleVisibility()">R$ 5.110,00</div>
-          <div id="hd-total-clp" class="hidden-val" style="font-size:11px;color:rgba(255,255,255,.45);margin-top:1px" onclick="toggleVisibility()">$ 89.649.123 CLP</div>
+          <div id="hd-total-clp" class="hidden-val" style="font-size:11px;color:rgba(255,255,255,.45);margin-top:1px" onclick="toggleVisibility()">$ 0 CLP</div>
         </div>
         <div style="text-align:right;padding-bottom:2px">
           <div style="font-size:9px;color:rgba(255,255,255,.5);margin-bottom:2px">GASTO ATÉ AGORA</div>
@@ -173,8 +167,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Barra de progresso do total -->
     <div class="progress-wrap" style="height:7px;margin-bottom:7px;background:rgba(255,255,255,.2)">
       <div id="hd-bar" class="progress-bar" style="height:7px;background:#fff;width:0%"></div>
     </div>
@@ -182,8 +174,6 @@
       <span id="hd-pct" class="hidden-val" style="color:rgba(255,255,255,.65)" onclick="toggleVisibility()">0.0% usado</span>
       <span id="hd-saldo" class="hidden-val" style="color:#fff;font-weight:600" onclick="toggleVisibility()">Saldo: US$ 1.000,00</span>
     </div>
-
-    <!-- Detalhe: Nomad + Cash separados -->
     <div style="display:flex;gap:8px">
       <div class="sub-display">
         <div class="lbl">💳 NOMAD</div>
@@ -201,7 +191,7 @@
   </div>
 </div>
 
-<!-- FAB: adicionar gasto em qualquer tela -->
+<!-- FAB -->
 <button id="fab" onclick="openExpenseModal()" title="Adicionar gasto">＋</button>
 
 <!-- TAB: RESUMO -->
@@ -250,6 +240,64 @@
   <div id="tips-list"></div>
 </div>
 
+<!-- TAB: SIMULADOR -->
+<div id="tab-simulador" class="tab">
+  <div class="section-title">💱 Simulador de Câmbio</div>
+
+  <div class="sim-card">
+    <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:12px">Digite o valor e veja as conversões</div>
+    <div style="margin-bottom:12px">
+      <div class="card-label">Moeda de origem</div>
+      <select id="sim-from" class="inp" onchange="calcSim()">
+        <option value="USD">🇺🇸 Dólar (USD)</option>
+        <option value="BRL">🇧🇷 Real (BRL)</option>
+        <option value="CLP">🇨🇱 Peso Chileno (CLP)</option>
+      </select>
+    </div>
+    <div class="sim-inp-wrap">
+      <input id="sim-amount" class="inp sim-inp" type="number" inputmode="decimal" placeholder="0,00" oninput="calcSim()" style="font-size:22px;font-weight:700;padding-left:44px"/>
+      <span id="sim-flag" class="sim-flag">🇺🇸</span>
+    </div>
+    <div class="sim-result" id="sim-result" style="display:none">
+      <div class="sim-result-row">
+        <div class="sim-cur"><span id="sim-r1-flag">🇧🇷</span><span id="sim-r1-label">Real (BRL)</span></div>
+        <div id="sim-r1-val" class="sim-val">R$ 0,00</div>
+      </div>
+      <div class="sim-result-row">
+        <div class="sim-cur"><span id="sim-r2-flag">🇨🇱</span><span id="sim-r2-label">Peso (CLP)</span></div>
+        <div id="sim-r2-val" class="sim-val">$ 0 CLP</div>
+      </div>
+      <div class="sim-result-row">
+        <div class="sim-cur"><span id="sim-r3-flag">🇺🇸</span><span id="sim-r3-label">Dólar (USD)</span></div>
+        <div id="sim-r3-val" class="sim-val">US$ 0,00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sim-card" style="background:#FEF9F0;border:1px solid #F5DEB3">
+    <div style="font-size:11px;font-weight:700;color:#9AA0B8;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">📌 TAXAS CONFIGURADAS</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:120px;background:#fff;border-radius:10px;padding:10px 12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <div style="font-size:10px;color:#9AA0B8;margin-bottom:3px">🇧🇷 1 BRL =</div>
+        <div id="sim-rate-clp" style="font-size:14px;font-weight:700;color:#1A1A2E">0 CLP</div>
+      </div>
+      <div style="flex:1;min-width:120px;background:#fff;border-radius:10px;padding:10px 12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <div style="font-size:10px;color:#9AA0B8;margin-bottom:3px">🇺🇸 1 USD =</div>
+        <div id="sim-rate-brl" style="font-size:14px;font-weight:700;color:#1A1A2E">R$ 0,00</div>
+      </div>
+      <div style="flex:1;min-width:120px;background:#fff;border-radius:10px;padding:10px 12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <div style="font-size:10px;color:#9AA0B8;margin-bottom:3px">🇨🇱 1 USD =</div>
+        <div id="sim-rate-clp2" style="font-size:14px;font-weight:700;color:#1A1A2E">0 CLP</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:#B0B8CC;margin-top:10px;text-align:center">Altere as taxas na aba Config ou no ✏️ do topo</div>
+  </div>
+
+  <!-- atalhos rápidos -->
+  <div class="section-title">⚡ Atalhos Rápidos</div>
+  <div id="sim-shortcuts" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
+</div>
+
 <!-- TAB: CONFIG -->
 <div id="tab-config" class="tab">
   <div class="section-title">Configurações</div>
@@ -285,10 +333,13 @@
     <div id="cfg-summary"></div>
   </div>
   <button onclick="saveConfig()" class="btn-primary" style="margin-bottom:10px">💾 Salvar Configurações</button>
-  <button onclick="clearExpenses()" style="width:100%;padding:12px;background:#FEF0F0;border:1px solid #FACACA;border-radius:11px;color:#C0392B;font-size:13px;cursor:pointer">🗑️ Apagar todos os gastos</button>
+  <button onclick="clearExpenses()" style="width:100%;padding:12px;background:#FEF0F0;border:1px solid #FACACA;border-radius:11px;color:#C0392B;font-size:13px;cursor:pointer;margin-bottom:10px">🗑️ Apagar todos os gastos</button>
+  <div style="text-align:center;font-size:10px;color:#B0B8CC;padding:8px 0">
+    🔥 Sincronizando via Firebase · Projeto: chile-79c9b
+  </div>
 </div>
 
-<!-- MODAL: Configurações (lápis header) -->
+<!-- MODAL: Configurações (lápis) -->
 <div id="modal-settings" class="modal-overlay" onclick="if(event.target===this)closeSettings()">
   <div class="modal-sheet">
     <div class="modal-title">⚙️ Editar Configurações</div>
@@ -380,16 +431,33 @@
   <button class="nav-btn active" onclick="setTab('resumo',this)"><span>📊</span><span>Resumo</span></button>
   <button class="nav-btn" onclick="setTab('gastos',this)"><span>💰</span><span>Gastos</span></button>
   <button class="nav-btn" onclick="setTab('roteiro',this)"><span>🗓️</span><span>Roteiro</span></button>
-  <button class="nav-btn" onclick="setTab('dicas',this)"><span>💡</span><span>Dicas</span></button>
+  <button class="nav-btn" onclick="setTab('simulador',this)"><span>💱</span><span>Câmbio</span></button>
   <button class="nav-btn" onclick="setTab('config',this)"><span>⚙️</span><span>Config</span></button>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ══ STATE ══
-const STORAGE_KEY='chile_trip_v6';
-const DEFAULT_STATE={
+// ══════════════════════════════════════
+// FIREBASE CONFIG
+// ══════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyDQYedIgSkGx-B3bXWjemygh7-kytlCcto",
+  authDomain: "chile-79c9b.firebaseapp.com",
+  databaseURL: "https://chile-79c9b-default-rtdb.firebaseio.com",
+  projectId: "chile-79c9b",
+  storageBucket: "chile-79c9b.firebasestorage.app",
+  messagingSenderId: "938831871392",
+  appId: "1:938831871392:web:9a74b61aaaf7111f92f8c5"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const REF = db.ref('chile2025');
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+const DEFAULT_STATE = {
   nomadUSD:1000, cashUSD:0, usdRate:5.11, clpRate:0.057,
   visible:false,
   categories:[
@@ -419,105 +487,147 @@ const DEFAULT_STATE={
   ],
 };
 
-let S=(()=>{
-  try{const s=localStorage.getItem(STORAGE_KEY);if(s)return{...DEFAULT_STATE,...JSON.parse(s)};}catch{}
-  return{...DEFAULT_STATE};
-})();
-// migrate old key
-if(!S.cashUSD) S.cashUSD=0;
+let S = {...DEFAULT_STATE};
+let isSaving = false;   // prevent echo loop
 
-function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(S));}catch{}}
+// ══════════════════════════════════════
+// SYNC — Firebase Realtime DB
+// ══════════════════════════════════════
+function setSyncStatus(status){
+  const dot=document.getElementById('sync-dot');
+  const lbl=document.getElementById('sync-label');
+  dot.className='';
+  if(status==='ok'){dot.style.background='#4FE89B';lbl.textContent='sync';}
+  else if(status==='syncing'){dot.className='syncing';dot.style.background='';lbl.textContent='salvando';}
+  else if(status==='offline'){dot.style.background='#FFAA00';lbl.textContent='offline';}
+  else{dot.className='error';lbl.textContent='erro';}
+}
 
-// ══ FORMATTERS ══
-const fUSD=v=>`US$ ${Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-const fBRL=v=>`R$ ${Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-const fCLP=v=>`$ ${Math.round(Number(v)).toLocaleString('pt-BR')} CLP`;
+// Listen for remote changes — runs on every device
+REF.on('value', snapshot => {
+  const data = snapshot.val();
+  if (!data) { save(); return; } // first time: push defaults
+  if (isSaving) return;          // skip our own writes
+  // Merge: keep local visibility pref, take everything else from DB
+  const localVisible = S.visible;
+  S = { ...DEFAULT_STATE, ...data, visible: localVisible };
+  if (!S.cashUSD) S.cashUSD = 0;
+  renderAll();
+  setSyncStatus('ok');
+}, err => {
+  console.error(err);
+  setSyncStatus('error');
+});
 
-function toUSD(amount,currency){
-  const n=Number(amount);
-  if(currency==='USD')return n;
-  if(currency==='BRL')return n/S.usdRate;
-  if(currency==='CLP')return(n*S.clpRate)/S.usdRate;
+// Check online/offline
+window.addEventListener('online',  () => setSyncStatus('ok'));
+window.addEventListener('offline', () => setSyncStatus('offline'));
+
+function save(){
+  isSaving = true;
+  setSyncStatus('syncing');
+  // Don't sync visibility — it's a per-device pref
+  const toSave = {...S};
+  delete toSave.visible;
+  REF.set(toSave)
+    .then(() => { setSyncStatus('ok'); })
+    .catch(() => { setSyncStatus('error'); })
+    .finally(() => { setTimeout(() => isSaving = false, 300); });
+}
+
+// ══════════════════════════════════════
+// FORMATTERS
+// ══════════════════════════════════════
+const fUSD = v => `US$ ${Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+const fBRL = v => `R$ ${Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+const fCLP = v => `$ ${Math.round(Number(v)).toLocaleString('pt-BR')} CLP`;
+
+function toUSD(amount, currency){
+  const n = Number(amount);
+  if(currency==='USD') return n;
+  if(currency==='BRL') return n / S.usdRate;
+  if(currency==='CLP') return (n * S.clpRate) / S.usdRate;
   return n;
 }
 function totals(){
-  const spent=S.expenses.reduce((s,e)=>s+e.usd,0);
-  const left=S.nomadUSD-spent;
-  const pct=Math.min((spent/(S.nomadUSD||1))*100,100);
-  return{spent,left,pct};
+  const spent = S.expenses.reduce((s,e) => s + e.usd, 0);
+  const left  = S.nomadUSD - spent;
+  const pct   = Math.min((spent / (S.nomadUSD||1)) * 100, 100);
+  return {spent, left, pct};
 }
 
-// ══ VISIBILITY ══
-function mask(t){return t.replace(/[0-9]/g,'●')}
-function setHV(el,text){
-  if(!el)return;
-  el.setAttribute('data-real',text);
-  el.textContent=S.visible?text:mask(text);
+// ══════════════════════════════════════
+// VISIBILITY
+// ══════════════════════════════════════
+function mask(t){ return t.replace(/[0-9]/g,'●'); }
+function setHV(el, text){
+  if(!el) return;
+  el.setAttribute('data-real', text);
+  el.textContent = S.visible ? text : mask(text);
 }
-function toggleVisibility(){S.visible=!S.visible;save();applyVisibility();}
+function toggleVisibility(){
+  S.visible = !S.visible;
+  // save visibility locally only
+  try { localStorage.setItem('chile_visible', S.visible); } catch{}
+  applyVisibility();
+}
 function applyVisibility(){
-  document.querySelectorAll('.hidden-val').forEach(el=>{
-    const r=el.getAttribute('data-real');
-    if(r)el.textContent=S.visible?r:mask(r);
+  document.querySelectorAll('.hidden-val').forEach(el => {
+    const r = el.getAttribute('data-real');
+    if(r) el.textContent = S.visible ? r : mask(r);
   });
-  document.getElementById('eye-icon').textContent=S.visible?'🙈':'👁';
-  document.getElementById('eye-label').textContent=S.visible?'Visível':'Oculto';
+  document.getElementById('eye-icon').textContent  = S.visible ? '🙈' : '👁';
+  document.getElementById('eye-label').textContent = S.visible ? 'Visível' : 'Oculto';
 }
 
-// ══ RENDER HEADER ══
+// ══════════════════════════════════════
+// RENDER HEADER
+// ══════════════════════════════════════
 function renderHeader(){
-  const {spent,left,pct}=totals();
-  const nomadLeft=Math.max(left,0);
-  const total=nomadLeft+S.cashUSD;           // saldo total = nomad restante + cash
-  const totalBRL=total*S.usdRate;
-  const totalCLP=totalBRL/S.clpRate;
-  // progress = gasto / orçamento nomad original
-  const pctTotal=Math.min((spent/(S.nomadUSD||1))*100,100);
-  const barColor=pctTotal>90?'#FF5555':pctTotal>70?'#FFDD00':'#fff';
-  const el=id=>document.getElementById(id);
+  const {spent, left, pct} = totals();
+  const nomadLeft  = Math.max(left, 0);
+  const total      = nomadLeft + S.cashUSD;
+  const totalBRL   = total * S.usdRate;
+  const totalCLP   = totalBRL / S.clpRate;
+  const pctT       = Math.min((spent / (S.nomadUSD||1)) * 100, 100);
+  const barColor   = pctT > 90 ? '#FF5555' : pctT > 70 ? '#FFDD00' : '#fff';
+  const el         = id => document.getElementById(id);
 
-  // ── DESTAQUE: total combinado ──
-  setHV(el('hd-total-combined'),fUSD(total));
-  setHV(el('hd-total-brl'),fBRL(totalBRL));
-  setHV(el('hd-total-clp'),fCLP(totalCLP));
-
-  // ── gasto ──
-  setHV(el('hd-spent-usd'),fUSD(spent));
-  setHV(el('hd-spent-brl'),fBRL(spent*S.usdRate));
-
-  // ── barra e % ──
-  el('hd-bar').style.width=pctTotal+'%';
-  el('hd-bar').style.background=barColor;
-  setHV(el('hd-pct'),pctTotal.toFixed(1)+'% da Nomad usado');
-  const saldo=(total>=0?'Saldo: ':'Excedeu: ')+fUSD(Math.abs(total));
-  const se=el('hd-saldo');
-  setHV(se,saldo);se.style.color=total>0?'#fff':'#FFD0D0';
-
-  // ── detalhe Nomad ──
-  setHV(el('hd-left-usd'),fUSD(nomadLeft));
-  setHV(el('hd-brl'),fBRL(nomadLeft*S.usdRate));
-  setHV(el('hd-brl-gasto'),'gasto: '+fBRL(spent*S.usdRate));
-
-  // ── detalhe Cash ──
-  setHV(el('hd-cash-usd'),fUSD(S.cashUSD));
-  setHV(el('hd-cash-brl'),fBRL(S.cashUSD*S.usdRate));
-  setHV(el('hd-clp'),fCLP(S.cashUSD*S.usdRate/S.clpRate));
-
-  // ── decolar badge ──
-  const dv=el('decolar-val');if(dv)setHV(dv,'R$ 11.984,00');
+  setHV(el('hd-total-combined'), fUSD(total));
+  setHV(el('hd-total-brl'),      fBRL(totalBRL));
+  setHV(el('hd-total-clp'),      fCLP(totalCLP));
+  setHV(el('hd-spent-usd'),      fUSD(spent));
+  setHV(el('hd-spent-brl'),      fBRL(spent * S.usdRate));
+  el('hd-bar').style.width       = pctT + '%';
+  el('hd-bar').style.background  = barColor;
+  setHV(el('hd-pct'),  pctT.toFixed(1) + '% da Nomad usado');
+  const saldo = (total >= 0 ? 'Saldo: ' : 'Excedeu: ') + fUSD(Math.abs(total));
+  const se = el('hd-saldo');
+  setHV(se, saldo); se.style.color = total > 0 ? '#fff' : '#FFD0D0';
+  setHV(el('hd-left-usd'),   fUSD(nomadLeft));
+  setHV(el('hd-brl'),        fBRL(nomadLeft * S.usdRate));
+  setHV(el('hd-brl-gasto'),  'gasto: ' + fBRL(spent * S.usdRate));
+  setHV(el('hd-cash-usd'),   fUSD(S.cashUSD));
+  setHV(el('hd-cash-brl'),   fBRL(S.cashUSD * S.usdRate));
+  setHV(el('hd-clp'),        fCLP(S.cashUSD * S.usdRate / S.clpRate));
+  const dv = el('decolar-val'); if(dv) setHV(dv, 'R$ 11.984,00');
 }
 
-// ══ RENDER CATEGORIES ══
+// ══════════════════════════════════════
+// RENDER CATEGORIES
+// ══════════════════════════════════════
 function renderCategories(){
-  const list=document.getElementById('cat-list');list.innerHTML='';
-  S.categories.forEach(cat=>{
-    const spent=S.expenses.filter(e=>e.category===cat.category).reduce((s,e)=>s+e.usd,0);
-    const p=cat.budgeted>0?Math.min((spent/cat.budgeted)*100,100):0;
-    const bar=cat.budgeted>0?`<div style="background:#EEF0F6;border-radius:99px;height:5px;margin-top:8px"><div style="height:100%;width:${p}%;background:${cat.color};border-radius:99px;transition:width .4s"></div></div>`:'';
-    const prevSub=cat.budgeted>0?`${fUSD(cat.budgeted)} <span style="color:#C0C8DC">· ${fBRL(cat.budgeted*S.usdRate)}</span>`:'—';
-    const spUSD=fUSD(spent),spBRL=fBRL(spent*S.usdRate);
-    const mU=S.visible?spUSD:mask(spUSD),mB=S.visible?spBRL:mask(spBRL);
-    list.innerHTML+=`<div class="card">
+  const list = document.getElementById('cat-list'); list.innerHTML = '';
+  S.categories.forEach(cat => {
+    const spent = S.expenses.filter(e => e.category === cat.category).reduce((s,e) => s + e.usd, 0);
+    const p = cat.budgeted > 0 ? Math.min((spent/cat.budgeted)*100, 100) : 0;
+    const bar = cat.budgeted > 0
+      ? `<div style="background:#EEF0F6;border-radius:99px;height:5px;margin-top:8px"><div style="height:100%;width:${p}%;background:${cat.color};border-radius:99px;transition:width .4s"></div></div>` : '';
+    const prevSub = cat.budgeted > 0
+      ? `${fUSD(cat.budgeted)} <span style="color:#C0C8DC">· ${fBRL(cat.budgeted*S.usdRate)}</span>` : '—';
+    const spUSD=fUSD(spent), spBRL=fBRL(spent*S.usdRate);
+    const mU=S.visible?spUSD:mask(spUSD), mB=S.visible?spBRL:mask(spBRL);
+    list.innerHTML += `<div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:20px">${cat.icon}</span>
@@ -535,19 +645,21 @@ function renderCategories(){
   });
 }
 
-// ══ RENDER EXPENSES ══
+// ══════════════════════════════════════
+// RENDER EXPENSES
+// ══════════════════════════════════════
 function renderExpenses(){
-  const list=document.getElementById('expense-list'),empty=document.getElementById('expense-empty');
-  list.innerHTML='';
-  if(S.expenses.length===0){empty.style.display='block';return;}
-  empty.style.display='none';
-  S.expenses.forEach(exp=>{
-    const cat=S.categories.find(c=>c.category===exp.category)||{};
-    const color=cat.color||'#C0392B',icon=cat.icon||'💸';
-    const note=exp.note?`<div style="font-size:10px;color:#B0B8CC;font-style:italic">${exp.note}</div>`:'';
-    const vUSD=fUSD(exp.usd),vBRL=fBRL(exp.usd*S.usdRate),vCLP=fCLP(exp.usd*S.usdRate/S.clpRate);
-    const mU=S.visible?vUSD:mask(vUSD),mB=S.visible?vBRL:mask(vBRL),mC=S.visible?vCLP:mask(vCLP);
-    list.innerHTML+=`
+  const list=document.getElementById('expense-list'), empty=document.getElementById('expense-empty');
+  list.innerHTML = '';
+  if(S.expenses.length === 0){ empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  S.expenses.forEach(exp => {
+    const cat   = S.categories.find(c => c.category === exp.category) || {};
+    const color = cat.color || '#C0392B', icon = cat.icon || '💸';
+    const note  = exp.note ? `<div style="font-size:10px;color:#B0B8CC;font-style:italic">${exp.note}</div>` : '';
+    const vUSD=fUSD(exp.usd), vBRL=fBRL(exp.usd*S.usdRate), vCLP=fCLP(exp.usd*S.usdRate/S.clpRate);
+    const mU=S.visible?vUSD:mask(vUSD), mB=S.visible?vBRL:mask(vBRL), mC=S.visible?vCLP:mask(vCLP);
+    list.innerHTML += `
       <div class="expense-item" style="border-left:3px solid ${color}">
         <span style="font-size:20px;flex-shrink:0">${icon}</span>
         <div style="flex:1;min-width:0">
@@ -560,111 +672,100 @@ function renderExpenses(){
           <div class="hidden-val" data-real="${vCLP}" style="font-size:9px;color:#C0C8DC" onclick="toggleVisibility()">${mC}</div>
         </div>
         <button class="edit-exp" onclick="openExpenseModal(${exp.id})" title="Editar">✏️</button>
-        <button class="del-exp" onclick="deleteExpense(${exp.id})" title="Apagar">×</button>
+        <button class="del-exp"  onclick="deleteExpense(${exp.id})" title="Apagar">×</button>
       </div>`;
   });
 }
-
 function deleteExpense(id){
-  if(!confirm('Apagar este gasto?'))return;
-  S.expenses=S.expenses.filter(e=>e.id!==id);save();renderAll();showToast('Removido 🗑️');
+  if(!confirm('Apagar este gasto?')) return;
+  S.expenses = S.expenses.filter(e => e.id !== id);
+  save(); renderAll(); showToast('Removido 🗑️');
 }
 
-// ══ EXPENSE MODAL (add + edit) ══
-let editingId=null;
-
+// ══════════════════════════════════════
+// EXPENSE MODAL
+// ══════════════════════════════════════
+let editingId = null;
 function populateModalSelects(){
-  const cs=document.getElementById('me-category');cs.innerHTML='';
-  S.categories.forEach(c=>{const o=document.createElement('option');o.value=c.category;o.textContent=c.category;cs.appendChild(o);});
-  const ds=document.getElementById('me-date');ds.innerHTML='';
-  S.itinerary.forEach(d=>{const o=document.createElement('option');o.value=d.date.slice(4);o.textContent=d.date;ds.appendChild(o);});
-  if(ds.options.length>1)ds.selectedIndex=1;
+  const cs=document.getElementById('me-category'); cs.innerHTML='';
+  S.categories.forEach(c => { const o=document.createElement('option'); o.value=c.category; o.textContent=c.category; cs.appendChild(o); });
+  const ds=document.getElementById('me-date'); ds.innerHTML='';
+  S.itinerary.forEach(d => { const o=document.createElement('option'); o.value=d.date.slice(4); o.textContent=d.date; ds.appendChild(o); });
+  if(ds.options.length > 1) ds.selectedIndex = 1;
 }
-
 function openExpenseModal(id){
   populateModalSelects();
-  editingId=id||null;
-  const title=document.getElementById('modal-expense-title');
-  const saveBtn=document.getElementById('modal-expense-save');
+  editingId = id || null;
   if(editingId){
-    const exp=S.expenses.find(e=>e.id===editingId);
-    if(!exp)return;
-    title.textContent='✏️ Editar Gasto';
-    saveBtn.textContent='✓ Atualizar';
-    document.getElementById('me-desc').value=exp.desc;
-    document.getElementById('me-amount').value=exp.amount;
-    document.getElementById('me-currency').value=exp.currency;
-    document.getElementById('me-note').value=exp.note||'';
-    // set category
-    document.getElementById('me-category').value=exp.category;
-    // set date
-    document.getElementById('me-date').value=exp.date;
+    const exp = S.expenses.find(e => e.id === editingId);
+    if(!exp) return;
+    document.getElementById('modal-expense-title').textContent = '✏️ Editar Gasto';
+    document.getElementById('modal-expense-save').textContent  = '✓ Atualizar';
+    document.getElementById('me-desc').value     = exp.desc;
+    document.getElementById('me-amount').value   = exp.amount;
+    document.getElementById('me-currency').value = exp.currency;
+    document.getElementById('me-note').value     = exp.note || '';
+    document.getElementById('me-category').value = exp.category;
+    document.getElementById('me-date').value     = exp.date;
   } else {
-    title.textContent='➕ Novo Gasto';
-    saveBtn.textContent='✓ Salvar';
-    document.getElementById('me-desc').value='';
-    document.getElementById('me-amount').value='';
-    document.getElementById('me-currency').value='USD';
-    document.getElementById('me-note').value='';
-    document.getElementById('modal-expense-preview').style.display='none';
+    document.getElementById('modal-expense-title').textContent = '➕ Novo Gasto';
+    document.getElementById('modal-expense-save').textContent  = '✓ Salvar';
+    ['me-desc','me-amount','me-note'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('me-currency').value = 'USD';
+    document.getElementById('modal-expense-preview').style.display = 'none';
   }
   updateModalPreview();
   document.getElementById('modal-expense').classList.add('open');
 }
-
-function closeExpenseModal(){
-  document.getElementById('modal-expense').classList.remove('open');
-  editingId=null;
-}
-
+function closeExpenseModal(){ document.getElementById('modal-expense').classList.remove('open'); editingId=null; }
 function updateModalPreview(){
-  const amount=Number(document.getElementById('me-amount').value);
-  const currency=document.getElementById('me-currency').value;
-  const prev=document.getElementById('modal-expense-preview');
-  if(!amount){prev.style.display='none';return;}
-  const usd=toUSD(amount,currency);
-  document.getElementById('mprev-usd').textContent=fUSD(usd);
-  document.getElementById('mprev-brl-clp').textContent=fBRL(usd*S.usdRate)+' · '+fCLP(usd*S.usdRate/S.clpRate);
-  prev.style.display='block';
+  const amount   = Number(document.getElementById('me-amount').value);
+  const currency = document.getElementById('me-currency').value;
+  const prev     = document.getElementById('modal-expense-preview');
+  if(!amount){ prev.style.display='none'; return; }
+  const usd = toUSD(amount, currency);
+  document.getElementById('mprev-usd').textContent       = fUSD(usd);
+  document.getElementById('mprev-brl-clp').textContent   = fBRL(usd*S.usdRate) + ' · ' + fCLP(usd*S.usdRate/S.clpRate);
+  prev.style.display = 'block';
 }
-
 function saveExpenseModal(){
-  const desc=document.getElementById('me-desc').value.trim();
-  const amount=Number(document.getElementById('me-amount').value);
-  const currency=document.getElementById('me-currency').value;
-  const category=document.getElementById('me-category').value;
-  const date=document.getElementById('me-date').value;
-  const note=document.getElementById('me-note').value.trim();
-  if(!desc||!amount){showToast('Preencha descrição e valor ⚠️');return;}
-  const usd=toUSD(amount,currency);
+  const desc     = document.getElementById('me-desc').value.trim();
+  const amount   = Number(document.getElementById('me-amount').value);
+  const currency = document.getElementById('me-currency').value;
+  const category = document.getElementById('me-category').value;
+  const date     = document.getElementById('me-date').value;
+  const note     = document.getElementById('me-note').value.trim();
+  if(!desc || !amount){ showToast('Preencha descrição e valor ⚠️'); return; }
+  const usd = toUSD(amount, currency);
   if(editingId){
-    const idx=S.expenses.findIndex(e=>e.id===editingId);
-    if(idx!==-1)S.expenses[idx]={...S.expenses[idx],desc,amount,currency,category,date,note,usd};
+    const idx = S.expenses.findIndex(e => e.id === editingId);
+    if(idx !== -1) S.expenses[idx] = {...S.expenses[idx], desc, amount, currency, category, date, note, usd};
     showToast('Gasto atualizado ✅');
   } else {
-    S.expenses.unshift({id:Date.now(),desc,amount,currency,category,date,note,usd});
+    S.expenses.unshift({id: Date.now(), desc, amount, currency, category, date, note, usd});
     showToast('Gasto adicionado ✅');
   }
-  save();renderAll();closeExpenseModal();
-  // if not on gastos tab, switch to it so user sees the expense
+  save(); renderAll(); closeExpenseModal();
 }
 
-// ══ RENDER ITIN ══
+// ══════════════════════════════════════
+// RENDER ITINERARY
+// ══════════════════════════════════════
 function renderItin(){
-  const list=document.getElementById('itin-list');list.innerHTML='';
-  S.itinerary.forEach(day=>{
-    const key=day.date.slice(4);
-    const spent=S.expenses.filter(e=>e.date===key).reduce((s,e)=>s+e.usd,0);
-    const vU=fUSD(spent),vB=fBRL(spent*S.usdRate);
-    const mU=S.visible?vU:mask(vU),mB=S.visible?vB:mask(vB);
-    const spentHtml=spent>0
-      ?`<div class="hidden-val" data-real="${vU}" style="font-size:13px;font-weight:700;color:#27AE60" onclick="toggleVisibility()">${mU}</div>
-        <div class="hidden-val" data-real="${vB}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mB}</div>`
-      :`<div style="font-size:12px;color:#D8DAE8">—</div>`;
-    const acts=day.activities.map((a,j)=>
+  const list = document.getElementById('itin-list'); list.innerHTML = '';
+  S.itinerary.forEach(day => {
+    const key   = day.date.slice(4);
+    const spent = S.expenses.filter(e => e.date === key).reduce((s,e) => s + e.usd, 0);
+    const vU=fUSD(spent), vB=fBRL(spent*S.usdRate);
+    const mU=S.visible?vU:mask(vU), mB=S.visible?vB:mask(vB);
+    const spentHtml = spent > 0
+      ? `<div class="hidden-val" data-real="${vU}" style="font-size:13px;font-weight:700;color:#27AE60" onclick="toggleVisibility()">${mU}</div>
+         <div class="hidden-val" data-real="${vB}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mB}</div>`
+      : `<div style="font-size:12px;color:#D8DAE8">—</div>`;
+    const acts = day.activities.map((a,j) =>
       `<div style="font-size:12px;color:#555E80;padding:4px 0;display:flex;align-items:center;gap:7px;${j<day.activities.length-1?'border-bottom:1px solid #F0F2F8':''}">
         <span style="color:#D0D4E8;font-size:9px">●</span>${a}</div>`).join('');
-    list.innerHTML+=`<div class="itin-day">
+    list.innerHTML += `<div class="itin-day">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
           <div style="font-size:13px;font-weight:700;color:#C0392B">${day.date}</div>
@@ -675,11 +776,13 @@ function renderItin(){
   });
 }
 
-// ══ RENDER TIPS ══
+// ══════════════════════════════════════
+// RENDER TIPS
+// ══════════════════════════════════════
 function renderTips(){
-  const list=document.getElementById('tips-list');list.innerHTML='';
-  S.tips.forEach(tip=>{
-    list.innerHTML+=`<div class="tip-card">
+  const list = document.getElementById('tips-list'); list.innerHTML = '';
+  S.tips.forEach(tip => {
+    list.innerHTML += `<div class="tip-card">
       <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px">
         <span style="font-size:22px">${tip.icon}</span>
         <div style="font-size:13px;font-weight:700;color:#1A1A2E">${tip.title}</div>
@@ -689,16 +792,77 @@ function renderTips(){
   });
 }
 
-// ══ CONFIG ══
+// ══════════════════════════════════════
+// SIMULADOR DE CÂMBIO
+// ══════════════════════════════════════
+const SIM_FLAGS = { USD:'🇺🇸', BRL:'🇧🇷', CLP:'🇨🇱' };
+const SIM_NAMES = { USD:'Dólar (USD)', BRL:'Real (BRL)', CLP:'Peso (CLP)' };
+const SIM_SHORTCUTS_BRL = [10, 20, 50, 100, 200, 500];
+
+function calcSim(){
+  const from   = document.getElementById('sim-from').value;
+  const amount = Number(document.getElementById('sim-amount').value);
+  const flag   = document.getElementById('sim-flag');
+  flag.textContent = SIM_FLAGS[from];
+
+  // update rates display
+  document.getElementById('sim-rate-clp').textContent  = Math.round(1 / S.clpRate).toLocaleString('pt-BR') + ' CLP';
+  document.getElementById('sim-rate-brl').textContent  = fBRL(S.usdRate);
+  document.getElementById('sim-rate-clp2').textContent = Math.round(S.usdRate / S.clpRate).toLocaleString('pt-BR') + ' CLP';
+
+  const res = document.getElementById('sim-result');
+  if(!amount){ res.style.display='none'; return; }
+
+  // convert to USD first, then to others
+  const usd = toUSD(amount, from);
+  const brl = usd * S.usdRate;
+  const clp = brl / S.clpRate;
+
+  const others = ['BRL','CLP','USD'].filter(c => c !== from);
+  const vals   = { USD: fUSD(usd), BRL: fBRL(brl), CLP: fCLP(clp) };
+
+  document.getElementById('sim-r1-flag').textContent  = SIM_FLAGS[others[0]];
+  document.getElementById('sim-r1-label').textContent = SIM_NAMES[others[0]];
+  document.getElementById('sim-r1-val').textContent   = vals[others[0]];
+  document.getElementById('sim-r2-flag').textContent  = SIM_FLAGS[others[1]];
+  document.getElementById('sim-r2-label').textContent = SIM_NAMES[others[1]];
+  document.getElementById('sim-r2-val').textContent   = vals[others[1]];
+  // 3rd row: same currency (total check)
+  document.getElementById('sim-r3-flag').textContent  = SIM_FLAGS[from];
+  document.getElementById('sim-r3-label').textContent = 'Você digitou';
+  document.getElementById('sim-r3-val').textContent   = vals[from];
+  res.style.display = 'block';
+}
+
+function renderSimShortcuts(){
+  const wrap = document.getElementById('sim-shortcuts'); wrap.innerHTML='';
+  SIM_SHORTCUTS_BRL.forEach(val => {
+    const btn = document.createElement('button');
+    btn.style.cssText='padding:8px 14px;background:#fff;border:1.5px solid #E0E4EE;border-radius:99px;font-size:13px;font-weight:600;color:#1A1A2E;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.06)';
+    btn.textContent = `R$ ${val}`;
+    btn.onclick = () => {
+      document.getElementById('sim-from').value   = 'BRL';
+      document.getElementById('sim-amount').value = val;
+      document.getElementById('sim-flag').textContent = '🇧🇷';
+      calcSim();
+      // scroll to result
+      document.getElementById('sim-result').scrollIntoView({behavior:'smooth', block:'nearest'});
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+// ══════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════
 function renderConfig(){
-  document.getElementById('cfg-nomad').value=S.nomadUSD;
-  document.getElementById('cfg-cash').value=S.cashUSD;
-  document.getElementById('cfg-usd').value=S.usdRate;
-  document.getElementById('cfg-clp').value=S.clpRate;
+  document.getElementById('cfg-nomad').value = S.nomadUSD;
+  document.getElementById('cfg-cash').value  = S.cashUSD;
+  document.getElementById('cfg-usd').value   = S.usdRate;
+  document.getElementById('cfg-clp').value   = S.clpRate;
   cfgConvert();
-  const {spent,left}=totals();
-  const total=S.nomadUSD+S.cashUSD;
-  document.getElementById('cfg-summary').innerHTML=`
+  const {spent, left} = totals();
+  document.getElementById('cfg-summary').innerHTML = `
     <div class="sum-row"><span class="sum-label">Nomad disponível</span><div><div class="sum-val">${fUSD(Math.max(left,0))}</div><div class="sum-sub">${fBRL(Math.max(left,0)*S.usdRate)}</div></div></div>
     <div class="sum-row"><span class="sum-label">Cash em espécie</span><div><div class="sum-val">${fUSD(S.cashUSD)}</div><div class="sum-sub">${fBRL(S.cashUSD*S.usdRate)}</div></div></div>
     <div class="sum-row"><span class="sum-label">Saldo total</span><div><div class="sum-val">${fUSD(Math.max(left,0)+S.cashUSD)}</div><div class="sum-sub">${fBRL((Math.max(left,0)+S.cashUSD)*S.usdRate)}</div></div></div>
@@ -706,73 +870,72 @@ function renderConfig(){
     <div class="sum-row"><span class="sum-label">Taxa: US$ 1 =</span><div class="sum-val">${fBRL(S.usdRate)}</div></div>
     <div class="sum-row"><span class="sum-label">Taxa: $ 1 CLP =</span><div class="sum-val">R$ ${S.clpRate}</div></div>`;
 }
-
 function cfgConvert(){
   const n=Number(document.getElementById('cfg-nomad').value)||0;
   const ca=Number(document.getElementById('cfg-cash').value)||0;
   const u=Number(document.getElementById('cfg-usd').value)||S.usdRate;
   const c=Number(document.getElementById('cfg-clp').value)||S.clpRate;
-  document.getElementById('cfg-nomad-brl').textContent=fBRL(n*u);
-  document.getElementById('cfg-nomad-clp').textContent=fCLP(n*u/c);
-  document.getElementById('cfg-cash-brl').textContent=fBRL(ca*u);
-  document.getElementById('cfg-cash-clp').textContent=fCLP(ca*u/c);
+  document.getElementById('cfg-nomad-brl').textContent = fBRL(n*u);
+  document.getElementById('cfg-nomad-clp').textContent = fCLP(n*u/c);
+  document.getElementById('cfg-cash-brl').textContent  = fBRL(ca*u);
+  document.getElementById('cfg-cash-clp').textContent  = fCLP(ca*u/c);
 }
-
 function saveConfig(){
-  S.nomadUSD=Number(document.getElementById('cfg-nomad').value)||S.nomadUSD;
-  S.cashUSD=Number(document.getElementById('cfg-cash').value)||0;
-  S.usdRate=Number(document.getElementById('cfg-usd').value)||S.usdRate;
-  S.clpRate=Number(document.getElementById('cfg-clp').value)||S.clpRate;
-  save();renderAll();showToast('Configurações salvas ✅');
+  S.nomadUSD = Number(document.getElementById('cfg-nomad').value) || S.nomadUSD;
+  S.cashUSD  = Number(document.getElementById('cfg-cash').value)  || 0;
+  S.usdRate  = Number(document.getElementById('cfg-usd').value)   || S.usdRate;
+  S.clpRate  = Number(document.getElementById('cfg-clp').value)   || S.clpRate;
+  save(); renderAll(); showToast('Configurações salvas ✅');
 }
-
 function clearExpenses(){
-  if(!confirm('Apagar todos os gastos? Isso não pode ser desfeito.'))return;
-  S.expenses=[];save();renderAll();showToast('Gastos apagados 🗑️');
+  if(!confirm('Apagar todos os gastos? Isso não pode ser desfeito.')) return;
+  S.expenses = []; save(); renderAll(); showToast('Gastos apagados 🗑️');
 }
 
-// ══ SETTINGS MODAL (lápis) ══
+// ══════════════════════════════════════
+// SETTINGS MODAL
+// ══════════════════════════════════════
 function openSettings(){
-  document.getElementById('ms-nomad').value=S.nomadUSD;
-  document.getElementById('ms-cash').value=S.cashUSD;
-  document.getElementById('ms-usd').value=S.usdRate;
-  document.getElementById('ms-clp').value=S.clpRate;
+  document.getElementById('ms-nomad').value = S.nomadUSD;
+  document.getElementById('ms-cash').value  = S.cashUSD;
+  document.getElementById('ms-usd').value   = S.usdRate;
+  document.getElementById('ms-clp').value   = S.clpRate;
   msConvert();
   document.getElementById('modal-settings').classList.add('open');
 }
-function closeSettings(){document.getElementById('modal-settings').classList.remove('open');}
+function closeSettings(){ document.getElementById('modal-settings').classList.remove('open'); }
 function saveSettings(){
-  S.nomadUSD=Number(document.getElementById('ms-nomad').value)||S.nomadUSD;
-  S.cashUSD=Number(document.getElementById('ms-cash').value)||0;
-  S.usdRate=Number(document.getElementById('ms-usd').value)||S.usdRate;
-  S.clpRate=Number(document.getElementById('ms-clp').value)||S.clpRate;
-  save();renderAll();closeSettings();showToast('Configurações salvas ✅');
+  S.nomadUSD = Number(document.getElementById('ms-nomad').value) || S.nomadUSD;
+  S.cashUSD  = Number(document.getElementById('ms-cash').value)  || 0;
+  S.usdRate  = Number(document.getElementById('ms-usd').value)   || S.usdRate;
+  S.clpRate  = Number(document.getElementById('ms-clp').value)   || S.clpRate;
+  save(); renderAll(); closeSettings(); showToast('Configurações salvas ✅');
 }
 function msConvert(){
-  const n=Number(document.getElementById('ms-nomad').value)||0;
-  const ca=Number(document.getElementById('ms-cash').value)||0;
-  const u=Number(document.getElementById('ms-usd').value)||S.usdRate;
-  const c=Number(document.getElementById('ms-clp').value)||S.clpRate;
-  const total=n+ca;
-  document.getElementById('ms-preview').textContent=
-    total>0?`Total: ${fUSD(total)} = ${fBRL(total*u)}`:'';
+  const n  = Number(document.getElementById('ms-nomad').value) || 0;
+  const ca = Number(document.getElementById('ms-cash').value)  || 0;
+  const u  = Number(document.getElementById('ms-usd').value)   || S.usdRate;
+  const c  = Number(document.getElementById('ms-clp').value)   || S.clpRate;
+  document.getElementById('ms-preview').textContent =
+    (n+ca) > 0 ? `Total: ${fUSD(n+ca)} = ${fBRL((n+ca)*u)}` : '';
 }
 
-// ══ ITINERARY MODAL ══
-let itinDraft=[];
-function openItin(){itinDraft=JSON.parse(JSON.stringify(S.itinerary));renderItinEdit();document.getElementById('modal-itin').classList.add('open');}
-function closeItin(){document.getElementById('modal-itin').classList.remove('open');}
-function saveItin(){S.itinerary=JSON.parse(JSON.stringify(itinDraft));save();renderAll();closeItin();showToast('Roteiro atualizado ✅');}
-
+// ══════════════════════════════════════
+// ITINERARY MODAL
+// ══════════════════════════════════════
+let itinDraft = [];
+function openItin(){ itinDraft=JSON.parse(JSON.stringify(S.itinerary)); renderItinEdit(); document.getElementById('modal-itin').classList.add('open'); }
+function closeItin(){ document.getElementById('modal-itin').classList.remove('open'); }
+function saveItin(){ S.itinerary=JSON.parse(JSON.stringify(itinDraft)); save(); renderAll(); closeItin(); showToast('Roteiro atualizado ✅'); }
 function renderItinEdit(){
-  const list=document.getElementById('itin-edit-list');list.innerHTML='';
-  itinDraft.forEach((day,di)=>{
-    const acts=day.activities.map((a,ai)=>`
+  const list = document.getElementById('itin-edit-list'); list.innerHTML='';
+  itinDraft.forEach((day,di) => {
+    const acts = day.activities.map((a,ai) => `
       <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
         <div class="act-text">${a}</div>
         <button class="act-del" onclick="removeAct(${di},${ai})">×</button>
       </div>`).join('');
-    list.innerHTML+=`<div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #E8EAF2">
+    list.innerHTML += `<div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #E8EAF2">
       <div style="font-size:12px;font-weight:700;color:#C0392B;margin-bottom:8px">${day.date}</div>
       ${acts}
       <div style="display:flex;gap:7px;margin-top:6px">
@@ -781,46 +944,58 @@ function renderItinEdit(){
       </div></div>`;
   });
 }
-function addAct(di){const i=document.getElementById(`na-${di}`),v=i.value.trim();if(!v)return;itinDraft[di].activities.push(v);i.value='';renderItinEdit();}
-function removeAct(di,ai){itinDraft[di].activities.splice(ai,1);renderItinEdit();}
+function addAct(di){ const i=document.getElementById(`na-${di}`),v=i.value.trim(); if(!v)return; itinDraft[di].activities.push(v); i.value=''; renderItinEdit(); }
+function removeAct(di,ai){ itinDraft[di].activities.splice(ai,1); renderItinEdit(); }
 
-// ══ TABS ══
-function setTab(name,btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
+// ══════════════════════════════════════
+// TABS
+// ══════════════════════════════════════
+function setTab(name, btn){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
   btn.classList.add('active');
-  if(name==='config')renderConfig();
+  if(name === 'config') renderConfig();
+  if(name === 'simulador'){ calcSim(); renderSimShortcuts(); }
 }
 
-// ══ TOAST ══
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
 let toastTimer;
 function showToast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.style.display='block';
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.display = 'block';
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>el.style.display='none',2500);
+  toastTimer = setTimeout(() => el.style.display='none', 2500);
 }
 
-function renderAll(){renderHeader();renderCategories();renderExpenses();renderItin();renderTips();}
+function renderAll(){ renderHeader(); renderCategories(); renderExpenses(); renderItin(); renderTips(); }
 
-// ══ WEATHER ══
+// ══════════════════════════════════════
+// WEATHER
+// ══════════════════════════════════════
 const WMO={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',77:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',85:'🌨️',86:'❄️',95:'⛈️',96:'⛈️',99:'⛈️'};
 async function fetchWeather(){
   const ic=document.getElementById('weather-icon'),tp=document.getElementById('weather-temp'),dc=document.getElementById('weather-desc');
-  ic.className='weather-loading';ic.textContent='⏳';tp.textContent='...';dc.textContent='Buscando';
+  ic.className='weather-loading'; ic.textContent='⏳'; tp.textContent='...'; dc.textContent='Buscando';
   try{
     const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=-33.4569&longitude=-70.6483&current=temperature_2m,weathercode,apparent_temperature&timezone=America%2FSantiago');
     const d=await r.json();
-    const t=Math.round(d.current.temperature_2m),f=Math.round(d.current.apparent_temperature),code=d.current.weathercode;
-    ic.className='';ic.textContent=WMO[code]||'🌡️';tp.textContent=t+'°C';dc.textContent='Sensação '+f+'°C';
-  }catch{ic.className='';ic.textContent='❓';tp.textContent='--°C';dc.textContent='Sem conexão';}
+    const t=Math.round(d.current.temperature_2m), f=Math.round(d.current.apparent_temperature), code=d.current.weathercode;
+    ic.className=''; ic.textContent=WMO[code]||'🌡️'; tp.textContent=t+'°C'; dc.textContent='Sensação '+f+'°C';
+  }catch{ ic.className=''; ic.textContent='❓'; tp.textContent='--°C'; dc.textContent='Sem conexão'; }
 }
 
-// ══ INIT ══
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+// Restore local visibility pref
+try { S.visible = localStorage.getItem('chile_visible') === 'true'; } catch{}
+setSyncStatus('syncing');
 renderAll();
 fetchWeather();
-setInterval(fetchWeather,10*60*1000);
+setInterval(fetchWeather, 10*60*1000);
 </script>
 </body>
 </html>
