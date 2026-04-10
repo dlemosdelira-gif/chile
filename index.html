@@ -4,222 +4,123 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
   <title>Chile 2025 🇨🇱</title>
-
-  <!-- PWA / iPhone home screen icon -->
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Chile 25"/>
-  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIGZpbGw9IiNDMDM5MkIiIHJ4PSIzMiIvPgogIDwhLS0gV2hpdGUgc3RhciBvZiBDaGlsZSAtLT4KICA8cG9seWdvbiBwb2ludHM9IjkwLDM2IDEwMiw3MiAxNDAsNzIgMTEwLDk0IDEyMSwxMzAgOTAsMTA4IDU5LDEzMCA3MCw5NCA0MCw3MiA3OCw3MiIgZmlsbD0iI2ZmZiIvPgogIDx0ZXh0IHg9IjkwIiB5PSIxNjUiIGZvbnQtc2l6ZT0iNTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPvCfh7Xwn4e8PC90ZXh0Pgo8L3N2Zz4="/>
+  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIGZpbGw9IiNDMDM5MkIiIHJ4PSIzMiIvPjxwb2x5Z29uIHBvaW50cz0iOTAsMzYgMTAyLDcyIDE0MCw3MiAxMTAsOTQgMTIxLDEzMCA5MCwxMDggNTksMTMwIDcwLDk0IDQwLDcyIDc4LDcyIiBmaWxsPSIjZmZmIi8+PHRleHQgeD0iOTAiIHk9IjE2NSIgZm9udC1zaXplPSI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+HtfCfh7w8L3RleHQ+PC9zdmc+"/>
   <meta name="theme-color" content="#C0392B"/>
-
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{background:#F5F6FA}
-    body{
-      background:#F5F6FA;
-      color:#1A1A2E;
-      font-family:'Outfit',sans-serif;
-      min-height:100vh;
-      max-width:480px;
-      margin:0 auto;
-      padding-bottom:82px;
-    }
-
-    /* ── inputs & selects ── */
+    html,body{background:#F5F6FA}
+    body{color:#1A1A2E;font-family:'Outfit',sans-serif;min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:82px}
     input,select,button{font-family:'Outfit',sans-serif}
-    .inp{
-      background:#fff;
-      border:1.5px solid #E0E4EE;
-      border-radius:10px;
-      padding:11px 12px;
-      color:#1A1A2E;
-      font-size:14px;
-      width:100%;
-    }
+    .inp{background:#fff;border:1.5px solid #E0E4EE;border-radius:10px;padding:11px 12px;color:#1A1A2E;font-size:14px;width:100%}
     .inp::placeholder{color:#B0B8CC}
     .inp:focus{outline:none;border-color:#C0392B}
     select.inp{font-size:13px;cursor:pointer}
     input[type=number]{-moz-appearance:textfield}
-    input[type=number]::-webkit-outer-spin-button,
-    input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+    input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 
-    /* ── HEADER — Chile red ── */
-    #header{
-      background:linear-gradient(160deg,#9B1B10 0%,#C0392B 55%,#E74C3C 100%);
-      padding:44px 20px 22px;
-      position:relative;
-      overflow:hidden;
-    }
-    #header::before{
-      content:'';position:absolute;top:-50px;right:-50px;
-      width:200px;height:200px;border-radius:50%;
-      background:rgba(255,255,255,0.07);
-    }
-    #header::after{
-      content:'★';position:absolute;bottom:18px;right:22px;
-      font-size:64px;color:rgba(255,255,255,0.08);line-height:1;
-    }
-
-    /* ── Nomad card inside header ── */
-    #nomad-card{
-      background:rgba(0,0,0,0.22);
-      border-radius:16px;padding:15px 16px;margin-top:14px;
-      border:1px solid rgba(255,255,255,0.15);
-    }
-
-    /* ── sub display BRL/CLP ── */
-    .sub-display{background:rgba(0,0,0,0.18);border-radius:9px;padding:8px 10px;flex:1}
-    .sub-display .lbl{font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:1px;margin-bottom:2px}
+    /* header */
+    #header{background:linear-gradient(160deg,#9B1B10 0%,#C0392B 55%,#E74C3C 100%);padding:44px 20px 22px;position:relative;overflow:hidden}
+    #header::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07)}
+    #header::after{content:'★';position:absolute;bottom:18px;right:22px;font-size:64px;color:rgba(255,255,255,.08);line-height:1}
+    #nomad-card{background:rgba(0,0,0,.22);border-radius:16px;padding:15px 16px;margin-top:12px;border:1px solid rgba(255,255,255,.15)}
+    .sub-display{background:rgba(0,0,0,.18);border-radius:9px;padding:8px 10px;flex:1}
+    .sub-display .lbl{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px;margin-bottom:2px}
     .sub-display .val{font-size:13px;font-weight:700;color:#fff}
-    .sub-display .sub{font-size:9px;color:rgba(255,255,255,0.45);margin-top:1px}
+    .sub-display .sub{font-size:9px;color:rgba(255,255,255,.45);margin-top:1px}
 
-    /* ── bottom nav ── */
-    #bottom-nav{
-      position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-      width:100%;max-width:480px;
-      background:#fff;border-top:1px solid #E8EAF2;
-      display:flex;z-index:100;
+    /* FAB — botão flutuante + */
+    #fab{
+      position:fixed;bottom:90px;right:calc(50% - 226px);
+      width:52px;height:52px;border-radius:50%;
+      background:linear-gradient(135deg,#C0392B,#E74C3C);
+      border:none;color:#fff;font-size:26px;line-height:1;
+      box-shadow:0 4px 16px rgba(192,57,43,.45);
+      cursor:pointer;z-index:150;
+      display:flex;align-items:center;justify-content:center;
+      transition:transform .15s;
     }
-    .nav-btn{
-      flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;
-      display:flex;flex-direction:column;align-items:center;gap:2px;
-      color:#B0B8CC;transition:color .2s;
-    }
+    #fab:active{transform:scale(.92)}
+    @media(max-width:480px){#fab{right:18px}}
+
+    /* bottom nav */
+    #bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #E8EAF2;display:flex;z-index:100}
+    .nav-btn{flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#B0B8CC;transition:color .2s}
     .nav-btn.active{color:#C0392B}
     .nav-btn span:first-child{font-size:17px}
     .nav-btn span:last-child{font-size:9px;font-weight:400}
     .nav-btn.active span:last-child{font-weight:700}
 
-    /* ── tabs ── */
+    /* tabs */
     .tab{display:none;padding:14px 14px 0}
     .tab.active{display:block}
 
-    /* ── cards (white on light bg) ── */
-    .card{background:#fff;border-radius:14px;padding:12px 15px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.07)}
+    /* cards */
+    .card{background:#fff;border-radius:14px;padding:12px 15px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
     .card-label{font-size:10px;color:#9AA0B8;letter-spacing:1px;margin-bottom:5px;text-transform:uppercase}
-
-    /* ── section title ── */
     .section-title{font-size:11px;font-weight:700;color:#B0B8CC;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
-
-    /* ── progress bar ── */
     .progress-wrap{background:#E8EAF2;border-radius:99px;overflow:hidden}
     .progress-bar{height:100%;border-radius:99px;transition:width .5s}
 
-    /* ── modals ── */
-    .modal-overlay{
-      display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);
-      z-index:200;align-items:flex-end;justify-content:center;
-    }
+    /* modals */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-end;justify-content:center}
     .modal-overlay.open{display:flex}
-    .modal-sheet{
-      background:#F5F6FA;border-radius:22px 22px 0 0;padding:22px;
-      width:100%;max-width:480px;max-height:85vh;overflow-y:auto;
-    }
+    .modal-sheet{background:#F5F6FA;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
     .modal-title{font-size:15px;font-weight:800;color:#1A1A2E;margin-bottom:18px}
 
-    /* ── buttons ── */
-    .btn-primary{
-      background:linear-gradient(135deg,#C0392B,#E74C3C);
-      border:none;border-radius:10px;color:#fff;
-      font-size:14px;font-weight:700;cursor:pointer;padding:12px;width:100%;
-    }
-    .btn-secondary{
-      background:#EEF0F6;border:none;border-radius:10px;
-      color:#555E80;font-size:14px;cursor:pointer;padding:12px;width:100%;
-    }
+    /* buttons */
+    .btn-primary{background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;padding:12px;width:100%}
+    .btn-secondary{background:#EEF0F6;border:none;border-radius:10px;color:#555E80;font-size:14px;cursor:pointer;padding:12px;width:100%}
 
-    /* ── toast ── */
-    #toast{
-      display:none;position:fixed;top:18px;left:50%;transform:translateX(-50%);
-      background:#2ECC71;color:#fff;padding:10px 22px;border-radius:99px;
-      font-size:13px;font-weight:700;z-index:999;
-      box-shadow:0 4px 20px rgba(46,204,113,0.4);white-space:nowrap;
-    }
+    /* toast */
+    #toast{display:none;position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#2ECC71;color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(46,204,113,.4);white-space:nowrap}
 
-    /* ── expense item ── */
-    .expense-item{
-      background:#fff;border-radius:13px;padding:11px 14px;
-      margin-bottom:9px;display:flex;align-items:center;gap:11px;
-      box-shadow:0 1px 4px rgba(0,0,0,0.07);
-    }
+    /* expense items */
+    .expense-item{background:#fff;border-radius:13px;padding:11px 14px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    #decolar-card{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:13px;border-left:4px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .tip-card{background:#fff;border-radius:13px;padding:14px 15px;margin-bottom:11px;border-left:3px solid #E67E22;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .itin-day{background:#fff;border-radius:13px;padding:13px 15px;margin-bottom:11px;border-top:3px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 
-    /* ── decolar card ── */
-    #decolar-card{
-      background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:13px;
-      border-left:4px solid #C0392B;
-      box-shadow:0 1px 4px rgba(0,0,0,0.07);
-    }
-
-    /* ── tip card ── */
-    .tip-card{
-      background:#fff;border-radius:13px;padding:14px 15px;
-      margin-bottom:11px;border-left:3px solid #E67E22;
-      box-shadow:0 1px 4px rgba(0,0,0,0.07);
-    }
-
-    /* ── itinerary day ── */
-    .itin-day{
-      background:#fff;border-radius:13px;padding:13px 15px;
-      margin-bottom:11px;border-top:3px solid #C0392B;
-      box-shadow:0 1px 4px rgba(0,0,0,0.07);
-    }
-
-    /* ── expense preview ── */
-    #expense-preview{
-      background:#F0FDF7;border-radius:8px;padding:8px 11px;
-      margin:8px 0 10px;font-size:12px;color:#1A7A4A;line-height:1.6;
-      display:none;border:1px solid #C8F0DA;
-    }
-
-    /* ── add form ── */
-    #expense-form{
-      background:#fff;border-radius:15px;padding:16px;margin-bottom:14px;
-      border:1px solid #E8EAF2;display:none;
-      box-shadow:0 1px 6px rgba(0,0,0,0.07);
-    }
-
+    /* form */
+    #expense-preview{background:#F0FDF7;border-radius:8px;padding:8px 11px;margin:8px 0 10px;font-size:12px;color:#1A7A4A;line-height:1.6;display:none;border:1px solid #C8F0DA}
     .row2{display:flex;gap:8px;margin-bottom:10px}
     .row2>div{flex:1}
     .row2>div:first-child{flex:2}
-
     .sub-conv{display:flex;gap:8px;margin-top:8px}
-    .sub-conv>div{
-      flex:1;background:#F5F6FA;border-radius:8px;
-      padding:7px 10px;font-size:11px;color:#555E80;border:1px solid #E8EAF2;
-    }
+    .sub-conv>div{flex:1;background:#F5F6FA;border-radius:8px;padding:7px 10px;font-size:11px;color:#555E80;border:1px solid #E8EAF2}
 
-    /* ── config summary row ── */
+    /* config */
     .sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #E8EAF2}
     .sum-row:last-child{border:none}
     .sum-label{font-size:12px;color:#9AA0B8}
     .sum-val{font-size:13px;font-weight:700;color:#1A1A2E;text-align:right}
     .sum-sub{font-size:9px;color:#B0B8CC}
 
-    /* ── itin edit ── */
+    /* itin edit */
     .act-text{flex:1;font-size:12px;background:#F5F6FA;border-radius:8px;padding:7px 10px;color:#333;border:1px solid #E0E4EE}
     .act-del{background:#FEF0F0;border:1px solid #FACACA;border-radius:7px;color:#C0392B;font-size:14px;cursor:pointer;padding:6px 10px;flex-shrink:0}
-
-    /* ── del expense ── */
-    .del-exp{background:none;border:none;color:#E74C3C;font-size:20px;cursor:pointer;padding-left:4px;flex-shrink:0;line-height:1}
-
-    /* ── expense empty ── */
+    .del-exp{background:none;border:none;color:#E74C3C;font-size:18px;cursor:pointer;padding:0 0 0 4px;flex-shrink:0;line-height:1}
+    .edit-exp{background:none;border:none;color:#B0B8CC;font-size:15px;cursor:pointer;padding:0;flex-shrink:0;line-height:1}
     #expense-empty{text-align:center;color:#C0C8DE;padding:40px;display:none}
 
-    /* ── hidden numbers ── */
-    .hidden-val{
-      cursor:pointer;
-      letter-spacing:0.05em;
-    }
+    /* hidden numbers */
+    .hidden-val{cursor:pointer;letter-spacing:.05em}
 
-    /* ── eye toggle ── */
+    /* eye & weather */
     @keyframes spin{to{transform:rotate(360deg)}}
     .weather-loading{display:inline-block;animation:spin 1s linear infinite}
-    #eye-btn{
-      background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.2);
-      border-radius:8px;padding:5px 10px;color:#fff;font-size:12px;
-      cursor:pointer;display:flex;align-items:center;gap:5px;
-    }
+    #eye-btn{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:5px 10px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
+
+    /* cash badge */
+    .cash-badge{background:rgba(0,0,0,.18);border-radius:9px;padding:8px 10px;flex:1;border:1px solid rgba(255,255,255,.12)}
+    .cash-badge .lbl{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px;margin-bottom:2px}
+    .cash-badge .val{font-size:13px;font-weight:700;color:#fff}
+
+    /* total combined bar */
+    #total-bar-wrap{background:rgba(0,0,0,.22);border-radius:12px;padding:11px 14px;margin-top:10px;border:1px solid rgba(255,255,255,.1)}
   </style>
 </head>
 <body>
@@ -238,34 +139,38 @@
       <button id="eye-btn" onclick="toggleVisibility()">
         <span id="eye-icon">👁</span><span id="eye-label">Oculto</span>
       </button>
-      <button onclick="openSettings()" style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 10px;color:#fff;font-size:12px;cursor:pointer;font-weight:600">✏️</button>
+      <!-- ✏️ lápis abre modal de configurações -->
+      <button onclick="openSettings()" style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 10px;color:#fff;font-size:14px;cursor:pointer;line-height:1">✏️</button>
     </div>
   </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+
+  <!-- weather + subtitle -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
     <div style="font-size:10px;color:rgba(255,255,255,.6)">03 jul → 08 jul · Ida 10h20 · Volta 17h05</div>
-    <div id="weather-pill" style="display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.22);border:1px solid rgba(255,255,255,0.18);border-radius:99px;padding:4px 10px;cursor:pointer" onclick="fetchWeather()" title="Atualizar temperatura">
+    <div id="weather-pill" onclick="fetchWeather()" style="display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.18);border-radius:99px;padding:4px 10px;cursor:pointer">
       <span id="weather-icon" style="font-size:14px">⏳</span>
       <span id="weather-temp" style="font-size:12px;font-weight:700;color:#fff">--°C</span>
       <span id="weather-desc" style="font-size:10px;color:rgba(255,255,255,.65)">Santiago</span>
     </div>
   </div>
 
+  <!-- Nomad card -->
   <div id="nomad-card">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
       <div>
         <div style="font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1.5px;margin-bottom:3px">💳 NOMAD · SALDO DISPONÍVEL</div>
-        <div id="hd-left-usd" class="hidden-val" style="font-size:28px;font-weight:800;line-height:1;color:#fff" onclick="toggleVisibility()">US$ 1.000,00</div>
+        <div id="hd-left-usd" class="hidden-val" style="font-size:26px;font-weight:800;line-height:1;color:#fff" onclick="toggleVisibility()">US$ 1.000,00</div>
       </div>
       <div style="text-align:right;padding-top:2px">
         <div style="font-size:9px;color:rgba(255,255,255,.55);margin-bottom:1px">USADO</div>
-        <div id="hd-spent-usd" class="hidden-val" style="font-size:17px;font-weight:700;color:#fff" onclick="toggleVisibility()">US$ 0,00</div>
+        <div id="hd-spent-usd" class="hidden-val" style="font-size:16px;font-weight:700;color:#fff" onclick="toggleVisibility()">US$ 0,00</div>
         <div id="hd-total-usd" class="hidden-val" style="font-size:9px;color:rgba(255,255,255,.45)" onclick="toggleVisibility()">de US$ 1.000,00</div>
       </div>
     </div>
-    <div class="progress-wrap" style="height:7px;margin:10px 0 7px;background:rgba(255,255,255,0.2)">
+    <div class="progress-wrap" style="height:7px;margin:10px 0 7px;background:rgba(255,255,255,.2)">
       <div id="hd-bar" class="progress-bar" style="height:7px;background:#fff;width:0%"></div>
     </div>
-    <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:10px">
       <span id="hd-pct" class="hidden-val" style="color:rgba(255,255,255,.7)" onclick="toggleVisibility()">0.0% usado</span>
       <span id="hd-saldo" class="hidden-val" style="color:#fff;font-weight:600" onclick="toggleVisibility()">Saldo: US$ 1.000,00</span>
     </div>
@@ -282,7 +187,30 @@
       </div>
     </div>
   </div>
+
+  <!-- Saldo total (Nomad + Cash) -->
+  <div id="total-bar-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px">💰 SALDO TOTAL (NOMAD + CASH)</div>
+      <div id="hd-total-combined" class="hidden-val" style="font-size:14px;font-weight:800;color:#fff" onclick="toggleVisibility()">US$ 1.000,00</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div class="cash-badge">
+        <div class="lbl">💵 CASH (USD)</div>
+        <div id="hd-cash-usd" class="val hidden-val" onclick="toggleVisibility()">US$ 0,00</div>
+        <div id="hd-cash-brl" class="sub hidden-val" onclick="toggleVisibility()">R$ 0,00</div>
+      </div>
+      <div class="cash-badge">
+        <div class="lbl">💳 NOMAD (USD)</div>
+        <div id="hd-nomad-usd" class="val hidden-val" onclick="toggleVisibility()">US$ 1.000,00</div>
+        <div id="hd-nomad-brl" class="sub hidden-val" onclick="toggleVisibility()">R$ 5.110,00</div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- FAB: adicionar gasto em qualquer tela -->
+<button id="fab" onclick="openExpenseModal()" title="Adicionar gasto">＋</button>
 
 <!-- TAB: RESUMO -->
 <div id="tab-resumo" class="tab active">
@@ -307,55 +235,10 @@
 
 <!-- TAB: GASTOS -->
 <div id="tab-gastos" class="tab">
-  <button onclick="toggleForm()" id="add-btn" style="width:100%;padding:13px;background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;border-radius:13px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px">
-    <span style="font-size:20px">+</span> Adicionar Gasto
-  </button>
-
-  <div id="expense-form">
-    <div style="font-size:14px;font-weight:700;color:#1A1A2E;margin-bottom:13px">Novo Gasto ✏️</div>
-    <div style="margin-bottom:10px">
-      <div class="card-label">Descrição</div>
-      <input id="f-desc" class="inp" placeholder="Ex: Almoço no Bali Hali"/>
-    </div>
-    <div class="row2">
-      <div>
-        <div class="card-label">Valor</div>
-        <input id="f-amount" class="inp" type="number" inputmode="decimal" pattern="[0-9]*" step="0.01" placeholder="0.00" oninput="updatePreview()"/>
-      </div>
-      <div style="flex:1!important">
-        <div class="card-label">Moeda</div>
-        <select id="f-currency" class="inp" onchange="updatePreview()">
-          <option value="USD">$ USD</option>
-          <option value="BRL">R$ BRL</option>
-          <option value="CLP">$ CLP</option>
-        </select>
-      </div>
-    </div>
-    <div id="expense-preview">
-      <div id="prev-usd" style="font-weight:700"></div>
-      <div id="prev-brl-clp" style="color:#1A7A4A;margin-top:2px"></div>
-    </div>
-    <div class="row2">
-      <div style="flex:1!important">
-        <div class="card-label">Categoria</div>
-        <select id="f-category" class="inp"></select>
-      </div>
-      <div style="flex:1!important">
-        <div class="card-label">Dia</div>
-        <select id="f-date" class="inp"></select>
-      </div>
-    </div>
-    <div style="margin-bottom:13px">
-      <div class="card-label">Nota (opcional)</div>
-      <input id="f-note" class="inp" placeholder="Observação..."/>
-    </div>
-    <button onclick="addExpense()" class="btn-primary">✓ Salvar Gasto</button>
-  </div>
-
   <div id="expense-empty">
     <div style="font-size:44px;margin-bottom:10px">🏔️</div>
     <div style="font-size:14px">Nenhum gasto ainda.</div>
-    <div style="font-size:11px;margin-top:4px">Adicione seu primeiro gasto!</div>
+    <div style="font-size:11px;margin-top:4px">Toque no + para adicionar!</div>
   </div>
   <div id="expense-list"></div>
 </div>
@@ -379,11 +262,19 @@
 <div id="tab-config" class="tab">
   <div class="section-title">Configurações</div>
   <div class="card" style="margin-bottom:11px">
-    <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💳 Saldo Nomad — Orçamento Total (USD)</div>
+    <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💳 Saldo Nomad (USD)</div>
     <input id="cfg-nomad" class="inp" type="number" inputmode="decimal" step="1" placeholder="1000" oninput="cfgConvert()"/>
     <div class="sub-conv" style="margin-top:8px">
       <div id="cfg-nomad-brl">R$ 5.110,00</div>
       <div id="cfg-nomad-clp">$ 89.649.123 CLP</div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:11px">
+    <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💵 Dinheiro em Espécie / Cash (USD)</div>
+    <input id="cfg-cash" class="inp" type="number" inputmode="decimal" step="1" placeholder="0" oninput="cfgConvert()"/>
+    <div class="sub-conv" style="margin-top:8px">
+      <div id="cfg-cash-brl">R$ 0,00</div>
+      <div id="cfg-cash-clp">$ 0 CLP</div>
     </div>
   </div>
   <div class="card" style="margin-bottom:11px">
@@ -405,26 +296,77 @@
   <button onclick="clearExpenses()" style="width:100%;padding:12px;background:#FEF0F0;border:1px solid #FACACA;border-radius:11px;color:#C0392B;font-size:13px;cursor:pointer">🗑️ Apagar todos os gastos</button>
 </div>
 
-<!-- MODAL: Editar Config -->
+<!-- MODAL: Configurações (lápis header) -->
 <div id="modal-settings" class="modal-overlay" onclick="if(event.target===this)closeSettings()">
   <div class="modal-sheet">
     <div class="modal-title">⚙️ Editar Configurações</div>
     <div style="margin-bottom:13px">
-      <div class="card-label">💳 Saldo Nomad — Orçamento Total (USD)</div>
+      <div class="card-label">💳 Saldo Nomad (USD)</div>
       <input id="ms-nomad" class="inp" type="number" inputmode="decimal" step="1" oninput="msConvert()"/>
-      <div id="ms-preview" style="font-size:11px;color:#9AA0B8;margin-top:5px"></div>
+    </div>
+    <div style="margin-bottom:13px">
+      <div class="card-label">💵 Cash em espécie (USD)</div>
+      <input id="ms-cash" class="inp" type="number" inputmode="decimal" step="1" oninput="msConvert()"/>
     </div>
     <div style="margin-bottom:13px">
       <div class="card-label">🇺🇸 US$ 1 em Reais (R$)</div>
       <input id="ms-usd" class="inp" type="number" inputmode="decimal" step="0.01" oninput="msConvert()"/>
     </div>
-    <div style="margin-bottom:18px">
+    <div style="margin-bottom:8px">
       <div class="card-label">🇨🇱 $ 1 CLP em Reais (R$)</div>
       <input id="ms-clp" class="inp" type="number" inputmode="decimal" step="0.001"/>
     </div>
+    <div id="ms-preview" style="font-size:11px;color:#9AA0B8;margin-bottom:16px;min-height:16px"></div>
     <div style="display:flex;gap:10px">
       <button onclick="closeSettings()" class="btn-secondary" style="flex:1">Cancelar</button>
       <button onclick="saveSettings()" class="btn-primary" style="flex:2">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Adicionar / Editar Gasto -->
+<div id="modal-expense" class="modal-overlay" onclick="if(event.target===this)closeExpenseModal()">
+  <div class="modal-sheet">
+    <div id="modal-expense-title" class="modal-title">➕ Novo Gasto</div>
+    <div style="margin-bottom:10px">
+      <div class="card-label">Descrição</div>
+      <input id="me-desc" class="inp" placeholder="Ex: Almoço no Bali Hali"/>
+    </div>
+    <div class="row2">
+      <div>
+        <div class="card-label">Valor</div>
+        <input id="me-amount" class="inp" type="number" inputmode="decimal" pattern="[0-9]*" step="0.01" placeholder="0.00" oninput="updateModalPreview()"/>
+      </div>
+      <div style="flex:1!important">
+        <div class="card-label">Moeda</div>
+        <select id="me-currency" class="inp" onchange="updateModalPreview()">
+          <option value="USD">$ USD</option>
+          <option value="BRL">R$ BRL</option>
+          <option value="CLP">$ CLP</option>
+        </select>
+      </div>
+    </div>
+    <div id="modal-expense-preview" style="background:#F0FDF7;border-radius:8px;padding:8px 11px;margin:0 0 10px;font-size:12px;color:#1A7A4A;line-height:1.6;display:none;border:1px solid #C8F0DA">
+      <div id="mprev-usd" style="font-weight:700"></div>
+      <div id="mprev-brl-clp" style="color:#1A7A4A;margin-top:2px"></div>
+    </div>
+    <div class="row2">
+      <div style="flex:1!important">
+        <div class="card-label">Categoria</div>
+        <select id="me-category" class="inp"></select>
+      </div>
+      <div style="flex:1!important">
+        <div class="card-label">Dia</div>
+        <select id="me-date" class="inp"></select>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div class="card-label">Nota (opcional)</div>
+      <input id="me-note" class="inp" placeholder="Observação..."/>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeExpenseModal()" class="btn-secondary" style="flex:1">Cancelar</button>
+      <button id="modal-expense-save" onclick="saveExpenseModal()" class="btn-primary" style="flex:2">✓ Salvar</button>
     </div>
   </div>
 </div>
@@ -453,9 +395,10 @@
 <div id="toast"></div>
 
 <script>
-const STORAGE_KEY='chile_trip_v5';
+// ══ STATE ══
+const STORAGE_KEY='chile_trip_v6';
 const DEFAULT_STATE={
-  nomadUSD:1000,usdRate:5.11,clpRate:0.057,
+  nomadUSD:1000, cashUSD:0, usdRate:5.11, clpRate:0.057,
   visible:false,
   categories:[
     {id:4,category:'Transporte',          icon:'🚇',budgeted:157,color:'#27AE60'},
@@ -488,9 +431,12 @@ let S=(()=>{
   try{const s=localStorage.getItem(STORAGE_KEY);if(s)return{...DEFAULT_STATE,...JSON.parse(s)};}catch{}
   return{...DEFAULT_STATE};
 })();
+// migrate old key
+if(!S.cashUSD) S.cashUSD=0;
 
 function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(S));}catch{}}
 
+// ══ FORMATTERS ══
 const fUSD=v=>`US$ ${Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
 const fBRL=v=>`R$ ${Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
 const fCLP=v=>`$ ${Math.round(Number(v)).toLocaleString('pt-BR')} CLP`;
@@ -502,7 +448,6 @@ function toUSD(amount,currency){
   if(currency==='CLP')return(n*S.clpRate)/S.usdRate;
   return n;
 }
-
 function totals(){
   const spent=S.expenses.reduce((s,e)=>s+e.usd,0);
   const left=S.nomadUSD-spent;
@@ -510,94 +455,82 @@ function totals(){
   return{spent,left,pct};
 }
 
-/* ── visibility (mask numbers with dots) ── */
-function mask(text){
-  // keep currency prefix, replace digits with ●
-  return text.replace(/[0-9]/g,'●');
+// ══ VISIBILITY ══
+function mask(t){return t.replace(/[0-9]/g,'●')}
+function setHV(el,text){
+  if(!el)return;
+  el.setAttribute('data-real',text);
+  el.textContent=S.visible?text:mask(text);
 }
-
-function toggleVisibility(){
-  S.visible=!S.visible;
-  save();
-  applyVisibility();
-}
-
+function toggleVisibility(){S.visible=!S.visible;save();applyVisibility();}
 function applyVisibility(){
   document.querySelectorAll('.hidden-val').forEach(el=>{
-    const stored = el.getAttribute('data-real');
-    if(!stored) return; // no real value stored yet, skip
-    if(S.visible){
-      el.textContent = stored;
-    } else {
-      el.textContent = mask(stored);
-    }
+    const r=el.getAttribute('data-real');
+    if(r)el.textContent=S.visible?r:mask(r);
   });
   document.getElementById('eye-icon').textContent=S.visible?'🙈':'👁';
   document.getElementById('eye-label').textContent=S.visible?'Visível':'Oculto';
 }
 
-/* Store real value on element and apply masking */
-function setHiddenVal(el, text){
-  el.setAttribute('data-real', text);
-  el.textContent = S.visible ? text : mask(text);
-}
-
+// ══ RENDER HEADER ══
 function renderHeader(){
   const {spent,left,pct}=totals();
   const barColor=pct>90?'#FF5555':pct>70?'#FFDD00':'#fff';
   const el=id=>document.getElementById(id);
-  setHiddenVal(el('hd-left-usd'), fUSD(Math.max(left,0)));
-  el('hd-left-usd').style.color='#fff';
-  setHiddenVal(el('hd-spent-usd'), fUSD(spent));
-  setHiddenVal(el('hd-total-usd'), 'de '+fUSD(S.nomadUSD));
+  setHV(el('hd-left-usd'),fUSD(Math.max(left,0)));
+  setHV(el('hd-spent-usd'),fUSD(spent));
+  setHV(el('hd-total-usd'),'de '+fUSD(S.nomadUSD));
   el('hd-bar').style.width=pct+'%';
   el('hd-bar').style.background=barColor;
-  setHiddenVal(el('hd-pct'), pct.toFixed(1)+'% usado');
+  setHV(el('hd-pct'),pct.toFixed(1)+'% usado');
   const saldo=(left>=0?'Saldo: ':'Excedeu: ')+fUSD(Math.abs(left));
   const se=el('hd-saldo');
-  setHiddenVal(se, saldo);
-  se.style.color=left>=0?'#fff':'#FFD0D0';
+  setHV(se,saldo);se.style.color=left>=0?'#fff':'#FFD0D0';
   const lb=Math.max(left,0)*S.usdRate,lc=lb/S.clpRate;
-  setHiddenVal(el('hd-brl'), fBRL(lb));
-  setHiddenVal(el('hd-brl-gasto'), 'gasto: '+fBRL(spent*S.usdRate));
-  setHiddenVal(el('hd-clp'), fCLP(lc));
-  setHiddenVal(el('hd-clp-gasto'), 'gasto: '+fCLP(spent*S.usdRate/S.clpRate));
+  setHV(el('hd-brl'),fBRL(lb));
+  setHV(el('hd-brl-gasto'),'gasto: '+fBRL(spent*S.usdRate));
+  setHV(el('hd-clp'),fCLP(lc));
+  setHV(el('hd-clp-gasto'),'gasto: '+fCLP(spent*S.usdRate/S.clpRate));
   // decolar
-  const dv=document.getElementById('decolar-val');
-  if(dv) setHiddenVal(dv,'R$ 11.984,00');
+  const dv=el('decolar-val');if(dv)setHV(dv,'R$ 11.984,00');
+  // total combined
+  const total=S.nomadUSD+S.cashUSD;
+  setHV(el('hd-total-combined'),fUSD(total));
+  setHV(el('hd-cash-usd'),fUSD(S.cashUSD));
+  setHV(el('hd-cash-brl'),fBRL(S.cashUSD*S.usdRate));
+  setHV(el('hd-nomad-usd'),fUSD(Math.max(left,0)));
+  setHV(el('hd-nomad-brl'),fBRL(Math.max(left,0)*S.usdRate));
 }
 
+// ══ RENDER CATEGORIES ══
 function renderCategories(){
   const list=document.getElementById('cat-list');list.innerHTML='';
   S.categories.forEach(cat=>{
     const spent=S.expenses.filter(e=>e.category===cat.category).reduce((s,e)=>s+e.usd,0);
     const p=cat.budgeted>0?Math.min((spent/cat.budgeted)*100,100):0;
-    const bar=cat.budgeted>0
-      ?`<div style="background:#EEF0F6;border-radius:99px;height:5px;margin-top:8px"><div style="height:100%;width:${p}%;background:${cat.color};border-radius:99px;transition:width .4s"></div></div>`:''
-    const prevSub=cat.budgeted>0
-      ?`${fUSD(cat.budgeted)} <span style="color:#C0C8DC">· ${fBRL(cat.budgeted*S.usdRate)}</span>`:'—';
+    const bar=cat.budgeted>0?`<div style="background:#EEF0F6;border-radius:99px;height:5px;margin-top:8px"><div style="height:100%;width:${p}%;background:${cat.color};border-radius:99px;transition:width .4s"></div></div>`:'';
+    const prevSub=cat.budgeted>0?`${fUSD(cat.budgeted)} <span style="color:#C0C8DC">· ${fBRL(cat.budgeted*S.usdRate)}</span>`:'—';
     const spUSD=fUSD(spent),spBRL=fBRL(spent*S.usdRate);
-    const mSpUSD=S.visible?spUSD:mask(spUSD),mSpBRL=S.visible?spBRL:mask(spBRL);
-    list.innerHTML+=`
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:20px">${cat.icon}</span>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:#1A1A2E">${cat.category}</div>
-              <div style="font-size:10px;color:#B0B8CC">Prev: ${prevSub}</div>
-            </div>
+    const mU=S.visible?spUSD:mask(spUSD),mB=S.visible?spBRL:mask(spBRL);
+    list.innerHTML+=`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">${cat.icon}</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#1A1A2E">${cat.category}</div>
+            <div style="font-size:10px;color:#B0B8CC">Prev: ${prevSub}</div>
           </div>
-          <div style="text-align:right">
-            <div class="hidden-val" data-real="${spUSD}" style="font-size:14px;font-weight:700;color:${cat.color}" onclick="toggleVisibility()">${mSpUSD}</div>
-            <div class="hidden-val" data-real="${spBRL}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mSpBRL}</div>
-            ${cat.budgeted>0?`<div style="font-size:9px;color:#C0C8DC">${p.toFixed(0)}% do prev.</div>`:''}
-          </div>
-        </div>${bar}
-      </div>`;
+        </div>
+        <div style="text-align:right">
+          <div class="hidden-val" data-real="${spUSD}" style="font-size:14px;font-weight:700;color:${cat.color}" onclick="toggleVisibility()">${mU}</div>
+          <div class="hidden-val" data-real="${spBRL}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mB}</div>
+          ${cat.budgeted>0?`<div style="font-size:9px;color:#C0C8DC">${p.toFixed(0)}% do prev.</div>`:''}
+        </div>
+      </div>${bar}</div>`;
   });
 }
 
+// ══ RENDER EXPENSES ══
 function renderExpenses(){
   const list=document.getElementById('expense-list'),empty=document.getElementById('expense-empty');
   list.innerHTML='';
@@ -607,8 +540,8 @@ function renderExpenses(){
     const cat=S.categories.find(c=>c.category===exp.category)||{};
     const color=cat.color||'#C0392B',icon=cat.icon||'💸';
     const note=exp.note?`<div style="font-size:10px;color:#B0B8CC;font-style:italic">${exp.note}</div>`:'';
-    const orig=exp.currency==='USD'?`<div style="font-size:9px;color:#C0C8DC">${fUSD(exp.amount)}</div>`
-              :exp.currency==='CLP'?`<div style="font-size:9px;color:#C0C8DC">${fCLP(exp.amount)}</div>`:'';
+    const vUSD=fUSD(exp.usd),vBRL=fBRL(exp.usd*S.usdRate),vCLP=fCLP(exp.usd*S.usdRate/S.clpRate);
+    const mU=S.visible?vUSD:mask(vUSD),mB=S.visible?vBRL:mask(vBRL),mC=S.visible?vCLP:mask(vCLP);
     list.innerHTML+=`
       <div class="expense-item" style="border-left:3px solid ${color}">
         <span style="font-size:20px;flex-shrink:0">${icon}</span>
@@ -617,68 +550,153 @@ function renderExpenses(){
           <div style="font-size:10px;color:#B0B8CC">${exp.category} · ${exp.date}/07</div>${note}
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <div class="hidden-val" data-real="${fUSD(exp.usd)}" style="font-size:14px;font-weight:800;color:${color}" onclick="toggleVisibility()">${S.visible?fUSD(exp.usd):mask(fUSD(exp.usd))}</div>
-          <div class="hidden-val" data-real="${fBRL(exp.usd*S.usdRate)}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${S.visible?fBRL(exp.usd*S.usdRate):mask(fBRL(exp.usd*S.usdRate))}</div>
-          <div class="hidden-val" data-real="${fCLP(exp.usd*S.usdRate/S.clpRate)}" style="font-size:9px;color:#C0C8DC" onclick="toggleVisibility()">${S.visible?fCLP(exp.usd*S.usdRate/S.clpRate):mask(fCLP(exp.usd*S.usdRate/S.clpRate))}</div>
-          ${orig}
+          <div class="hidden-val" data-real="${vUSD}" style="font-size:14px;font-weight:800;color:${color}" onclick="toggleVisibility()">${mU}</div>
+          <div class="hidden-val" data-real="${vBRL}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mB}</div>
+          <div class="hidden-val" data-real="${vCLP}" style="font-size:9px;color:#C0C8DC" onclick="toggleVisibility()">${mC}</div>
         </div>
-        <button class="del-exp" onclick="deleteExpense(${exp.id})">×</button>
+        <button class="edit-exp" onclick="openExpenseModal(${exp.id})" title="Editar">✏️</button>
+        <button class="del-exp" onclick="deleteExpense(${exp.id})" title="Apagar">×</button>
       </div>`;
   });
 }
 
-function deleteExpense(id){S.expenses=S.expenses.filter(e=>e.id!==id);save();renderAll();showToast('Removido 🗑️');}
+function deleteExpense(id){
+  if(!confirm('Apagar este gasto?'))return;
+  S.expenses=S.expenses.filter(e=>e.id!==id);save();renderAll();showToast('Removido 🗑️');
+}
 
+// ══ EXPENSE MODAL (add + edit) ══
+let editingId=null;
+
+function populateModalSelects(){
+  const cs=document.getElementById('me-category');cs.innerHTML='';
+  S.categories.forEach(c=>{const o=document.createElement('option');o.value=c.category;o.textContent=c.category;cs.appendChild(o);});
+  const ds=document.getElementById('me-date');ds.innerHTML='';
+  S.itinerary.forEach(d=>{const o=document.createElement('option');o.value=d.date.slice(4);o.textContent=d.date;ds.appendChild(o);});
+  if(ds.options.length>1)ds.selectedIndex=1;
+}
+
+function openExpenseModal(id){
+  populateModalSelects();
+  editingId=id||null;
+  const title=document.getElementById('modal-expense-title');
+  const saveBtn=document.getElementById('modal-expense-save');
+  if(editingId){
+    const exp=S.expenses.find(e=>e.id===editingId);
+    if(!exp)return;
+    title.textContent='✏️ Editar Gasto';
+    saveBtn.textContent='✓ Atualizar';
+    document.getElementById('me-desc').value=exp.desc;
+    document.getElementById('me-amount').value=exp.amount;
+    document.getElementById('me-currency').value=exp.currency;
+    document.getElementById('me-note').value=exp.note||'';
+    // set category
+    document.getElementById('me-category').value=exp.category;
+    // set date
+    document.getElementById('me-date').value=exp.date;
+  } else {
+    title.textContent='➕ Novo Gasto';
+    saveBtn.textContent='✓ Salvar';
+    document.getElementById('me-desc').value='';
+    document.getElementById('me-amount').value='';
+    document.getElementById('me-currency').value='USD';
+    document.getElementById('me-note').value='';
+    document.getElementById('modal-expense-preview').style.display='none';
+  }
+  updateModalPreview();
+  document.getElementById('modal-expense').classList.add('open');
+}
+
+function closeExpenseModal(){
+  document.getElementById('modal-expense').classList.remove('open');
+  editingId=null;
+}
+
+function updateModalPreview(){
+  const amount=Number(document.getElementById('me-amount').value);
+  const currency=document.getElementById('me-currency').value;
+  const prev=document.getElementById('modal-expense-preview');
+  if(!amount){prev.style.display='none';return;}
+  const usd=toUSD(amount,currency);
+  document.getElementById('mprev-usd').textContent=fUSD(usd);
+  document.getElementById('mprev-brl-clp').textContent=fBRL(usd*S.usdRate)+' · '+fCLP(usd*S.usdRate/S.clpRate);
+  prev.style.display='block';
+}
+
+function saveExpenseModal(){
+  const desc=document.getElementById('me-desc').value.trim();
+  const amount=Number(document.getElementById('me-amount').value);
+  const currency=document.getElementById('me-currency').value;
+  const category=document.getElementById('me-category').value;
+  const date=document.getElementById('me-date').value;
+  const note=document.getElementById('me-note').value.trim();
+  if(!desc||!amount){showToast('Preencha descrição e valor ⚠️');return;}
+  const usd=toUSD(amount,currency);
+  if(editingId){
+    const idx=S.expenses.findIndex(e=>e.id===editingId);
+    if(idx!==-1)S.expenses[idx]={...S.expenses[idx],desc,amount,currency,category,date,note,usd};
+    showToast('Gasto atualizado ✅');
+  } else {
+    S.expenses.unshift({id:Date.now(),desc,amount,currency,category,date,note,usd});
+    showToast('Gasto adicionado ✅');
+  }
+  save();renderAll();closeExpenseModal();
+  // if not on gastos tab, switch to it so user sees the expense
+}
+
+// ══ RENDER ITIN ══
 function renderItin(){
   const list=document.getElementById('itin-list');list.innerHTML='';
   S.itinerary.forEach(day=>{
     const key=day.date.slice(4);
     const spent=S.expenses.filter(e=>e.date===key).reduce((s,e)=>s+e.usd,0);
-    const itSpUSD=fUSD(spent),itSpBRL=fBRL(spent*S.usdRate);
-    const mItUSD=S.visible?itSpUSD:mask(itSpUSD),mItBRL=S.visible?itSpBRL:mask(itSpBRL);
+    const vU=fUSD(spent),vB=fBRL(spent*S.usdRate);
+    const mU=S.visible?vU:mask(vU),mB=S.visible?vB:mask(vB);
     const spentHtml=spent>0
-      ?`<div class="hidden-val" data-real="${itSpUSD}" style="font-size:13px;font-weight:700;color:#27AE60" onclick="toggleVisibility()">${mItUSD}</div>
-        <div class="hidden-val" data-real="${itSpBRL}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mItBRL}</div>`
-      :`<div style="font-size:13px;font-weight:600;color:#D8DAE8">${fUSD(0)}</div>`;
+      ?`<div class="hidden-val" data-real="${vU}" style="font-size:13px;font-weight:700;color:#27AE60" onclick="toggleVisibility()">${mU}</div>
+        <div class="hidden-val" data-real="${vB}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mB}</div>`
+      :`<div style="font-size:12px;color:#D8DAE8">—</div>`;
     const acts=day.activities.map((a,j)=>
       `<div style="font-size:12px;color:#555E80;padding:4px 0;display:flex;align-items:center;gap:7px;${j<day.activities.length-1?'border-bottom:1px solid #F0F2F8':''}">
-        <span style="color:#D0D4E8;font-size:9px">●</span> ${a}
-       </div>`).join('');
-    list.innerHTML+=`
-      <div class="itin-day">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#C0392B">${day.date}</div>
-            <div style="font-size:10px;color:#B0B8CC">${day.label}</div>
-          </div>
-          <div style="text-align:right">${spentHtml}</div>
-        </div>${acts}
-      </div>`;
+        <span style="color:#D0D4E8;font-size:9px">●</span>${a}</div>`).join('');
+    list.innerHTML+=`<div class="itin-day">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#C0392B">${day.date}</div>
+          <div style="font-size:10px;color:#B0B8CC">${day.label}</div>
+        </div>
+        <div style="text-align:right">${spentHtml}</div>
+      </div>${acts}</div>`;
   });
 }
 
+// ══ RENDER TIPS ══
 function renderTips(){
   const list=document.getElementById('tips-list');list.innerHTML='';
   S.tips.forEach(tip=>{
-    list.innerHTML+=`
-      <div class="tip-card">
-        <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px">
-          <span style="font-size:22px">${tip.icon}</span>
-          <div style="font-size:13px;font-weight:700;color:#1A1A2E">${tip.title}</div>
-        </div>
-        <div style="font-size:12px;line-height:1.68;color:#555E80">${tip.text}</div>
-      </div>`;
+    list.innerHTML+=`<div class="tip-card">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px">
+        <span style="font-size:22px">${tip.icon}</span>
+        <div style="font-size:13px;font-weight:700;color:#1A1A2E">${tip.title}</div>
+      </div>
+      <div style="font-size:12px;line-height:1.68;color:#555E80">${tip.text}</div>
+    </div>`;
   });
 }
 
+// ══ CONFIG ══
 function renderConfig(){
   document.getElementById('cfg-nomad').value=S.nomadUSD;
+  document.getElementById('cfg-cash').value=S.cashUSD;
   document.getElementById('cfg-usd').value=S.usdRate;
   document.getElementById('cfg-clp').value=S.clpRate;
   cfgConvert();
   const {spent,left}=totals();
+  const total=S.nomadUSD+S.cashUSD;
   document.getElementById('cfg-summary').innerHTML=`
     <div class="sum-row"><span class="sum-label">Nomad disponível</span><div><div class="sum-val">${fUSD(Math.max(left,0))}</div><div class="sum-sub">${fBRL(Math.max(left,0)*S.usdRate)}</div></div></div>
+    <div class="sum-row"><span class="sum-label">Cash em espécie</span><div><div class="sum-val">${fUSD(S.cashUSD)}</div><div class="sum-sub">${fBRL(S.cashUSD*S.usdRate)}</div></div></div>
+    <div class="sum-row"><span class="sum-label">Saldo total</span><div><div class="sum-val">${fUSD(Math.max(left,0)+S.cashUSD)}</div><div class="sum-sub">${fBRL((Math.max(left,0)+S.cashUSD)*S.usdRate)}</div></div></div>
     <div class="sum-row"><span class="sum-label">Total gasto</span><div><div class="sum-val">${fUSD(spent)}</div><div class="sum-sub">${fBRL(spent*S.usdRate)}</div></div></div>
     <div class="sum-row"><span class="sum-label">Taxa: US$ 1 =</span><div class="sum-val">${fBRL(S.usdRate)}</div></div>
     <div class="sum-row"><span class="sum-label">Taxa: $ 1 CLP =</span><div class="sum-val">R$ ${S.clpRate}</div></div>`;
@@ -686,58 +704,21 @@ function renderConfig(){
 
 function cfgConvert(){
   const n=Number(document.getElementById('cfg-nomad').value)||0;
+  const ca=Number(document.getElementById('cfg-cash').value)||0;
   const u=Number(document.getElementById('cfg-usd').value)||S.usdRate;
   const c=Number(document.getElementById('cfg-clp').value)||S.clpRate;
   document.getElementById('cfg-nomad-brl').textContent=fBRL(n*u);
   document.getElementById('cfg-nomad-clp').textContent=fCLP(n*u/c);
+  document.getElementById('cfg-cash-brl').textContent=fBRL(ca*u);
+  document.getElementById('cfg-cash-clp').textContent=fCLP(ca*u/c);
 }
 
 function saveConfig(){
   S.nomadUSD=Number(document.getElementById('cfg-nomad').value)||S.nomadUSD;
+  S.cashUSD=Number(document.getElementById('cfg-cash').value)||0;
   S.usdRate=Number(document.getElementById('cfg-usd').value)||S.usdRate;
   S.clpRate=Number(document.getElementById('cfg-clp').value)||S.clpRate;
   save();renderAll();showToast('Configurações salvas ✅');
-}
-
-function populateForm(){
-  const cs=document.getElementById('f-category');cs.innerHTML='';
-  S.categories.forEach(c=>{const o=document.createElement('option');o.value=c.category;o.textContent=c.category;cs.appendChild(o);});
-  const ds=document.getElementById('f-date');ds.innerHTML='';
-  S.itinerary.forEach(d=>{const o=document.createElement('option');o.value=d.date.slice(4);o.textContent=d.date;ds.appendChild(o);});
-  if(ds.options.length>1)ds.selectedIndex=1;
-}
-
-function toggleForm(){
-  const form=document.getElementById('expense-form'),btn=document.getElementById('add-btn');
-  const open=form.style.display==='block';
-  form.style.display=open?'none':'block';
-  btn.innerHTML=open?'<span style="font-size:20px">+</span> Adicionar Gasto':'<span style="font-size:20px">−</span> Cancelar';
-  btn.style.background=open?'linear-gradient(135deg,#C0392B,#E74C3C)':'#EEF0F6';
-  btn.style.color=open?'#fff':'#555E80';
-  if(!open){['f-desc','f-amount','f-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('expense-preview').style.display='none';}
-}
-
-function updatePreview(){
-  const amount=Number(document.getElementById('f-amount').value);
-  const currency=document.getElementById('f-currency').value;
-  const prev=document.getElementById('expense-preview');
-  if(!amount){prev.style.display='none';return;}
-  const usd=toUSD(amount,currency);
-  document.getElementById('prev-usd').textContent=fUSD(usd);
-  document.getElementById('prev-brl-clp').textContent=fBRL(usd*S.usdRate)+' · '+fCLP(usd*S.usdRate/S.clpRate);
-  prev.style.display='block';
-}
-
-function addExpense(){
-  const desc=document.getElementById('f-desc').value.trim();
-  const amount=Number(document.getElementById('f-amount').value);
-  const currency=document.getElementById('f-currency').value;
-  const category=document.getElementById('f-category').value;
-  const date=document.getElementById('f-date').value;
-  const note=document.getElementById('f-note').value.trim();
-  if(!desc||!amount){showToast('Preencha descrição e valor ⚠️');return;}
-  S.expenses.unshift({id:Date.now(),desc,amount,currency,category,date,note,usd:toUSD(amount,currency)});
-  save();renderAll();toggleForm();showToast('Gasto adicionado! ✅');
 }
 
 function clearExpenses(){
@@ -745,8 +726,10 @@ function clearExpenses(){
   S.expenses=[];save();renderAll();showToast('Gastos apagados 🗑️');
 }
 
+// ══ SETTINGS MODAL (lápis) ══
 function openSettings(){
   document.getElementById('ms-nomad').value=S.nomadUSD;
+  document.getElementById('ms-cash').value=S.cashUSD;
   document.getElementById('ms-usd').value=S.usdRate;
   document.getElementById('ms-clp').value=S.clpRate;
   msConvert();
@@ -755,17 +738,22 @@ function openSettings(){
 function closeSettings(){document.getElementById('modal-settings').classList.remove('open');}
 function saveSettings(){
   S.nomadUSD=Number(document.getElementById('ms-nomad').value)||S.nomadUSD;
+  S.cashUSD=Number(document.getElementById('ms-cash').value)||0;
   S.usdRate=Number(document.getElementById('ms-usd').value)||S.usdRate;
   S.clpRate=Number(document.getElementById('ms-clp').value)||S.clpRate;
   save();renderAll();closeSettings();showToast('Configurações salvas ✅');
 }
 function msConvert(){
   const n=Number(document.getElementById('ms-nomad').value)||0;
+  const ca=Number(document.getElementById('ms-cash').value)||0;
   const u=Number(document.getElementById('ms-usd').value)||S.usdRate;
   const c=Number(document.getElementById('ms-clp').value)||S.clpRate;
-  document.getElementById('ms-preview').textContent=n>0?`= ${fBRL(n*u)} · ${fCLP(n*u/c)}`:'';
+  const total=n+ca;
+  document.getElementById('ms-preview').textContent=
+    total>0?`Total: ${fUSD(total)} = ${fBRL(total*u)}`:'';
 }
 
+// ══ ITINERARY MODAL ══
 let itinDraft=[];
 function openItin(){itinDraft=JSON.parse(JSON.stringify(S.itinerary));renderItinEdit();document.getElementById('modal-itin').classList.add('open');}
 function closeItin(){document.getElementById('modal-itin').classList.remove('open');}
@@ -779,26 +767,19 @@ function renderItinEdit(){
         <div class="act-text">${a}</div>
         <button class="act-del" onclick="removeAct(${di},${ai})">×</button>
       </div>`).join('');
-    list.innerHTML+=`
-      <div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #E8EAF2">
-        <div style="font-size:12px;font-weight:700;color:#C0392B;margin-bottom:8px">${day.date}</div>
-        ${acts}
-        <div style="display:flex;gap:7px;margin-top:6px">
-          <input id="new-act-${di}" class="inp" placeholder="+ Nova atividade..." style="font-size:12px;padding:8px 10px" onkeydown="if(event.key==='Enter')addAct(${di})"/>
-          <button onclick="addAct(${di})" style="padding:8px 14px;background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;color:#C0392B;font-size:16px;cursor:pointer;flex-shrink:0">+</button>
-        </div>
-      </div>`;
+    list.innerHTML+=`<div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #E8EAF2">
+      <div style="font-size:12px;font-weight:700;color:#C0392B;margin-bottom:8px">${day.date}</div>
+      ${acts}
+      <div style="display:flex;gap:7px;margin-top:6px">
+        <input id="na-${di}" class="inp" placeholder="+ Nova atividade..." style="font-size:12px;padding:8px 10px" onkeydown="if(event.key==='Enter')addAct(${di})"/>
+        <button onclick="addAct(${di})" style="padding:8px 14px;background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;color:#C0392B;font-size:16px;cursor:pointer;flex-shrink:0">+</button>
+      </div></div>`;
   });
 }
-
-function addAct(di){
-  const i=document.getElementById(`new-act-${di}`),v=i.value.trim();
-  if(!v)return;
-  itinDraft[di].activities.push(v);
-  i.value='';renderItinEdit();
-}
+function addAct(di){const i=document.getElementById(`na-${di}`),v=i.value.trim();if(!v)return;itinDraft[di].activities.push(v);i.value='';renderItinEdit();}
 function removeAct(di,ai){itinDraft[di].activities.splice(ai,1);renderItinEdit();}
 
+// ══ TABS ══
 function setTab(name,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -807,6 +788,7 @@ function setTab(name,btn){
   if(name==='config')renderConfig();
 }
 
+// ══ TOAST ══
 let toastTimer;
 function showToast(msg){
   const el=document.getElementById('toast');
@@ -817,65 +799,23 @@ function showToast(msg){
 
 function renderAll(){renderHeader();renderCategories();renderExpenses();renderItin();renderTips();}
 
-populateForm();
-renderAll();
-
-/* ── WEATHER (Open-Meteo, Santiago de Chile) ── */
-const WMO_ICONS = {
-  0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
-  45:'🌫️', 48:'🌫️',
-  51:'🌦️', 53:'🌦️', 55:'🌧️',
-  61:'🌧️', 63:'🌧️', 65:'🌧️',
-  71:'🌨️', 73:'🌨️', 75:'❄️',
-  77:'❄️', 80:'🌦️', 81:'🌧️', 82:'⛈️',
-  85:'🌨️', 86:'❄️',
-  95:'⛈️', 96:'⛈️', 99:'⛈️',
-};
-const WMO_DESC = {
-  0:'Céu limpo', 1:'Predominante limpo', 2:'Parcialmente nublado', 3:'Nublado',
-  45:'Neblina', 48:'Neblina c/ geada',
-  51:'Garoa leve', 53:'Garoa moderada', 55:'Garoa intensa',
-  61:'Chuva leve', 63:'Chuva moderada', 65:'Chuva forte',
-  71:'Neve leve', 73:'Neve moderada', 75:'Neve forte',
-  77:'Granizo', 80:'Pancadas leves', 81:'Pancadas moderadas', 82:'Pancadas fortes',
-  85:'Neve em pancadas', 86:'Neve intensa',
-  95:'Trovoada', 96:'Trovoada c/ granizo', 99:'Trovoada intensa',
-};
-
+// ══ WEATHER ══
+const WMO={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',77:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',85:'🌨️',86:'❄️',95:'⛈️',96:'⛈️',99:'⛈️'};
 async function fetchWeather(){
-  const icon=document.getElementById('weather-icon');
-  const temp=document.getElementById('weather-temp');
-  const desc=document.getElementById('weather-desc');
-  icon.className='weather-loading';
-  icon.textContent='⏳';
-  temp.textContent='...';
-  desc.textContent='Buscando';
-  try {
-    // Santiago de Chile: lat -33.4569, lon -70.6483
-    const url='https://api.open-meteo.com/v1/forecast?latitude=-33.4569&longitude=-70.6483&current=temperature_2m,weathercode,apparent_temperature&timezone=America%2FSantiago';
-    const res=await fetch(url);
-    const data=await res.json();
-    const t=Math.round(data.current.temperature_2m);
-    const feels=Math.round(data.current.apparent_temperature);
-    const code=data.current.weathercode;
-    icon.className='';
-    icon.textContent=WMO_ICONS[code]||'🌡️';
-    temp.textContent=t+'°C';
-    desc.textContent='Sensação '+feels+'°C';
-  } catch(e) {
-    icon.className='';
-    icon.textContent='❓';
-    temp.textContent='--°C';
-    desc.textContent='Sem conexão';
-  }
+  const ic=document.getElementById('weather-icon'),tp=document.getElementById('weather-temp'),dc=document.getElementById('weather-desc');
+  ic.className='weather-loading';ic.textContent='⏳';tp.textContent='...';dc.textContent='Buscando';
+  try{
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=-33.4569&longitude=-70.6483&current=temperature_2m,weathercode,apparent_temperature&timezone=America%2FSantiago');
+    const d=await r.json();
+    const t=Math.round(d.current.temperature_2m),f=Math.round(d.current.apparent_temperature),code=d.current.weathercode;
+    ic.className='';ic.textContent=WMO[code]||'🌡️';tp.textContent=t+'°C';dc.textContent='Sensação '+f+'°C';
+  }catch{ic.className='';ic.textContent='❓';tp.textContent='--°C';dc.textContent='Sem conexão';}
 }
 
-// Auto-fetch on load
+// ══ INIT ══
+renderAll();
 fetchWeather();
-// Refresh every 10 minutes
-setInterval(fetchWeather, 10*60*1000);
-
-
+setInterval(fetchWeather,10*60*1000);
 </script>
 </body>
 </html>
