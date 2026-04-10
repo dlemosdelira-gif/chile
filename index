@@ -1,0 +1,601 @@
+import { useState, useEffect } from “react”;
+
+const STORAGE_KEY = “chile_trip_v4”;
+
+const DEFAULT_STATE = {
+nomadUSD: 1000,   // Único orçamento — saldo Nomad em dólar
+usdRate: 5.11,
+clpRate: 0.057,
+categories: [
+{ id: 4, category: “Transporte”,          icon: “🚇”, budgeted: 157, color: “#27AE60” },  // ~800 BRL
+{ id: 5, category: “Alimentação”,          icon: “🍽️”, budgeted: 880, color: “#E74C3C” },  // ~4500 BRL
+{ id: 6, category: “Passeios / Ingressos”, icon: “🎡”, budgeted: 391, color: “#F39C12” },  // ~2000 BRL
+{ id: 7, category: “Outros”,               icon: “💸”, budgeted: 0,   color: “#1ABC9C” },
+],
+itinerary: [
+{ date: “Sex 03/07”, label: “Chegada”, activities: [“Chegada em Santiago”] },
+{ date: “Sáb 04/07”, label: “Dia 2”,   activities: [“Bali Hali”, “Wonderland Café”, “Sky Costanera (pôr do sol)”] },
+{ date: “Dom 05/07”, label: “Dia 3”,   activities: [“Farellones”] },
+{ date: “Seg 06/07”, label: “Dia 4”,   activities: [“Mirador Interactive Museum”, “Parque Bicentenário”, “Zoológico Buin Zoo”] },
+{ date: “Ter 07/07”, label: “Dia 5”,   activities: [“Portillo”] },
+{ date: “Qua 08/07”, label: “Dia 6”,   activities: [“Cerro San Cristóbal + Zoo”, “KidZania”, “Pizzaria Tiramisú”] },
+],
+expenses: [],
+tips: [
+{ id: 1, icon: “🏨”, title: “Hospedagem — Cartão BR”,        text: “No check-in/check-out use seu cartão de crédito brasileiro para garantir 19% de desconto (o desconto do imposto compensa o IOF e sai mais barato do que pagar em moeda estrangeira).” },
+{ id: 2, icon: “💳”, title: “Gastos do dia — Nomad”,         text: “Para transporte, alimentação e passeios use a Nomad. Ela não converte para peso automaticamente; apenas pagamentos cobrados em moeda estrangeira têm isenção de IOF.” },
+{ id: 3, icon: “🌡️”, title: “Clima em julho”,                text: “Julho é pleno inverno no Chile. Em Santiago as temperaturas ficam entre 3°C e 14°C. Leve casaco pesado, luvas e cachecol — indispensável para Farellones e Portillo.” },
+{ id: 4, icon: “🚇”, title: “Metrô de Santiago (Bip!)”,      text: “O metrô é a forma mais barata e rápida de se locomover. Carregue o cartão Bip! em qualquer estação. Custo aproximado de 800 CLP por viagem.” },
+{ id: 5, icon: “🍷”, title: “Gorjeta nos restaurantes”,      text: “No Chile a gorjeta não é obrigatória, mas é bem-vista: 10% é o padrão. Verifique se o ‘servicio’ já está incluso na conta antes de deixar a mais.” },
+{ id: 6, icon: “💊”, title: “Altitude em Farellones/Portillo”, text: “Farellones fica a ~2.500 m e Portillo a ~2.800 m. Podem ocorrer sintomas de mal de montanha. Suba devagar, beba bastante água e evite esforço excessivo no primeiro dia.” },
+{ id: 7, icon: “🛒”, title: “Supermercados e economias”,     text: “Jumbo e Líder são os maiores supermercados. Comprar água, snacks e café nos mercados sai muito mais barato do que em pontos turísticos.” },
+{ id: 8, icon: “📱”, title: “Chip local ou eSIM”,            text: “Considere um chip chileno ou eSIM para dados baratos. Operadoras Entel e Movistar têm boa cobertura. O roaming pode sair muito caro.” },
+],
+};
+
+/* ── formatadores ── */
+const fUSD = (v) => `US$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+const fBRL = (v) => `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+const fCLP = (v) => `$ ${Math.round(Number(v)).toLocaleString("pt-BR")} CLP`;
+
+/* ── input numérico com teclado numérico mobile ── */
+const NumInput = ({ value, onChange, placeholder, step = “0.01”, style }) => (
+<input
+type=“number” inputMode=“decimal” pattern=”[0-9]*”
+step={step} value={value} placeholder={placeholder}
+onChange={e => onChange(e.target.value)}
+style={{ background: “#0B0F1A”, border: “1px solid rgba(255,255,255,0.15)”, borderRadius: 10,
+padding: “11px 12px”, color: “#fff”, fontSize: 15, boxSizing: “border-box”,
+width: “100%”, fontFamily: “inherit”, …style }}
+/>
+);
+
+export default function App() {
+const [tab, setTab] = useState(“resumo”);
+const [state, setState] = useState(() => {
+try {
+const s = localStorage.getItem(STORAGE_KEY);
+if (s) return { …DEFAULT_STATE, …JSON.parse(s) };
+} catch {}
+return DEFAULT_STATE;
+});
+
+const [showForm,       setShowForm]       = useState(false);
+const [form,           setForm]           = useState({ desc: “”, amount: “”, currency: “USD”, category: “Alimentação”, date: “04/07”, note: “” });
+const [toast,          setToast]          = useState(””);
+const [editSettings,   setEditSettings]   = useState(false);
+const [settingsDraft,  setSettingsDraft]  = useState({});
+const [editItinerary,  setEditItinerary]  = useState(false);
+const [itin,           setItin]           = useState([]);
+const [newActivity,    setNewActivity]    = useState({});
+
+const { nomadUSD, usdRate, clpRate, categories, itinerary, expenses, tips } = state;
+
+useEffect(() => {
+try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+}, [state]);
+
+const update = (patch) => setState(s => ({ …s, …patch }));
+const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(””), 2500); };
+
+/* conversão para USD (moeda-base) */
+const toUSD = (amount, currency) => {
+const n = Number(amount);
+if (currency === “USD”) return n;
+if (currency === “BRL”) return n / usdRate;
+if (currency === “CLP”) return (n * clpRate) / usdRate;
+return n;
+};
+
+/* totais — tudo em USD */
+const totalSpentUSD = expenses.reduce((s, e) => s + e.usd, 0);
+const nomadLeft     = nomadUSD - totalSpentUSD;
+const pct           = Math.min((totalSpentUSD / (nomadUSD || 1)) * 100, 100);
+
+/* por categoria (USD) */
+const byCategory = categories.map(cat => ({
+…cat,
+spent: expenses.filter(e => e.category === cat.category).reduce((s, e) => s + e.usd, 0),
+}));
+
+/* por dia (USD) */
+const byDay = itinerary.map(day => {
+const key   = day.date.slice(4);
+const spent = expenses.filter(e => e.date === key).reduce((s, e) => s + e.usd, 0);
+return { …day, spent, key };
+});
+
+/* adicionar gasto */
+const addExpense = () => {
+if (!form.desc || !form.amount) return;
+const usd = toUSD(form.amount, form.currency);
+update({ expenses: [{ …form, id: Date.now(), usd, amount: Number(form.amount) }, …expenses] });
+setForm({ desc: “”, amount: “”, currency: “USD”, category: “Alimentação”, date: “04/07”, note: “” });
+setShowForm(false);
+showToast(“Gasto adicionado! ✅”);
+};
+
+/* editar settings */
+const openSettings = () => { setSettingsDraft({ nomadUSD, usdRate, clpRate }); setEditSettings(true); };
+const saveSettings = () => {
+update({ nomadUSD: Number(settingsDraft.nomadUSD), usdRate: Number(settingsDraft.usdRate), clpRate: Number(settingsDraft.clpRate) });
+setEditSettings(false);
+showToast(“Configurações salvas ✅”);
+};
+
+/* editar roteiro */
+const openItin  = () => { setItin(JSON.parse(JSON.stringify(itinerary))); setNewActivity({}); setEditItinerary(true); };
+const saveItin  = () => { update({ itinerary: itin }); setEditItinerary(false); showToast(“Roteiro atualizado ✅”); };
+const addAct    = (di) => {
+const v = (newActivity[di] || “”).trim(); if (!v) return;
+setItin(itin.map((d, i) => i === di ? { …d, activities: […d.activities, v] } : d));
+setNewActivity(p => ({ …p, [di]: “” }));
+};
+const removeAct = (di, ai) =>
+setItin(itin.map((d, i) => i === di ? { …d, activities: d.activities.filter((_, j) => j !== ai) } : d));
+
+const tabs = [
+{ id: “resumo”,  label: “Resumo”,  icon: “📊” },
+{ id: “gastos”,  label: “Gastos”,  icon: “💰” },
+{ id: “roteiro”, label: “Roteiro”, icon: “🗓️” },
+{ id: “dicas”,   label: “Dicas”,   icon: “💡” },
+{ id: “config”,  label: “Config”,  icon: “⚙️” },
+];
+
+const inp = { background: “#0B0F1A”, border: “1px solid rgba(255,255,255,0.15)”, borderRadius: 10,
+padding: “11px 12px”, color: “#fff”, fontSize: 14, boxSizing: “border-box”, width: “100%”, fontFamily: “inherit” };
+const sel = { …inp, fontSize: 13 };
+
+/* preview de conversão ao digitar o gasto */
+const previewUSD = form.amount > 0 ? toUSD(form.amount, form.currency) : null;
+
+return (
+<div style={{ fontFamily: “‘Outfit’, sans-serif”, background: “#0B0F1A”, minHeight: “100vh”,
+color: “#F0F4FF”, maxWidth: 480, margin: “0 auto”, position: “relative”, paddingBottom: 82 }}>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+```
+  {/* ══ HEADER ══ */}
+  <div style={{ background: "linear-gradient(135deg,#1a2a6c 0%,#b21f1f 52%,#fdbb2d 100%)",
+    padding: "26px 20px 20px", position: "relative", overflow: "hidden" }}>
+    <div style={{ position:"absolute", top:-40, right:-40, width:160, height:160, borderRadius:"50%", background:"rgba(255,255,255,0.04)" }} />
+    <div style={{ position:"absolute", bottom:-20, left:-20, width:100, height:100, borderRadius:"50%", background:"rgba(255,255,255,0.04)" }} />
+
+    {/* título + editar */}
+    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:2 }}>
+      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+        <span style={{ fontSize:26 }}>🇨🇱</span>
+        <div>
+          <div style={{ fontSize:10, opacity:0.8, letterSpacing:2, textTransform:"uppercase" }}>Minha Viagem</div>
+          <div style={{ fontSize:21, fontWeight:800, lineHeight:1.1 }}>Chile 2025</div>
+        </div>
+      </div>
+      <button onClick={openSettings} style={{ background:"rgba(255,255,255,0.18)", border:"none",
+        borderRadius:8, padding:"6px 12px", color:"#fff", fontSize:12, cursor:"pointer",
+        fontFamily:"inherit", fontWeight:600 }}>✏️ Editar</button>
+    </div>
+    <div style={{ fontSize:10, opacity:0.6, marginBottom:16 }}>03 jul → 08 jul · Santiago · Ida 10h20 · Volta 17h05</div>
+
+    {/* ── Nomad card central ── */}
+    <div style={{ background:"rgba(0,0,0,0.35)", borderRadius:14, padding:"16px 18px" }}>
+      {/* linha principal USD */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:4 }}>
+        <div>
+          <div style={{ fontSize:10, opacity:0.65, letterSpacing:1.5, marginBottom:3 }}>💳 NOMAD · SALDO DISPONÍVEL</div>
+          <div style={{ fontSize:30, fontWeight:800, lineHeight:1, color: nomadLeft >= 0 ? "#4FE89B" : "#FF4444" }}>
+            {fUSD(Math.max(nomadLeft, 0))}
+          </div>
+        </div>
+        <div style={{ textAlign:"right", paddingTop:2 }}>
+          <div style={{ fontSize:10, opacity:0.55, marginBottom:1 }}>USADO</div>
+          <div style={{ fontSize:17, fontWeight:700 }}>{fUSD(totalSpentUSD)}</div>
+          <div style={{ fontSize:10, opacity:0.4 }}>de {fUSD(nomadUSD)}</div>
+        </div>
+      </div>
+
+      {/* barra de progresso */}
+      <div style={{ background:"rgba(255,255,255,0.13)", borderRadius:99, height:8, overflow:"hidden", margin:"10px 0 8px" }}>
+        <div style={{ height:"100%", width:`${pct}%`,
+          background: pct>90?"#FF4444":pct>70?"#FFAA00":"#4FE89B",
+          borderRadius:99, transition:"width 0.5s" }} />
+      </div>
+      <div style={{ display:"flex", justifyContent:"space-between", fontSize:10, opacity:0.75, marginBottom:12 }}>
+        <span>{pct.toFixed(1)}% usado</span>
+        <span style={{ color: nomadLeft>=0 ? "#4FE89B" : "#FF4444" }}>
+          {nomadLeft>=0 ? `Saldo: ${fUSD(nomadLeft)}` : `Excedeu: ${fUSD(Math.abs(nomadLeft))}`}
+        </span>
+      </div>
+
+      {/* linha BRL + CLP (visualização) */}
+      <div style={{ display:"flex", gap:8 }}>
+        <div style={{ flex:1, background:"rgba(255,255,255,0.06)", borderRadius:9, padding:"8px 10px" }}>
+          <div style={{ fontSize:9, opacity:0.55, marginBottom:2, letterSpacing:1 }}>SALDO EM R$</div>
+          <div style={{ fontSize:14, fontWeight:700 }}>{fBRL(Math.max(nomadLeft,0) * usdRate)}</div>
+          <div style={{ fontSize:9, opacity:0.4 }}>gasto: {fBRL(totalSpentUSD * usdRate)}</div>
+        </div>
+        <div style={{ flex:1, background:"rgba(255,255,255,0.06)", borderRadius:9, padding:"8px 10px" }}>
+          <div style={{ fontSize:9, opacity:0.55, marginBottom:2, letterSpacing:1 }}>SALDO EM CLP</div>
+          <div style={{ fontSize:14, fontWeight:700 }}>{fCLP(Math.max(nomadLeft,0) * usdRate / clpRate)}</div>
+          <div style={{ fontSize:9, opacity:0.4 }}>gasto: {fCLP(totalSpentUSD * usdRate / clpRate)}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* ══ CONTENT ══ */}
+  <div style={{ padding:"14px 14px 0" }}>
+
+    {/* ── RESUMO ── */}
+    {tab === "resumo" && (
+      <div>
+        {/* Pacote Decolar pago */}
+        <div style={{ background:"linear-gradient(135deg,rgba(79,107,237,.13),rgba(155,89,182,.13))",
+          borderRadius:14, padding:"13px 15px", marginBottom:13,
+          border:"1px solid rgba(79,107,237,.28)" }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
+            <div>
+              <div style={{ fontSize:13, fontWeight:700 }}>📦 Pacote Decolar</div>
+              <div style={{ fontSize:10, opacity:0.5 }}>Já pago — não sai da Nomad</div>
+            </div>
+            <div style={{ textAlign:"right" }}>
+              <div style={{ fontSize:15, fontWeight:800, color:"#7F9FFF" }}>R$ 11.984,00</div>
+              <div style={{ fontSize:9, background:"#4FE89B", color:"#000", padding:"1px 8px",
+                borderRadius:99, fontWeight:700, marginTop:3, display:"inline-block" }}>✓ PAGO</div>
+            </div>
+          </div>
+          {["✈️ Passagens Aéreas","🏨 Hospedagem","🛡️ Seguro Viagem"].map((it,i)=>(
+            <div key={i} style={{ fontSize:11, opacity:0.5, padding:"1px 0" }}>· {it}</div>
+          ))}
+        </div>
+
+        {/* por categoria */}
+        <div style={{ fontSize:11, fontWeight:700, opacity:0.45, marginBottom:9, letterSpacing:1.5, textTransform:"uppercase" }}>Gastos por Categoria</div>
+        {byCategory.map(cat => {
+          const p = cat.budgeted > 0 ? Math.min((cat.spent / cat.budgeted)*100, 100) : 0;
+          return (
+            <div key={cat.id} style={{ background:"#141929", borderRadius:13, padding:"11px 14px", marginBottom:9 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom: cat.budgeted>0?7:0 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <span style={{ fontSize:19 }}>{cat.icon}</span>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:600 }}>{cat.category}</div>
+                    <div style={{ fontSize:10, opacity:0.4 }}>
+                      Prev: {cat.budgeted>0 ? fUSD(cat.budgeted) : "—"}
+                      {cat.budgeted>0 && <span style={{ opacity:0.6 }}> · {fBRL(cat.budgeted*usdRate)}</span>}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ textAlign:"right" }}>
+                  <div style={{ fontSize:14, fontWeight:700, color:cat.color }}>{fUSD(cat.spent)}</div>
+                  <div style={{ fontSize:10, opacity:0.4 }}>{fBRL(cat.spent*usdRate)}</div>
+                  {cat.budgeted>0 && <div style={{ fontSize:9, opacity:0.38 }}>{p.toFixed(0)}% do prev.</div>}
+                </div>
+              </div>
+              {cat.budgeted>0 && (
+                <div style={{ background:"rgba(255,255,255,0.07)", borderRadius:99, height:4 }}>
+                  <div style={{ height:"100%", width:`${p}%`, background:cat.color, borderRadius:99, transition:"width .4s" }} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    )}
+
+    {/* ── GASTOS ── */}
+    {tab === "gastos" && (
+      <div>
+        <button onClick={() => setShowForm(v => !v)}
+          style={{ width:"100%", padding:"13px",
+            background: showForm ? "rgba(255,255,255,0.07)" : "linear-gradient(135deg,#4F6BED,#9B59B6)",
+            border:"none", borderRadius:13, color:"#fff", fontSize:15, fontWeight:700,
+            cursor:"pointer", marginBottom:14, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+          <span style={{ fontSize:20 }}>{showForm ? "−" : "+"}</span>
+          {showForm ? "Cancelar" : "Adicionar Gasto"}
+        </button>
+
+        {showForm && (
+          <div style={{ background:"#141929", borderRadius:15, padding:16, marginBottom:14, border:"1px solid rgba(255,255,255,0.07)" }}>
+            <div style={{ fontSize:14, fontWeight:700, marginBottom:13 }}>Novo Gasto ✏️</div>
+
+            <div style={{ marginBottom:10 }}>
+              <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>DESCRIÇÃO</div>
+              <input value={form.desc} onChange={e=>setForm(p=>({...p,desc:e.target.value}))}
+                placeholder="Ex: Almoço no Bali Hali" style={inp} />
+            </div>
+
+            <div style={{ display:"flex", gap:8, marginBottom: previewUSD ? 0 : 10 }}>
+              <div style={{ flex:2 }}>
+                <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>VALOR</div>
+                <NumInput value={form.amount} onChange={v=>setForm(p=>({...p,amount:v}))} placeholder="0.00" />
+              </div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>MOEDA</div>
+                <select value={form.currency} onChange={e=>setForm(p=>({...p,currency:e.target.value}))} style={sel}>
+                  <option value="USD">$ USD</option>
+                  <option value="BRL">R$ BRL</option>
+                  <option value="CLP">$ CLP</option>
+                </select>
+              </div>
+            </div>
+
+            {previewUSD && (
+              <div style={{ background:"rgba(79,232,155,0.08)", borderRadius:8, padding:"8px 11px",
+                margin:"8px 0 10px", fontSize:12, color:"#4FE89B", lineHeight:1.6 }}>
+                <div style={{ fontWeight:700 }}>{fUSD(previewUSD)}</div>
+                <div style={{ opacity:0.7 }}>{fBRL(previewUSD*usdRate)} · {fCLP(previewUSD*usdRate/clpRate)}</div>
+              </div>
+            )}
+
+            <div style={{ display:"flex", gap:8, marginBottom:10 }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>CATEGORIA</div>
+                <select value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))} style={sel}>
+                  {categories.map(c=><option key={c.id}>{c.category}</option>)}
+                </select>
+              </div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>DIA</div>
+                <select value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))} style={sel}>
+                  {itinerary.map(d=><option key={d.date} value={d.date.slice(4)}>{d.date}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{ marginBottom:13 }}>
+              <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>NOTA (opcional)</div>
+              <input value={form.note} onChange={e=>setForm(p=>({...p,note:e.target.value}))}
+                placeholder="Observação..." style={inp} />
+            </div>
+
+            <button onClick={addExpense} style={{ width:"100%", padding:12,
+              background:"linear-gradient(135deg,#4F6BED,#9B59B6)", border:"none",
+              borderRadius:10, color:"#fff", fontSize:14, fontWeight:700, cursor:"pointer" }}>
+              ✓ Salvar Gasto
+            </button>
+          </div>
+        )}
+
+        {expenses.length === 0 ? (
+          <div style={{ textAlign:"center", opacity:0.32, padding:40 }}>
+            <div style={{ fontSize:44, marginBottom:10 }}>🏔️</div>
+            <div style={{ fontSize:14 }}>Nenhum gasto ainda.</div>
+            <div style={{ fontSize:11, marginTop:4 }}>Adicione seu primeiro gasto da viagem!</div>
+          </div>
+        ) : expenses.map(exp => {
+          const cat = categories.find(c => c.category === exp.category);
+          return (
+            <div key={exp.id} style={{ background:"#141929", borderRadius:13, padding:"11px 14px",
+              marginBottom:9, display:"flex", alignItems:"center", gap:11,
+              borderLeft:`3px solid ${cat?.color||"#4F6BED"}` }}>
+              <span style={{ fontSize:20, flexShrink:0 }}>{cat?.icon||"💸"}</span>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontSize:13, fontWeight:600, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{exp.desc}</div>
+                <div style={{ fontSize:10, opacity:0.42 }}>{exp.category} · {exp.date}/07</div>
+                {exp.note && <div style={{ fontSize:10, opacity:0.32, fontStyle:"italic" }}>{exp.note}</div>}
+              </div>
+              <div style={{ textAlign:"right", flexShrink:0 }}>
+                <div style={{ fontSize:14, fontWeight:800, color:cat?.color||"#4FE89B" }}>{fUSD(exp.usd)}</div>
+                <div style={{ fontSize:10, opacity:0.45 }}>{fBRL(exp.usd*usdRate)}</div>
+                <div style={{ fontSize:9, opacity:0.3 }}>{fCLP(exp.usd*usdRate/clpRate)}</div>
+              </div>
+              <button onClick={()=>{ update({ expenses: expenses.filter(e=>e.id!==exp.id) }); showToast("Removido 🗑️"); }}
+                style={{ background:"none", border:"none", color:"#FF4444", fontSize:20, cursor:"pointer", paddingLeft:4, flexShrink:0, lineHeight:1 }}>×</button>
+            </div>
+          );
+        })}
+      </div>
+    )}
+
+    {/* ── ROTEIRO ── */}
+    {tab === "roteiro" && (
+      <div>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+          <div style={{ fontSize:11, fontWeight:700, opacity:0.45, letterSpacing:1.5, textTransform:"uppercase" }}>Roteiro & Gastos por Dia</div>
+          <button onClick={openItin} style={{ background:"rgba(79,107,237,0.18)", border:"1px solid rgba(79,107,237,0.35)",
+            borderRadius:8, padding:"5px 11px", color:"#8FA4FF", fontSize:11, cursor:"pointer",
+            fontFamily:"inherit", fontWeight:600 }}>✏️ Editar</button>
+        </div>
+        {byDay.map((day,i) => (
+          <div key={i} style={{ background:"#141929", borderRadius:13, padding:"13px 15px", marginBottom:11, borderTop:"2px solid rgba(79,107,237,0.22)" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+              <div>
+                <div style={{ fontSize:13, fontWeight:700, color:"#7F9FFF" }}>{day.date}</div>
+                <div style={{ fontSize:10, opacity:0.4 }}>{day.label}</div>
+              </div>
+              <div style={{ textAlign:"right" }}>
+                <div style={{ fontSize:13, fontWeight:700, color:day.spent>0?"#4FE89B":"#fff", opacity:day.spent>0?1:0.15 }}>
+                  {fUSD(day.spent)}
+                </div>
+                {day.spent>0 && <div style={{ fontSize:10, opacity:0.38 }}>{fBRL(day.spent*usdRate)}</div>}
+              </div>
+            </div>
+            {day.activities.map((a,j)=>(
+              <div key={j} style={{ fontSize:12, padding:"4px 0", display:"flex", alignItems:"center", gap:7,
+                borderBottom:j<day.activities.length-1?"1px solid rgba(255,255,255,0.04)":"none" }}>
+                <span style={{ opacity:0.28, fontSize:9 }}>●</span> {a}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* ── DICAS ── */}
+    {tab === "dicas" && (
+      <div>
+        <div style={{ fontSize:11, fontWeight:700, opacity:0.45, marginBottom:12, letterSpacing:1.5, textTransform:"uppercase" }}>Dicas para a Viagem 🇨🇱</div>
+        {tips.map(tip=>(
+          <div key={tip.id} style={{ background:"#141929", borderRadius:13, padding:"14px 15px", marginBottom:11, borderLeft:"3px solid rgba(253,187,45,0.55)" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:9, marginBottom:7 }}>
+              <span style={{ fontSize:22 }}>{tip.icon}</span>
+              <div style={{ fontSize:13, fontWeight:700 }}>{tip.title}</div>
+            </div>
+            <div style={{ fontSize:12, lineHeight:1.68, opacity:0.7 }}>{tip.text}</div>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* ── CONFIG ── */}
+    {tab === "config" && (
+      <div>
+        <div style={{ fontSize:11, fontWeight:700, opacity:0.45, marginBottom:12, letterSpacing:1.5, textTransform:"uppercase" }}>Configurações</div>
+
+        <div style={{ background:"#141929", borderRadius:13, padding:16, marginBottom:11 }}>
+          <div style={{ fontSize:13, fontWeight:700, marginBottom:13 }}>💳 Saldo Nomad — Orçamento Total (USD)</div>
+          <NumInput value={nomadUSD} onChange={v=>update({nomadUSD:Number(v)})} step="1" placeholder="1000" />
+          <div style={{ display:"flex", gap:8, marginTop:8 }}>
+            <div style={{ flex:1, background:"rgba(255,255,255,0.05)", borderRadius:8, padding:"7px 10px", fontSize:11, opacity:0.7 }}>
+              {fBRL(nomadUSD*usdRate)}
+            </div>
+            <div style={{ flex:1, background:"rgba(255,255,255,0.05)", borderRadius:8, padding:"7px 10px", fontSize:11, opacity:0.7 }}>
+              {fCLP(nomadUSD*usdRate/clpRate)}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ background:"#141929", borderRadius:13, padding:16, marginBottom:11 }}>
+          <div style={{ fontSize:13, fontWeight:700, marginBottom:13 }}>💱 Taxas de Câmbio</div>
+          <div style={{ marginBottom:11 }}>
+            <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>🇺🇸 US$ 1 em Reais (R$)</div>
+            <NumInput value={usdRate} onChange={v=>update({usdRate:Number(v)})} step="0.01" />
+          </div>
+          <div>
+            <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>🇨🇱 $ 1 CLP em Reais (R$)</div>
+            <NumInput value={clpRate} onChange={v=>update({clpRate:Number(v)})} step="0.001" />
+          </div>
+        </div>
+
+        <div style={{ background:"#141929", borderRadius:13, padding:16, marginBottom:16 }}>
+          <div style={{ fontSize:13, fontWeight:700, marginBottom:10 }}>📊 Resumo</div>
+          {[
+            { label:"Nomad disponível", v: fUSD(Math.max(nomadLeft,0)), sub: fBRL(Math.max(nomadLeft,0)*usdRate), alert:false },
+            { label:"Total gasto",      v: fUSD(totalSpentUSD),         sub: fBRL(totalSpentUSD*usdRate),         alert:false },
+            { label:"Taxa: US$ 1 =",    v: fBRL(usdRate),               sub:"",                                   alert:false },
+            { label:"Taxa: $ 1 CLP =",  v:`R$ ${clpRate}`,              sub:"",                                   alert:false },
+          ].map((r,i)=>(
+            <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:i<3?"1px solid rgba(255,255,255,0.05)":"none" }}>
+              <div style={{ fontSize:12, opacity:0.55 }}>{r.label}</div>
+              <div style={{ textAlign:"right" }}>
+                <div style={{ fontSize:13, fontWeight:700 }}>{r.v}</div>
+                {r.sub && <div style={{ fontSize:9, opacity:0.38 }}>{r.sub}</div>}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={()=>{ if(window.confirm("Apagar todos os gastos lançados?")) { update({expenses:[]}); showToast("Gastos apagados 🗑️"); } }}
+          style={{ width:"100%", padding:12, background:"rgba(255,68,68,0.1)", border:"1px solid rgba(255,68,68,0.28)",
+            borderRadius:11, color:"#FF7777", fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>
+          🗑️ Apagar todos os gastos
+        </button>
+      </div>
+    )}
+  </div>
+
+  {/* ══ MODAL: Editar Config (header) ══ */}
+  {editSettings && (
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.72)", zIndex:200,
+      display:"flex", alignItems:"flex-end", justifyContent:"center" }}
+      onClick={e=>e.target===e.currentTarget&&setEditSettings(false)}>
+      <div style={{ background:"#141929", borderRadius:"18px 18px 0 0", padding:22,
+        width:"100%", maxWidth:480, maxHeight:"80vh", overflowY:"auto" }}>
+        <div style={{ fontSize:15, fontWeight:800, marginBottom:18 }}>⚙️ Editar Configurações</div>
+
+        <div style={{ marginBottom:13 }}>
+          <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>💳 Saldo Nomad — Orçamento Total (USD)</div>
+          <NumInput value={settingsDraft.nomadUSD} onChange={v=>setSettingsDraft(p=>({...p,nomadUSD:v}))} step="1" />
+          {settingsDraft.nomadUSD > 0 && (
+            <div style={{ fontSize:11, opacity:0.45, marginTop:5 }}>
+              = {fBRL(settingsDraft.nomadUSD * (settingsDraft.usdRate||usdRate))} · {fCLP(settingsDraft.nomadUSD*(settingsDraft.usdRate||usdRate)/clpRate)}
+            </div>
+          )}
+        </div>
+        <div style={{ marginBottom:13 }}>
+          <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>🇺🇸 US$ 1 em Reais (R$)</div>
+          <NumInput value={settingsDraft.usdRate} onChange={v=>setSettingsDraft(p=>({...p,usdRate:v}))} step="0.01" />
+        </div>
+        <div style={{ marginBottom:18 }}>
+          <div style={{ fontSize:10, opacity:0.55, marginBottom:4, letterSpacing:1 }}>🇨🇱 $ 1 CLP em Reais (R$)</div>
+          <NumInput value={settingsDraft.clpRate} onChange={v=>setSettingsDraft(p=>({...p,clpRate:v}))} step="0.001" />
+        </div>
+
+        <div style={{ display:"flex", gap:10 }}>
+          <button onClick={()=>setEditSettings(false)} style={{ flex:1, padding:12, background:"rgba(255,255,255,0.07)",
+            border:"none", borderRadius:10, color:"#fff", fontSize:14, cursor:"pointer", fontFamily:"inherit" }}>Cancelar</button>
+          <button onClick={saveSettings} style={{ flex:2, padding:12, background:"linear-gradient(135deg,#4F6BED,#9B59B6)",
+            border:"none", borderRadius:10, color:"#fff", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>Salvar</button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* ══ MODAL: Editar Roteiro ══ */}
+  {editItinerary && (
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:200,
+      display:"flex", alignItems:"flex-end", justifyContent:"center" }}
+      onClick={e=>e.target===e.currentTarget&&setEditItinerary(false)}>
+      <div style={{ background:"#141929", borderRadius:"18px 18px 0 0", padding:20,
+        width:"100%", maxWidth:480, maxHeight:"88vh", overflowY:"auto" }}>
+        <div style={{ fontSize:15, fontWeight:800, marginBottom:16 }}>🗓️ Editar Roteiro</div>
+        {itin.map((day,di)=>(
+          <div key={di} style={{ marginBottom:16, paddingBottom:14, borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
+            <div style={{ fontSize:12, fontWeight:700, color:"#7F9FFF", marginBottom:8 }}>{day.date}</div>
+            {day.activities.map((a,ai)=>(
+              <div key={ai} style={{ display:"flex", alignItems:"center", gap:7, marginBottom:6 }}>
+                <div style={{ flex:1, fontSize:12, background:"#0B0F1A", borderRadius:8,
+                  padding:"7px 10px", color:"#F0F4FF", opacity:0.85 }}>{a}</div>
+                <button onClick={()=>removeAct(di,ai)} style={{ background:"rgba(255,68,68,0.12)",
+                  border:"none", borderRadius:7, color:"#FF4444", fontSize:14,
+                  cursor:"pointer", padding:"6px 10px", flexShrink:0 }}>×</button>
+              </div>
+            ))}
+            <div style={{ display:"flex", gap:7, marginTop:6 }}>
+              <input value={newActivity[di]||""} onChange={e=>setNewActivity(p=>({...p,[di]:e.target.value}))}
+                placeholder="+ Nova atividade..."
+                onKeyDown={e=>e.key==="Enter"&&addAct(di)}
+                style={{ ...inp, fontSize:12, padding:"8px 10px" }} />
+              <button onClick={()=>addAct(di)} style={{ padding:"8px 14px",
+                background:"rgba(79,107,237,0.25)", border:"1px solid rgba(79,107,237,0.4)",
+                borderRadius:8, color:"#8FA4FF", fontSize:16, cursor:"pointer", flexShrink:0 }}>+</button>
+            </div>
+          </div>
+        ))}
+        <div style={{ display:"flex", gap:10, marginTop:4 }}>
+          <button onClick={()=>setEditItinerary(false)} style={{ flex:1, padding:12, background:"rgba(255,255,255,0.07)",
+            border:"none", borderRadius:10, color:"#fff", fontSize:14, cursor:"pointer", fontFamily:"inherit" }}>Cancelar</button>
+          <button onClick={saveItin} style={{ flex:2, padding:12, background:"linear-gradient(135deg,#4F6BED,#9B59B6)",
+            border:"none", borderRadius:10, color:"#fff", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>Salvar Roteiro</button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* TOAST */}
+  {toast && (
+    <div style={{ position:"fixed", top:18, left:"50%", transform:"translateX(-50%)",
+      background:"#4FE89B", color:"#000", padding:"10px 22px", borderRadius:99,
+      fontSize:13, fontWeight:700, zIndex:999,
+      boxShadow:"0 4px 24px rgba(79,232,155,0.4)", whiteSpace:"nowrap" }}>
+      {toast}
+    </div>
+  )}
+
+  {/* BOTTOM NAV */}
+  <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)",
+    width:"100%", maxWidth:480, background:"#0D1120", borderTop:"1px solid rgba(255,255,255,0.06)", display:"flex" }}>
+    {tabs.map(t=>(
+      <button key={t.id} onClick={()=>setTab(t.id)} style={{ flex:1, padding:"11px 0 13px", background:"none",
+        border:"none", cursor:"pointer", display:"flex", flexDirection:"column",
+        alignItems:"center", gap:2, opacity:tab===t.id?1:0.36, transition:"opacity .2s" }}>
+        <span style={{ fontSize:17 }}>{t.icon}</span>
+        <span style={{ fontSize:9, color:tab===t.id?"#7F9FFF":"#888", fontWeight:tab===t.id?700:400 }}>{t.label}</span>
+      </button>
+    ))}
+  </div>
+</div>
+```
+
+);
+}
