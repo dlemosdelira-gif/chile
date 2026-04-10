@@ -154,56 +154,48 @@
     </div>
   </div>
 
-  <!-- Nomad card -->
+  <!-- Saldo principal: TOTAL = Nomad + Cash -->
   <div id="nomad-card">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-      <div>
-        <div style="font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1.5px;margin-bottom:3px">💳 NOMAD · SALDO DISPONÍVEL</div>
-        <div id="hd-left-usd" class="hidden-val" style="font-size:26px;font-weight:800;line-height:1;color:#fff" onclick="toggleVisibility()">US$ 1.000,00</div>
-      </div>
-      <div style="text-align:right;padding-top:2px">
-        <div style="font-size:9px;color:rgba(255,255,255,.55);margin-bottom:1px">USADO</div>
-        <div id="hd-spent-usd" class="hidden-val" style="font-size:16px;font-weight:700;color:#fff" onclick="toggleVisibility()">US$ 0,00</div>
-        <div id="hd-total-usd" class="hidden-val" style="font-size:9px;color:rgba(255,255,255,.45)" onclick="toggleVisibility()">de US$ 1.000,00</div>
+
+    <!-- DESTAQUE: soma total -->
+    <div style="margin-bottom:12px">
+      <div style="font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1.5px;margin-bottom:4px">💰 SALDO DISPONÍVEL TOTAL</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div>
+          <div id="hd-total-combined" class="hidden-val" style="font-size:32px;font-weight:800;line-height:1;color:#fff" onclick="toggleVisibility()">US$ 1.000,00</div>
+          <div id="hd-total-brl" class="hidden-val" style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px" onclick="toggleVisibility()">R$ 5.110,00</div>
+          <div id="hd-total-clp" class="hidden-val" style="font-size:11px;color:rgba(255,255,255,.45);margin-top:1px" onclick="toggleVisibility()">$ 89.649.123 CLP</div>
+        </div>
+        <div style="text-align:right;padding-bottom:2px">
+          <div style="font-size:9px;color:rgba(255,255,255,.5);margin-bottom:2px">GASTO ATÉ AGORA</div>
+          <div id="hd-spent-usd" class="hidden-val" style="font-size:15px;font-weight:700;color:rgba(255,255,255,.9)" onclick="toggleVisibility()">US$ 0,00</div>
+          <div id="hd-spent-brl" class="hidden-val" style="font-size:10px;color:rgba(255,255,255,.45)" onclick="toggleVisibility()">R$ 0,00</div>
+        </div>
       </div>
     </div>
-    <div class="progress-wrap" style="height:7px;margin:10px 0 7px;background:rgba(255,255,255,.2)">
+
+    <!-- Barra de progresso do total -->
+    <div class="progress-wrap" style="height:7px;margin-bottom:7px;background:rgba(255,255,255,.2)">
       <div id="hd-bar" class="progress-bar" style="height:7px;background:#fff;width:0%"></div>
     </div>
-    <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:10px">
-      <span id="hd-pct" class="hidden-val" style="color:rgba(255,255,255,.7)" onclick="toggleVisibility()">0.0% usado</span>
+    <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:12px">
+      <span id="hd-pct" class="hidden-val" style="color:rgba(255,255,255,.65)" onclick="toggleVisibility()">0.0% usado</span>
       <span id="hd-saldo" class="hidden-val" style="color:#fff;font-weight:600" onclick="toggleVisibility()">Saldo: US$ 1.000,00</span>
     </div>
-    <div style="display:flex;gap:8px">
-      <div class="sub-display">
-        <div class="lbl">SALDO EM R$</div>
-        <div id="hd-brl" class="val hidden-val" onclick="toggleVisibility()">R$ 5.110,00</div>
-        <div id="hd-brl-gasto" class="sub hidden-val" onclick="toggleVisibility()">gasto: R$ 0,00</div>
-      </div>
-      <div class="sub-display">
-        <div class="lbl">SALDO EM CLP</div>
-        <div id="hd-clp" class="val hidden-val" onclick="toggleVisibility()">$ 89.649.123 CLP</div>
-        <div id="hd-clp-gasto" class="sub hidden-val" onclick="toggleVisibility()">gasto: $ 0 CLP</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Saldo total (Nomad + Cash) -->
-  <div id="total-bar-wrap">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <div style="font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px">💰 SALDO TOTAL (NOMAD + CASH)</div>
-      <div id="hd-total-combined" class="hidden-val" style="font-size:14px;font-weight:800;color:#fff" onclick="toggleVisibility()">US$ 1.000,00</div>
-    </div>
+    <!-- Detalhe: Nomad + Cash separados -->
     <div style="display:flex;gap:8px">
-      <div class="cash-badge">
-        <div class="lbl">💵 CASH (USD)</div>
+      <div class="sub-display">
+        <div class="lbl">💳 NOMAD</div>
+        <div id="hd-left-usd" class="val hidden-val" onclick="toggleVisibility()">US$ 1.000,00</div>
+        <div id="hd-brl" class="sub hidden-val" onclick="toggleVisibility()">R$ 5.110,00</div>
+        <div id="hd-brl-gasto" class="sub hidden-val" style="margin-top:2px;font-size:8px;opacity:.7" onclick="toggleVisibility()">gasto: R$ 0,00</div>
+      </div>
+      <div class="sub-display">
+        <div class="lbl">💵 CASH (PESO/USD)</div>
         <div id="hd-cash-usd" class="val hidden-val" onclick="toggleVisibility()">US$ 0,00</div>
         <div id="hd-cash-brl" class="sub hidden-val" onclick="toggleVisibility()">R$ 0,00</div>
-      </div>
-      <div class="cash-badge">
-        <div class="lbl">💳 NOMAD (USD)</div>
-        <div id="hd-nomad-usd" class="val hidden-val" onclick="toggleVisibility()">US$ 1.000,00</div>
-        <div id="hd-nomad-brl" class="sub hidden-val" onclick="toggleVisibility()">R$ 5.110,00</div>
+        <div id="hd-clp" class="sub hidden-val" style="margin-top:2px;font-size:8px;opacity:.7" onclick="toggleVisibility()">$ 0 CLP</div>
       </div>
     </div>
   </div>
@@ -475,31 +467,44 @@ function applyVisibility(){
 // ══ RENDER HEADER ══
 function renderHeader(){
   const {spent,left,pct}=totals();
-  const barColor=pct>90?'#FF5555':pct>70?'#FFDD00':'#fff';
+  const nomadLeft=Math.max(left,0);
+  const total=nomadLeft+S.cashUSD;           // saldo total = nomad restante + cash
+  const totalBRL=total*S.usdRate;
+  const totalCLP=totalBRL/S.clpRate;
+  // progress = gasto / orçamento nomad original
+  const pctTotal=Math.min((spent/(S.nomadUSD||1))*100,100);
+  const barColor=pctTotal>90?'#FF5555':pctTotal>70?'#FFDD00':'#fff';
   const el=id=>document.getElementById(id);
-  setHV(el('hd-left-usd'),fUSD(Math.max(left,0)));
-  setHV(el('hd-spent-usd'),fUSD(spent));
-  setHV(el('hd-total-usd'),'de '+fUSD(S.nomadUSD));
-  el('hd-bar').style.width=pct+'%';
-  el('hd-bar').style.background=barColor;
-  setHV(el('hd-pct'),pct.toFixed(1)+'% usado');
-  const saldo=(left>=0?'Saldo: ':'Excedeu: ')+fUSD(Math.abs(left));
-  const se=el('hd-saldo');
-  setHV(se,saldo);se.style.color=left>=0?'#fff':'#FFD0D0';
-  const lb=Math.max(left,0)*S.usdRate,lc=lb/S.clpRate;
-  setHV(el('hd-brl'),fBRL(lb));
-  setHV(el('hd-brl-gasto'),'gasto: '+fBRL(spent*S.usdRate));
-  setHV(el('hd-clp'),fCLP(lc));
-  setHV(el('hd-clp-gasto'),'gasto: '+fCLP(spent*S.usdRate/S.clpRate));
-  // decolar
-  const dv=el('decolar-val');if(dv)setHV(dv,'R$ 11.984,00');
-  // total combined
-  const total=S.nomadUSD+S.cashUSD;
+
+  // ── DESTAQUE: total combinado ──
   setHV(el('hd-total-combined'),fUSD(total));
+  setHV(el('hd-total-brl'),fBRL(totalBRL));
+  setHV(el('hd-total-clp'),fCLP(totalCLP));
+
+  // ── gasto ──
+  setHV(el('hd-spent-usd'),fUSD(spent));
+  setHV(el('hd-spent-brl'),fBRL(spent*S.usdRate));
+
+  // ── barra e % ──
+  el('hd-bar').style.width=pctTotal+'%';
+  el('hd-bar').style.background=barColor;
+  setHV(el('hd-pct'),pctTotal.toFixed(1)+'% da Nomad usado');
+  const saldo=(total>=0?'Saldo: ':'Excedeu: ')+fUSD(Math.abs(total));
+  const se=el('hd-saldo');
+  setHV(se,saldo);se.style.color=total>0?'#fff':'#FFD0D0';
+
+  // ── detalhe Nomad ──
+  setHV(el('hd-left-usd'),fUSD(nomadLeft));
+  setHV(el('hd-brl'),fBRL(nomadLeft*S.usdRate));
+  setHV(el('hd-brl-gasto'),'gasto: '+fBRL(spent*S.usdRate));
+
+  // ── detalhe Cash ──
   setHV(el('hd-cash-usd'),fUSD(S.cashUSD));
   setHV(el('hd-cash-brl'),fBRL(S.cashUSD*S.usdRate));
-  setHV(el('hd-nomad-usd'),fUSD(Math.max(left,0)));
-  setHV(el('hd-nomad-brl'),fBRL(Math.max(left,0)*S.usdRate));
+  setHV(el('hd-clp'),fCLP(S.cashUSD*S.usdRate/S.clpRate));
+
+  // ── decolar badge ──
+  const dv=el('decolar-val');if(dv)setHV(dv,'R$ 11.984,00');
 }
 
 // ══ RENDER CATEGORIES ══
