@@ -47,7 +47,8 @@
     .inp:focus{outline:none;border-color:#C0392B}
     select.inp{font-size:13px;cursor:pointer}
     input[type=number]{-moz-appearance:textfield}
-    input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
     /* header */
     #header{background:linear-gradient(160deg,#9B1B10 0%,#C0392B 55%,#E74C3C 100%);padding:44px 20px 22px;position:relative;overflow:hidden}
@@ -295,7 +296,7 @@
       </select>
     </div>
     <div class="sim-inp-wrap">
-      <input id="sim-amount" class="inp sim-inp" type="number" inputmode="decimal" placeholder="0,00" oninput="calcSim()" style="font-size:22px;font-weight:700;padding-left:44px"/>
+      <input id="sim-amount" class="inp sim-inp" type="number" inputmode="decimal" step="any" placeholder="0,00" oninput="calcSim()" style="font-size:22px;font-weight:700;padding-left:44px"/>
       <span id="sim-flag" class="sim-flag">🇺🇸</span>
     </div>
     <div class="sim-result" id="sim-result" style="display:none">
@@ -429,7 +430,7 @@
     <div class="row2">
       <div>
         <div class="card-label">Valor</div>
-        <input id="me-amount" class="inp" type="number" inputmode="decimal" step="any" placeholder="0.00" oninput="updateModalPreview()"/>
+        <input id="me-amount" class="inp" type="number" inputmode="decimal" step="any" placeholder="0" oninput="updateModalPreview()"/>
       </div>
       <div style="flex:1!important">
         <div class="card-label">Moeda</div>
@@ -609,6 +610,8 @@ REF.on('value', snapshot => {
   const localVisible = S.visible;
   S = { ...DEFAULT_STATE, ...normalized, visible: localVisible };
   if (!S.cashCLP) S.cashCLP = 0;
+  // Migrate stale clpRate: old default was 0.057 (wrong), correct is 0.0057
+  if (S.clpRate >= 0.05) { S.clpRate = S.clpRate / 10; save(); }
   renderAll();
   setSyncStatus('ok');
 }, err => {
