@@ -298,6 +298,17 @@
   <div id="sim-shortcuts" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
 </div>
 
+
+
+<!-- TAB: CHECKLIST -->
+<div id="tab-checklist" class="tab">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="section-title" style="margin-bottom:0">Checklist da Viagem</div>
+    <button onclick="openChecklist()" style="background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;padding:5px 11px;color:#C0392B;font-size:11px;cursor:pointer;font-weight:600">✏️ Editar</button>
+  </div>
+  <div id="checklist-list"></div>
+</div>
+
 <!-- TAB: CONFIG -->
 <div id="tab-config" class="tab">
   <div class="section-title">Configurações</div>
@@ -426,12 +437,32 @@
   </div>
 </div>
 
+
+
+<!-- MODAL: Editar Checklist -->
+<div id="modal-checklist" class="modal-overlay" onclick="if(event.target===this)closeChecklist()">
+  <div class="modal-sheet">
+    <div class="modal-title">📋 Editar Checklist</div>
+    <div id="checklist-edit-list"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;margin-bottom:14px">
+      <input id="new-check-item" class="inp" placeholder="+ Novo item" onkeydown="if(event.key==='Enter')addChecklistItem()"/>
+      <button onclick="addChecklistItem()" style="padding:10px 14px;background:#FEF0F0;border:1px solid #FACACA;border-radius:10px;color:#C0392B;font-size:18px;cursor:pointer;flex-shrink:0">+</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button onclick="closeChecklist()" class="btn-secondary" style="flex:1">Cancelar</button>
+      <button onclick="saveChecklist()" class="btn-primary" style="flex:2">Salvar Checklist</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- BOTTOM NAV -->
 <div id="bottom-nav">
   <button class="nav-btn active" onclick="setTab('resumo',this)"><span>📊</span><span>Resumo</span></button>
   <button class="nav-btn" onclick="setTab('gastos',this)"><span>💰</span><span>Gastos</span></button>
   <button class="nav-btn" onclick="setTab('roteiro',this)"><span>🗓️</span><span>Roteiro</span></button>
   <button class="nav-btn" onclick="setTab('simulador',this)"><span>💱</span><span>Câmbio</span></button>
+  <button class="nav-btn" onclick="setTab('checklist',this)"><span>📋</span><span>Lista</span></button>
   <button class="nav-btn" onclick="setTab('config',this)"><span>⚙️</span><span>Config</span></button>
 </div>
 
@@ -473,6 +504,12 @@ const DEFAULT_STATE = {
     {date:'Seg 06/07',label:'Dia 4',  activities:['Mirador Interactive Museum','Parque Bicentenário','Zoológico Buin Zoo']},
     {date:'Ter 07/07',label:'Dia 5',  activities:['Portillo']},
     {date:'Qua 08/07',label:'Dia 6',  activities:['Cerro San Cristóbal + Zoo','KidZania','Pizzaria Tiramisú']},
+  ],
+  checklist:[
+    {id:1,text:'Passaporte',done:false},
+    {id:2,text:'RG',done:false},
+    {id:3,text:'Roupas térmicas',done:false},
+    {id:4,text:'Protetor labial',done:false},
   ],
   expenses:[],
   tips:[
@@ -1072,6 +1109,116 @@ function msConvert(){
     (n+ca) > 0 ? `Total: ${fUSD(n+ca)} = ${fBRL((n+ca)*u)}` : '';
 }
 
+
+// ══════════════════════════════════════
+// CHECKLIST
+// ══════════════════════════════════════
+let checklistDraft = [];
+
+function getChecklistArr(){
+  const arr = Array.isArray(S.checklist) ? S.checklist : Object.values(S.checklist || {});
+  return arr.map((item, idx) => {
+    if(item && typeof item === 'object' && 'text' in item) {
+      return { id: item.id || Date.now() + idx, text: item.text || '', done: !!item.done };
+    }
+    return { id: Date.now() + idx, text: String(item || ''), done: false };
+  }).filter(item => item.text.trim());
+}
+
+function renderChecklist(){
+  const list = document.getElementById('checklist-list');
+  if(!list) return;
+  list.innerHTML = '';
+
+  const arr = getChecklistArr();
+  if(arr.length === 0){
+    list.innerHTML = `<div class="card" style="text-align:center;color:#B0B8CC">Nenhum item ainda.</div>`;
+    return;
+  }
+
+  arr.forEach(item => {
+    list.innerHTML += `<div class="card" style="padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleChecklistItem(${item.id})">
+      <div style="width:20px;height:20px;border-radius:6px;border:1.5px solid ${item.done ? '#27AE60' : '#D6DBEA'};background:${item.done ? '#27AE60' : '#fff'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;flex-shrink:0">${item.done ? '✓' : ''}</div>
+      <div style="font-size:13px;color:${item.done ? '#9AA0B8' : '#1A1A2E'};text-decoration:${item.done ? 'line-through' : 'none'};flex:1">${item.text}</div>
+    </div>`;
+  });
+}
+
+function toggleChecklistItem(id){
+  const arr = getChecklistArr();
+  const idx = arr.findIndex(item => item.id === id);
+  if(idx === -1) return;
+  arr[idx].done = !arr[idx].done;
+  S.checklist = arr;
+  save();
+  renderChecklist();
+}
+
+function openChecklist(){
+  checklistDraft = JSON.parse(JSON.stringify(getChecklistArr()));
+  renderChecklistEdit();
+  document.getElementById('modal-checklist').classList.add('open');
+}
+
+function closeChecklist(){
+  document.getElementById('modal-checklist').classList.remove('open');
+}
+
+function renderChecklistEdit(){
+  const list = document.getElementById('checklist-edit-list');
+  list.innerHTML = '';
+
+  if(checklistDraft.length === 0){
+    list.innerHTML = `<div style="font-size:12px;color:#B0B8CC;margin-bottom:6px">Nenhum item no checklist.</div>`;
+    return;
+  }
+
+  checklistDraft.forEach((item, i) => {
+    list.innerHTML += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <button onclick="toggleChecklistDraft(${i})" style="width:22px;height:22px;border-radius:7px;border:1.5px solid ${item.done ? '#27AE60' : '#D6DBEA'};background:${item.done ? '#27AE60' : '#fff'};color:#fff;font-size:12px;cursor:pointer;flex-shrink:0">${item.done ? '✓' : ''}</button>
+      <input class="inp" value="${String(item.text).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}" style="font-size:12px;padding:8px 10px" oninput="updateChecklistText(${i}, this.value)"/>
+      <button onclick="removeChecklistItem(${i})" style="padding:8px 11px;background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;color:#C0392B;font-size:16px;cursor:pointer;flex-shrink:0">×</button>
+    </div>`;
+  });
+}
+
+function addChecklistItem(){
+  const input = document.getElementById('new-check-item');
+  const value = (input.value || '').trim();
+  if(!value) return;
+  checklistDraft.push({ id: Date.now(), text: value, done: false });
+  input.value = '';
+  renderChecklistEdit();
+}
+
+function removeChecklistItem(i){
+  checklistDraft.splice(i, 1);
+  renderChecklistEdit();
+}
+
+function toggleChecklistDraft(i){
+  if(!checklistDraft[i]) return;
+  checklistDraft[i].done = !checklistDraft[i].done;
+  renderChecklistEdit();
+}
+
+function updateChecklistText(i, value){
+  if(!checklistDraft[i]) return;
+  checklistDraft[i].text = value;
+}
+
+function saveChecklist(){
+  S.checklist = checklistDraft.map(item => ({
+    id: item.id || Date.now(),
+    text: String(item.text || '').trim(),
+    done: !!item.done
+  })).filter(item => item.text);
+  save();
+  renderChecklist();
+  closeChecklist();
+  showToast('Checklist atualizado ✅');
+}
+
 // ══════════════════════════════════════
 // TABS
 // ══════════════════════════════════════
@@ -1095,7 +1242,7 @@ function showToast(msg){
   toastTimer = setTimeout(() => el.style.display='none', 2500);
 }
 
-function renderAll(){ renderHeader(); renderCategories(); renderExpenses(); renderItin(); renderTips(); }
+function renderAll(){ renderHeader(); renderCategories(); renderExpenses(); renderItin(); renderTips(); renderChecklist(); }
 
 // ══════════════════════════════════════
 // WEATHER
