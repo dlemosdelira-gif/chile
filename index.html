@@ -774,10 +774,6 @@ function saveExpenseModal(){
 // ══════════════════════════════════════
 // RENDER ITINERARY
 // ══════════════════════════════════════
-<script>
-// ══════════════════════════════════════
-// RENDER ITINERARY
-// ══════════════════════════════════════
 function renderItin(){
   const list = document.getElementById('itin-list');
   list.innerHTML = '';
@@ -931,7 +927,7 @@ function removeAct(di, ai){
   itinDraft[di].activities.splice(ai, 1);
   renderItinEdit();
 }
-</script>
+
 // ══════════════════════════════════════
 // RENDER TIPS
 // ══════════════════════════════════════
@@ -1075,39 +1071,6 @@ function msConvert(){
   document.getElementById('ms-preview').textContent =
     (n+ca) > 0 ? `Total: ${fUSD(n+ca)} = ${fBRL((n+ca)*u)}` : '';
 }
-
-// ══════════════════════════════════════
-// ITINERARY MODAL
-// ══════════════════════════════════════
-let itinDraft = [];
-function openItin(){
-  // Ensure itinerary is a real array before editing
-  const itin = Array.isArray(S.itinerary) ? S.itinerary : Object.values(S.itinerary||{});
-  itinDraft = JSON.parse(JSON.stringify(itin));
-  renderItinEdit();
-  document.getElementById('modal-itin').classList.add('open');
-}
-function closeItin(){ document.getElementById('modal-itin').classList.remove('open'); }
-function saveItin(){ S.itinerary=JSON.parse(JSON.stringify(itinDraft.map(d => ({...d, activities:[...d.activities]})))); save(); renderAll(); closeItin(); showToast('Roteiro atualizado ✅'); }
-function renderItinEdit(){
-  const list = document.getElementById('itin-edit-list'); list.innerHTML='';
-  itinDraft.forEach((day,di) => {
-    const acts = day.activities.map((a,ai) => `
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
-        <div class="act-text">${a}</div>
-        <button class="act-del" onclick="removeAct(${di},${ai})">×</button>
-      </div>`).join('');
-    list.innerHTML += `<div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #E8EAF2">
-      <div style="font-size:12px;font-weight:700;color:#C0392B;margin-bottom:8px">${day.date}</div>
-      ${acts}
-      <div style="display:flex;gap:7px;margin-top:6px">
-        <input id="na-${di}" class="inp" placeholder="+ Nova atividade..." style="font-size:12px;padding:8px 10px" onkeydown="if(event.key==='Enter')addAct(${di})"/>
-        <button onclick="addAct(${di})" style="padding:8px 14px;background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;color:#C0392B;font-size:16px;cursor:pointer;flex-shrink:0">+</button>
-      </div></div>`;
-  });
-}
-function addAct(di){ const i=document.getElementById(`na-${di}`),v=i.value.trim(); if(!v)return; itinDraft[di].activities.push(v); i.value=''; renderItinEdit(); }
-function removeAct(di,ai){ itinDraft[di].activities.splice(ai,1); renderItinEdit(); }
 
 // ══════════════════════════════════════
 // TABS
