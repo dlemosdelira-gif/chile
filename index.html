@@ -182,7 +182,7 @@
         <div id="hd-brl-gasto" class="sub hidden-val" style="margin-top:2px;font-size:8px;opacity:.7" onclick="toggleVisibility()">gasto: R$ 0,00</div>
       </div>
       <div class="sub-display">
-        <div class="lbl">💵 CASH (PESO/USD)</div>
+        <div class="lbl">💵 CASH (PESO 🇨🇱)</div>
         <div id="hd-cash-usd" class="val hidden-val" onclick="toggleVisibility()">US$ 0,00</div>
         <div id="hd-cash-brl" class="sub hidden-val" onclick="toggleVisibility()">R$ 0,00</div>
         <div id="hd-clp" class="sub hidden-val" style="margin-top:2px;font-size:8px;opacity:.7" onclick="toggleVisibility()">$ 0 CLP</div>
@@ -217,6 +217,22 @@
 
 <!-- TAB: GASTOS -->
 <div id="tab-gastos" class="tab">
+  <!-- filtro + ordenação -->
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <select id="filter-cat" class="inp" style="flex:2;font-size:12px;padding:8px 10px" onchange="renderExpenses()">
+      <option value="">Todas as categorias</option>
+    </select>
+    <select id="filter-sort" class="inp" style="flex:1;font-size:12px;padding:8px 10px" onchange="renderExpenses()">
+      <option value="newest">Mais recente</option>
+      <option value="oldest">Mais antigo</option>
+      <option value="highest">Maior valor</option>
+      <option value="lowest">Menor valor</option>
+    </select>
+  </div>
+  <div id="filter-badge" style="display:none;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+    <div id="filter-badge-text" style="background:#FEF0F0;border:1px solid #FACACA;border-radius:99px;padding:4px 12px;font-size:12px;color:#C0392B;font-weight:600"></div>
+    <button onclick="clearFilter()" style="background:none;border:none;color:#B0B8CC;font-size:18px;cursor:pointer;line-height:1;padding:0">×</button>
+  </div>
   <div id="expense-empty">
     <div style="font-size:44px;margin-bottom:10px">🏔️</div>
     <div style="font-size:14px">Nenhum gasto ainda.</div>
@@ -321,7 +337,7 @@
     </div>
   </div>
   <div class="card" style="margin-bottom:11px">
-    <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💵 Dinheiro em Espécie / Cash (USD)</div>
+    <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💵 Peso Chileno em Espécie (CLP)</div>
     <input id="cfg-cash" class="inp" type="number" inputmode="decimal" step="1" placeholder="0" oninput="cfgConvert()"/>
     <div class="sub-conv" style="margin-top:8px">
       <div id="cfg-cash-brl">R$ 0,00</div>
@@ -359,7 +375,7 @@
       <input id="ms-nomad" class="inp" type="number" inputmode="decimal" step="1" oninput="msConvert()"/>
     </div>
     <div style="margin-bottom:13px">
-      <div class="card-label">💵 Cash em espécie (USD)</div>
+      <div class="card-label">💵 Peso Chileno em espécie (CLP)</div>
       <input id="ms-cash" class="inp" type="number" inputmode="decimal" step="1" oninput="msConvert()"/>
     </div>
     <div style="margin-bottom:13px">
@@ -389,7 +405,7 @@
     <div class="row2">
       <div>
         <div class="card-label">Valor</div>
-        <input id="me-amount" class="inp" type="number" inputmode="decimal" pattern="[0-9]*" step="0.01" placeholder="0.00" oninput="updateModalPreview()"/>
+        <input id="me-amount" class="inp" type="number" inputmode="decimal" step="any" placeholder="0.00" oninput="updateModalPreview()"/>
       </div>
       <div style="flex:1!important">
         <div class="card-label">Moeda</div>
@@ -489,7 +505,7 @@ const REF = db.ref('chile2025');
 // STATE
 // ══════════════════════════════════════
 const DEFAULT_STATE = {
-  nomadUSD:1000, cashUSD:0, usdRate:5.11, clpRate:0.057,
+  nomadUSD:1000, cashCLP:0, usdRate:5.11, clpRate:0.057,
   visible:false,
   categories:[
     {id:4,category:'Transporte',          icon:'🚇',budgeted:157,color:'#27AE60'},
@@ -568,7 +584,7 @@ REF.on('value', snapshot => {
   const normalized = normalizeState(data);
   const localVisible = S.visible;
   S = { ...DEFAULT_STATE, ...normalized, visible: localVisible };
-  if (!S.cashUSD) S.cashUSD = 0;
+  if (!S.cashCLP) S.cashCLP = 0;
   renderAll();
   setSyncStatus('ok');
 }, err => {
@@ -644,7 +660,8 @@ function applyVisibility(){
 function renderHeader(){
   const {spent, left, pct} = totals();
   const nomadLeft  = Math.max(left, 0);
-  const total      = nomadLeft + S.cashUSD;
+  const cashInUSD   = ((S.cashCLP||0) * S.clpRate);
+  const total      = nomadLeft + cashInUSD;
   const totalBRL   = total * S.usdRate;
   const totalCLP   = totalBRL / S.clpRate;
   const pctT       = Math.min((spent / (S.nomadUSD||1)) * 100, 100);
@@ -665,9 +682,10 @@ function renderHeader(){
   setHV(el('hd-left-usd'),   fUSD(nomadLeft));
   setHV(el('hd-brl'),        fBRL(nomadLeft * S.usdRate));
   setHV(el('hd-brl-gasto'),  'gasto: ' + fBRL(spent * S.usdRate));
-  setHV(el('hd-cash-usd'),   fUSD(S.cashUSD));
-  setHV(el('hd-cash-brl'),   fBRL(S.cashUSD * S.usdRate));
-  setHV(el('hd-clp'),        fCLP(S.cashUSD * S.usdRate / S.clpRate));
+  const cashUSDval = (S.cashCLP||0) * S.clpRate;
+  setHV(el('hd-cash-usd'),   fCLP(S.cashCLP||0));
+  setHV(el('hd-cash-brl'),   fBRL(cashUSDval));
+  setHV(el('hd-clp'),        fBRL(cashUSDval));
   const dv = el('decolar-val'); if(dv) setHV(dv, 'R$ 11.984,00');
 }
 
@@ -685,7 +703,7 @@ function renderCategories(){
       ? `${fUSD(cat.budgeted)} <span style="color:#C0C8DC">· ${fBRL(cat.budgeted*S.usdRate)}</span>` : '—';
     const spUSD=fUSD(spent), spBRL=fBRL(spent*S.usdRate);
     const mU=S.visible?spUSD:mask(spUSD), mB=S.visible?spBRL:mask(spBRL);
-    list.innerHTML += `<div class="card">
+    list.innerHTML += `<div class="card" style="cursor:pointer" onclick="goToCategory('${cat.category}')">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:20px">${cat.icon}</span>
@@ -695,9 +713,10 @@ function renderCategories(){
           </div>
         </div>
         <div style="text-align:right">
-          <div class="hidden-val" data-real="${spUSD}" style="font-size:14px;font-weight:700;color:${cat.color}" onclick="toggleVisibility()">${mU}</div>
-          <div class="hidden-val" data-real="${spBRL}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mB}</div>
+          <div class="hidden-val" data-real="${spUSD}" style="font-size:14px;font-weight:700;color:${cat.color}">${mU}</div>
+          <div class="hidden-val" data-real="${spBRL}" style="font-size:10px;color:#B0B8CC">${mB}</div>
           ${cat.budgeted>0?`<div style="font-size:9px;color:#C0C8DC">${p.toFixed(0)}% do prev.</div>`:''}
+          <div style="font-size:9px;color:#C0C8DC;margin-top:2px">ver gastos →</div>
         </div>
       </div>${bar}</div>`;
   });
@@ -706,11 +725,79 @@ function renderCategories(){
 // ══════════════════════════════════════
 // RENDER EXPENSES
 // ══════════════════════════════════════
+function populateFilterCats(){
+  const sel = document.getElementById('filter-cat');
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Todas as categorias</option>';
+  S.categories.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.category; o.textContent = c.icon + ' ' + c.category;
+    if(c.category === cur) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function goToCategory(cat){
+  // Switch to gastos tab
+  const btn = [...document.querySelectorAll('.nav-btn')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'gastos'"));
+  if(btn) setTab('gastos', btn);
+  // Set filter
+  const sel = document.getElementById('filter-cat');
+  if(sel){ sel.value = cat; }
+  renderExpenses();
+  // Show badge
+  showFilterBadge(cat);
+}
+
+function showFilterBadge(cat){
+  const badge = document.getElementById('filter-badge');
+  const txt   = document.getElementById('filter-badge-text');
+  if(!badge || !txt) return;
+  if(cat){
+    const c = S.categories.find(x => x.category === cat);
+    txt.textContent = (c ? c.icon + ' ' : '') + cat;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function clearFilter(){
+  const sel = document.getElementById('filter-cat');
+  if(sel) sel.value = '';
+  showFilterBadge('');
+  renderExpenses();
+}
+
 function renderExpenses(){
   const list=document.getElementById('expense-list'), empty=document.getElementById('expense-empty');
   list.innerHTML = '';
-  const expArr2 = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{});
-  if(expArr2.length === 0){ empty.style.display='block'; return; }
+
+  // Populate filter dropdown
+  populateFilterCats();
+
+  let expArr2 = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{});
+
+  // Apply category filter
+  const filterCat  = (document.getElementById('filter-cat')  || {}).value || '';
+  const filterSort = (document.getElementById('filter-sort') || {}).value || 'newest';
+  showFilterBadge(filterCat);
+
+  if(filterCat) expArr2 = expArr2.filter(e => e.category === filterCat);
+
+  // Sort
+  expArr2 = [...expArr2]; // copy
+  if(filterSort === 'oldest')  expArr2.sort((a,b) => a.id - b.id);
+  else if(filterSort === 'highest') expArr2.sort((a,b) => b.usd - a.usd);
+  else if(filterSort === 'lowest')  expArr2.sort((a,b) => a.usd - b.usd);
+  else expArr2.sort((a,b) => b.id - a.id); // newest
+
+  if(expArr2.length === 0){
+    empty.style.display='block';
+    empty.querySelector('div:nth-child(2)').textContent = filterCat ? 'Nenhum gasto nessa categoria.' : 'Nenhum gasto ainda.';
+    return;
+  }
   empty.style.display = 'none';
   expArr2.forEach(exp => {
     const cat   = S.categories.find(c => c.category === exp.category) || {};
@@ -1046,32 +1133,32 @@ function renderSimShortcuts(){
 // ══════════════════════════════════════
 function renderConfig(){
   document.getElementById('cfg-nomad').value = S.nomadUSD;
-  document.getElementById('cfg-cash').value  = S.cashUSD;
+  document.getElementById('cfg-cash').value  = S.cashCLP||0;
   document.getElementById('cfg-usd').value   = S.usdRate;
   document.getElementById('cfg-clp').value   = S.clpRate;
   cfgConvert();
   const {spent, left} = totals();
   document.getElementById('cfg-summary').innerHTML = `
     <div class="sum-row"><span class="sum-label">Nomad disponível</span><div><div class="sum-val">${fUSD(Math.max(left,0))}</div><div class="sum-sub">${fBRL(Math.max(left,0)*S.usdRate)}</div></div></div>
-    <div class="sum-row"><span class="sum-label">Cash em espécie</span><div><div class="sum-val">${fUSD(S.cashUSD)}</div><div class="sum-sub">${fBRL(S.cashUSD*S.usdRate)}</div></div></div>
-    <div class="sum-row"><span class="sum-label">Saldo total</span><div><div class="sum-val">${fUSD(Math.max(left,0)+S.cashUSD)}</div><div class="sum-sub">${fBRL((Math.max(left,0)+S.cashUSD)*S.usdRate)}</div></div></div>
+    <div class="sum-row"><span class="sum-label">Cash (Peso 🇨🇱)</span><div><div class="sum-val">${fCLP(S.cashCLP||0)}</div><div class="sum-sub">${fBRL((S.cashCLP||0)*S.clpRate)}</div></div></div>
+    <div class="sum-row"><span class="sum-label">Saldo total</span><div><div class="sum-val">${fUSD(Math.max(left,0)+((S.cashCLP||0)*S.clpRate))}</div><div class="sum-sub">${fBRL((Math.max(left,0)+((S.cashCLP||0)*S.clpRate))*S.usdRate)}</div></div></div>
     <div class="sum-row"><span class="sum-label">Total gasto</span><div><div class="sum-val">${fUSD(spent)}</div><div class="sum-sub">${fBRL(spent*S.usdRate)}</div></div></div>
     <div class="sum-row"><span class="sum-label">Taxa: US$ 1 =</span><div class="sum-val">${fBRL(S.usdRate)}</div></div>
     <div class="sum-row"><span class="sum-label">Taxa: $ 1 CLP =</span><div class="sum-val">R$ ${S.clpRate}</div></div>`;
 }
 function cfgConvert(){
   const n=Number(document.getElementById('cfg-nomad').value)||0;
-  const ca=Number(document.getElementById('cfg-cash').value)||0;
+  const ca=Number(document.getElementById('cfg-cash').value)||0;  // now CLP
   const u=Number(document.getElementById('cfg-usd').value)||S.usdRate;
   const c=Number(document.getElementById('cfg-clp').value)||S.clpRate;
   document.getElementById('cfg-nomad-brl').textContent = fBRL(n*u);
   document.getElementById('cfg-nomad-clp').textContent = fCLP(n*u/c);
-  document.getElementById('cfg-cash-brl').textContent  = fBRL(ca*u);
-  document.getElementById('cfg-cash-clp').textContent  = fCLP(ca*u/c);
+  document.getElementById('cfg-cash-brl').textContent  = fBRL(ca*c);   // CLP→BRL
+  document.getElementById('cfg-cash-clp').textContent  = fCLP(ca);     // already CLP
 }
 function saveConfig(){
   S.nomadUSD = Number(document.getElementById('cfg-nomad').value) || S.nomadUSD;
-  S.cashUSD  = Number(document.getElementById('cfg-cash').value)  || 0;
+  S.cashCLP  = Number(document.getElementById('cfg-cash').value)  || 0;
   S.usdRate  = Number(document.getElementById('cfg-usd').value)   || S.usdRate;
   S.clpRate  = Number(document.getElementById('cfg-clp').value)   || S.clpRate;
   save(); renderAll(); showToast('Configurações salvas ✅');
@@ -1086,7 +1173,7 @@ function clearExpenses(){
 // ══════════════════════════════════════
 function openSettings(){
   document.getElementById('ms-nomad').value = S.nomadUSD;
-  document.getElementById('ms-cash').value  = S.cashUSD;
+  document.getElementById('ms-cash').value  = S.cashCLP||0;
   document.getElementById('ms-usd').value   = S.usdRate;
   document.getElementById('ms-clp').value   = S.clpRate;
   msConvert();
@@ -1095,7 +1182,7 @@ function openSettings(){
 function closeSettings(){ document.getElementById('modal-settings').classList.remove('open'); }
 function saveSettings(){
   S.nomadUSD = Number(document.getElementById('ms-nomad').value) || S.nomadUSD;
-  S.cashUSD  = Number(document.getElementById('ms-cash').value)  || 0;
+  S.cashCLP  = Number(document.getElementById('ms-cash').value)  || 0;
   S.usdRate  = Number(document.getElementById('ms-usd').value)   || S.usdRate;
   S.clpRate  = Number(document.getElementById('ms-clp').value)   || S.clpRate;
   save(); renderAll(); closeSettings(); showToast('Configurações salvas ✅');
@@ -1105,8 +1192,9 @@ function msConvert(){
   const ca = Number(document.getElementById('ms-cash').value)  || 0;
   const u  = Number(document.getElementById('ms-usd').value)   || S.usdRate;
   const c  = Number(document.getElementById('ms-clp').value)   || S.clpRate;
+  const cashBRL = ca * (Number(document.getElementById('ms-clp').value)||S.clpRate);
   document.getElementById('ms-preview').textContent =
-    (n+ca) > 0 ? `Total: ${fUSD(n+ca)} = ${fBRL((n+ca)*u)}` : '';
+    (n > 0 || ca > 0) ? `Nomad: ${fUSD(n)} + Cash: ${fCLP(ca)} ≈ ${fBRL(n*u + cashBRL)}` : '';
 }
 
 
