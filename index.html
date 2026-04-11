@@ -490,6 +490,25 @@ const DEFAULT_STATE = {
 let S = {...DEFAULT_STATE};
 let isSaving = false;   // prevent echo loop
 
+// Firebase returns arrays as objects {0:{...},1:{...}} — convert them back
+function normalizeState(data){
+  const fix = v => {
+    if (Array.isArray(v)) return v.map(fix);
+    if (v && typeof v === 'object') {
+      // Check if it looks like a numeric-keyed object (Firebase array)
+      const keys = Object.keys(v);
+      const isArr = keys.length > 0 && keys.every(k => /^\d+$/.test(k));
+      if (isArr) return keys.sort((a,b)=>Number(a)-Number(b)).map(k => fix(v[k]));
+      // Regular object — recurse into values
+      const out = {};
+      keys.forEach(k => out[k] = fix(v[k]));
+      return out;
+    }
+    return v;
+  };
+  return fix(data);
+}
+
 // ══════════════════════════════════════
 // SYNC — Firebase Realtime DB
 // ══════════════════════════════════════
@@ -508,9 +527,10 @@ REF.on('value', snapshot => {
   const data = snapshot.val();
   if (!data) { save(); return; } // first time: push defaults
   if (isSaving) return;          // skip our own writes
-  // Merge: keep local visibility pref, take everything else from DB
+  // Normalize Firebase object-arrays back to real JS arrays, then merge
+  const normalized = normalizeState(data);
   const localVisible = S.visible;
-  S = { ...DEFAULT_STATE, ...data, visible: localVisible };
+  S = { ...DEFAULT_STATE, ...normalized, visible: localVisible };
   if (!S.cashUSD) S.cashUSD = 0;
   renderAll();
   setSyncStatus('ok');
@@ -550,7 +570,8 @@ function toUSD(amount, currency){
   return n;
 }
 function totals(){
-  const spent = S.expenses.reduce((s,e) => s + e.usd, 0);
+  const expArr = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{});
+  const spent = expArr.reduce((s,e) => s + (e.usd||0), 0);
   const left  = S.nomadUSD - spent;
   const pct   = Math.min((spent / (S.nomadUSD||1)) * 100, 100);
   return {spent, left, pct};
@@ -619,7 +640,7 @@ function renderHeader(){
 function renderCategories(){
   const list = document.getElementById('cat-list'); list.innerHTML = '';
   S.categories.forEach(cat => {
-    const spent = S.expenses.filter(e => e.category === cat.category).reduce((s,e) => s + e.usd, 0);
+    const expArrC = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); const spent = expArrC.filter(e => e.category === cat.category).reduce((s,e) => s + (e.usd||0), 0);
     const p = cat.budgeted > 0 ? Math.min((spent/cat.budgeted)*100, 100) : 0;
     const bar = cat.budgeted > 0
       ? `<div style="background:#EEF0F6;border-radius:99px;height:5px;margin-top:8px"><div style="height:100%;width:${p}%;background:${cat.color};border-radius:99px;transition:width .4s"></div></div>` : '';
@@ -651,9 +672,10 @@ function renderCategories(){
 function renderExpenses(){
   const list=document.getElementById('expense-list'), empty=document.getElementById('expense-empty');
   list.innerHTML = '';
-  if(S.expenses.length === 0){ empty.style.display='block'; return; }
+  const expArr2 = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{});
+  if(expArr2.length === 0){ empty.style.display='block'; return; }
   empty.style.display = 'none';
-  S.expenses.forEach(exp => {
+  expArr2.forEach(exp => {
     const cat   = S.categories.find(c => c.category === exp.category) || {};
     const color = cat.color || '#C0392B', icon = cat.icon || '💸';
     const note  = exp.note ? `<div style="font-size:10px;color:#B0B8CC;font-style:italic">${exp.note}</div>` : '';
@@ -678,7 +700,8 @@ function renderExpenses(){
 }
 function deleteExpense(id){
   if(!confirm('Apagar este gasto?')) return;
-  S.expenses = S.expenses.filter(e => e.id !== id);
+  const expArrD = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{});
+  S.expenses = expArrD.filter(e => e.id !== id);
   save(); renderAll(); showToast('Removido 🗑️');
 }
 
@@ -690,7 +713,8 @@ function populateModalSelects(){
   const cs=document.getElementById('me-category'); cs.innerHTML='';
   S.categories.forEach(c => { const o=document.createElement('option'); o.value=c.category; o.textContent=c.category; cs.appendChild(o); });
   const ds=document.getElementById('me-date'); ds.innerHTML='';
-  S.itinerary.forEach(d => { const o=document.createElement('option'); o.value=d.date.slice(4); o.textContent=d.date; ds.appendChild(o); });
+  const itinArr = Array.isArray(S.itinerary) ? S.itinerary : Object.values(S.itinerary||{});
+  itinArr.forEach(d => { const o=document.createElement('option'); o.value=d.date.slice(4); o.textContent=d.date; ds.appendChild(o); });
   if(ds.options.length > 1) ds.selectedIndex = 1;
 }
 function openExpenseModal(id){
@@ -738,11 +762,10 @@ function saveExpenseModal(){
   if(!desc || !amount){ showToast('Preencha descrição e valor ⚠️'); return; }
   const usd = toUSD(amount, currency);
   if(editingId){
-    const idx = S.expenses.findIndex(e => e.id === editingId);
-    if(idx !== -1) S.expenses[idx] = {...S.expenses[idx], desc, amount, currency, category, date, note, usd};
+    const expArrE = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); const idx = expArrE.findIndex(e => e.id === editingId); if(idx !== -1) expArrE[idx] = {...expArrE[idx], desc, amount, currency, category, date, note, usd}; S.expenses = expArrE;
     showToast('Gasto atualizado ✅');
   } else {
-    S.expenses.unshift({id: Date.now(), desc, amount, currency, category, date, note, usd});
+    const expArrU = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); expArrU.unshift({id: Date.now(), desc, amount, currency, category, date, note, usd}); S.expenses = expArrU;
     showToast('Gasto adicionado ✅');
   }
   save(); renderAll(); closeExpenseModal();
@@ -753,9 +776,10 @@ function saveExpenseModal(){
 // ══════════════════════════════════════
 function renderItin(){
   const list = document.getElementById('itin-list'); list.innerHTML = '';
-  S.itinerary.forEach(day => {
+  const itin = Array.isArray(S.itinerary) ? S.itinerary : Object.values(S.itinerary||{});
+  itin.forEach(day => {
     const key   = day.date.slice(4);
-    const spent = S.expenses.filter(e => e.date === key).reduce((s,e) => s + e.usd, 0);
+    const expArrI = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); const spent = expArrI.filter(e => e.date === key).reduce((s,e) => s + (e.usd||0), 0);
     const vU=fUSD(spent), vB=fBRL(spent*S.usdRate);
     const mU=S.visible?vU:mask(vU), mB=S.visible?vB:mask(vB);
     const spentHtml = spent > 0
@@ -924,9 +948,15 @@ function msConvert(){
 // ITINERARY MODAL
 // ══════════════════════════════════════
 let itinDraft = [];
-function openItin(){ itinDraft=JSON.parse(JSON.stringify(S.itinerary)); renderItinEdit(); document.getElementById('modal-itin').classList.add('open'); }
+function openItin(){
+  // Ensure itinerary is a real array before editing
+  const itin = Array.isArray(S.itinerary) ? S.itinerary : Object.values(S.itinerary||{});
+  itinDraft = JSON.parse(JSON.stringify(itin));
+  renderItinEdit();
+  document.getElementById('modal-itin').classList.add('open');
+}
 function closeItin(){ document.getElementById('modal-itin').classList.remove('open'); }
-function saveItin(){ S.itinerary=JSON.parse(JSON.stringify(itinDraft)); save(); renderAll(); closeItin(); showToast('Roteiro atualizado ✅'); }
+function saveItin(){ S.itinerary=JSON.parse(JSON.stringify(itinDraft.map(d => ({...d, activities:[...d.activities]})))); save(); renderAll(); closeItin(); showToast('Roteiro atualizado ✅'); }
 function renderItinEdit(){
   const list = document.getElementById('itin-edit-list'); list.innerHTML='';
   itinDraft.forEach((day,di) => {
