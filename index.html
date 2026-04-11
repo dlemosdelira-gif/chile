@@ -15,8 +15,32 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{background:#F5F6FA}
-    body{color:#1A1A2E;font-family:'Outfit',sans-serif;min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:82px}
+    html{background:#E0E2EA;min-height:100vh}
+    body{
+      color:#1A1A2E;font-family:'Outfit',sans-serif;
+      min-height:100vh;background:#F5F6FA;
+      /* Center on desktop like a mobile app */
+      max-width:520px;
+      margin:0 auto;
+      padding-bottom:82px;
+      /* subtle shadow on desktop so it looks like a card */
+      box-shadow:0 0 0 1px rgba(0,0,0,.06), 0 8px 40px rgba(0,0,0,.12);
+    }
+
+    /* Desktop & tablet: give it some breathing room */
+    @media(min-width:560px){
+      html{padding:24px 0 32px}
+      body{border-radius:20px;overflow:hidden;min-height:calc(100vh - 56px)}
+      #bottom-nav{border-radius:0 0 20px 20px}
+      .modal-overlay{align-items:center}
+      .modal-sheet{border-radius:18px;max-width:520px;margin:0 auto}
+    }
+
+    /* Mobile: full screen, no frills */
+    @media(max-width:559px){
+      html{background:#F5F6FA;padding:0}
+      body{box-shadow:none;max-width:100%}
+    }
     input,select,button{font-family:'Outfit',sans-serif}
     .inp{background:#fff;border:1.5px solid #E0E4EE;border-radius:10px;padding:11px 12px;color:#1A1A2E;font-size:14px;width:100%}
     .inp::placeholder{color:#B0B8CC}
@@ -43,12 +67,12 @@
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
     /* FAB */
-    #fab{position:fixed;bottom:90px;right:calc(50% - 226px);width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;color:#fff;font-size:26px;line-height:1;box-shadow:0 4px 16px rgba(192,57,43,.45);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+    #fab{position:fixed;bottom:90px;right:calc(50% - 246px);width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;color:#fff;font-size:26px;line-height:1;box-shadow:0 4px 16px rgba(192,57,43,.45);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;transition:transform .15s}
     #fab:active{transform:scale(.92)}
-    @media(max-width:480px){#fab{right:18px}}
+    @media(max-width:559px){#fab{right:18px}}
 
     /* bottom nav */
-    #bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #E8EAF2;display:flex;z-index:100}
+    #bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:#fff;border-top:1px solid #E8EAF2;display:flex;z-index:100}
     .nav-btn{flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#B0B8CC;transition:color .2s}
     .nav-btn.active{color:#C0392B}
     .nav-btn span:first-child{font-size:17px}
@@ -330,7 +354,7 @@
   <div class="section-title">Configurações</div>
   <div class="card" style="margin-bottom:11px">
     <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💳 Saldo Nomad (USD)</div>
-    <input id="cfg-nomad" class="inp" type="number" inputmode="decimal" step="1" placeholder="1000" oninput="cfgConvert()"/>
+    <input id="cfg-nomad" class="inp" type="number" inputmode="decimal" step="any" placeholder="1000" oninput="cfgConvert()"/>
     <div class="sub-conv" style="margin-top:8px">
       <div id="cfg-nomad-brl">R$ 5.110,00</div>
       <div id="cfg-nomad-clp">$ 89.649.123 CLP</div>
@@ -338,7 +362,7 @@
   </div>
   <div class="card" style="margin-bottom:11px">
     <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💵 Peso Chileno em Espécie (CLP)</div>
-    <input id="cfg-cash" class="inp" type="number" inputmode="decimal" step="1" placeholder="0" oninput="cfgConvert()"/>
+    <input id="cfg-cash" class="inp" type="number" inputmode="decimal" step="any" placeholder="0" oninput="cfgConvert()"/>
     <div class="sub-conv" style="margin-top:8px">
       <div id="cfg-cash-brl">R$ 0,00</div>
       <div id="cfg-cash-clp">US$ 0,00</div>
@@ -348,11 +372,11 @@
     <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💱 Taxas de Câmbio</div>
     <div style="margin-bottom:11px">
       <div class="card-label">🇺🇸 US$ 1 em Reais (R$)</div>
-      <input id="cfg-usd" class="inp" type="number" inputmode="decimal" step="0.01" oninput="cfgConvert()"/>
+      <input id="cfg-usd" class="inp" type="number" inputmode="decimal" step="any" oninput="cfgConvert()"/>
     </div>
     <div>
       <div class="card-label">🇨🇱 $ 1 CLP em Reais (R$)</div>
-      <input id="cfg-clp" class="inp" type="number" inputmode="decimal" step="0.001" oninput="cfgConvert()"/>
+      <input id="cfg-clp" class="inp" type="number" inputmode="decimal" step="any" oninput="cfgConvert()"/>
     </div>
   </div>
   <div class="card" style="margin-bottom:16px">
@@ -372,19 +396,19 @@
     <div class="modal-title">⚙️ Editar Configurações</div>
     <div style="margin-bottom:13px">
       <div class="card-label">💳 Saldo Nomad (USD)</div>
-      <input id="ms-nomad" class="inp" type="number" inputmode="decimal" step="1" oninput="msConvert()"/>
+      <input id="ms-nomad" class="inp" type="number" inputmode="decimal" step="any" oninput="msConvert()"/>
     </div>
     <div style="margin-bottom:13px">
       <div class="card-label">💵 Peso Chileno em espécie (CLP)</div>
-      <input id="ms-cash" class="inp" type="number" inputmode="decimal" step="1" oninput="msConvert()"/>
+      <input id="ms-cash" class="inp" type="number" inputmode="decimal" step="any" oninput="msConvert()"/>
     </div>
     <div style="margin-bottom:13px">
       <div class="card-label">🇺🇸 US$ 1 em Reais (R$)</div>
-      <input id="ms-usd" class="inp" type="number" inputmode="decimal" step="0.01" oninput="msConvert()"/>
+      <input id="ms-usd" class="inp" type="number" inputmode="decimal" step="any" oninput="msConvert()"/>
     </div>
     <div style="margin-bottom:8px">
       <div class="card-label">🇨🇱 $ 1 CLP em Reais (R$)</div>
-      <input id="ms-clp" class="inp" type="number" inputmode="decimal" step="0.001"/>
+      <input id="ms-clp" class="inp" type="number" inputmode="decimal" step="any"/>
     </div>
     <div id="ms-preview" style="font-size:11px;color:#9AA0B8;margin-bottom:16px;min-height:16px"></div>
     <div style="display:flex;gap:10px">
@@ -505,7 +529,7 @@ const REF = db.ref('chile2025');
 // STATE
 // ══════════════════════════════════════
 const DEFAULT_STATE = {
-  nomadUSD:1000, cashCLP:0, usdRate:5.11, clpRate:0.057,
+  nomadUSD:1000, cashCLP:0, usdRate:5.11, clpRate:0.0057,
   visible:false,
   categories:[
     {id:4,category:'Transporte',          icon:'🚇',budgeted:157,color:'#27AE60'},
@@ -833,6 +857,7 @@ function deleteExpense(id){
 // EXPENSE MODAL
 // ══════════════════════════════════════
 let editingId = null;
+let dragSrcIdx = -1;
 function populateModalSelects(){
   const cs=document.getElementById('me-category'); cs.innerHTML='';
   S.categories.forEach(c => { const o=document.createElement('option'); o.value=c.category; o.textContent=c.category; cs.appendChild(o); });
@@ -1264,11 +1289,65 @@ function renderChecklistEdit(){
   }
 
   checklistDraft.forEach((item, i) => {
-    list.innerHTML += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <button onclick="toggleChecklistDraft(${i})" style="width:22px;height:22px;border-radius:7px;border:1.5px solid ${item.done ? '#27AE60' : '#D6DBEA'};background:${item.done ? '#27AE60' : '#fff'};color:#fff;font-size:12px;cursor:pointer;flex-shrink:0">${item.done ? '✓' : ''}</button>
-      <input class="inp" value="${String(item.text).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}" style="font-size:12px;padding:8px 10px" oninput="updateChecklistText(${i}, this.value)"/>
-      <button onclick="removeChecklistItem(${i})" style="padding:8px 11px;background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;color:#C0392B;font-size:16px;cursor:pointer;flex-shrink:0">×</button>
-    </div>`;
+    const safe = String(item.text).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const div = document.createElement('div');
+    div.dataset.idx = i;
+    div.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;transition:opacity .2s';
+    div.draggable = true;
+    div.innerHTML = `
+      <span class="drag-handle" style="cursor:grab;font-size:18px;color:#D0D4E0;flex-shrink:0;touch-action:none;user-select:none" title="Arraste para reordenar">⠿</span>
+      <button onclick="toggleChecklistDraft(${i})" style="width:22px;height:22px;border-radius:7px;border:1.5px solid ${item.done?'#27AE60':'#D6DBEA'};background:${item.done?'#27AE60':'#fff'};color:#fff;font-size:12px;cursor:pointer;flex-shrink:0">${item.done?'✓':''}</button>
+      <input class="inp" value="${safe}" style="font-size:12px;padding:8px 10px" oninput="updateChecklistText(${i}, this.value)"/>
+      <button onclick="removeChecklistItem(${i})" style="padding:8px 11px;background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;color:#C0392B;font-size:16px;cursor:pointer;flex-shrink:0">×</button>`;
+    // Drag events
+    div.addEventListener('dragstart', e => {
+      dragSrcIdx = i;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => div.style.opacity = '0.4', 0);
+    });
+    div.addEventListener('dragend',  () => { div.style.opacity='1'; });
+    div.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; });
+    div.addEventListener('drop', e => {
+      e.preventDefault();
+      if(dragSrcIdx === i) return;
+      const moved = checklistDraft.splice(dragSrcIdx, 1)[0];
+      checklistDraft.splice(i, 0, moved);
+      dragSrcIdx = -1;
+      renderChecklistEdit();
+    });
+    // Touch drag (mobile)
+    let touchY = 0, touchItem = null;
+    div.querySelector('.drag-handle').addEventListener('touchstart', e => {
+      touchY = e.touches[0].clientY;
+      touchItem = div;
+      div.style.opacity = '0.5';
+      e.preventDefault();
+    }, {passive:false});
+    div.querySelector('.drag-handle').addEventListener('touchmove', e => {
+      if(!touchItem) return;
+      const y = e.touches[0].clientY;
+      const items = [...list.children];
+      let target = null, minDist = Infinity;
+      items.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const mid  = rect.top + rect.height/2;
+        const dist = Math.abs(y - mid);
+        if(dist < minDist){ minDist=dist; target=el; }
+      });
+      if(target && target !== div) list.insertBefore(div, y < target.getBoundingClientRect().top + target.getBoundingClientRect().height/2 ? target : target.nextSibling);
+      e.preventDefault();
+    }, {passive:false});
+    div.querySelector('.drag-handle').addEventListener('touchend', () => {
+      if(!touchItem) return;
+      div.style.opacity = '1';
+      // Sync order from DOM back to draft
+      const newOrder = [...list.children].map(el => checklistDraft[Number(el.dataset.idx)]).filter(Boolean);
+      checklistDraft.length = 0;
+      newOrder.forEach(x => checklistDraft.push(x));
+      touchItem = null;
+      renderChecklistEdit();
+    });
+    list.appendChild(div);
   });
 }
 
