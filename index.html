@@ -774,32 +774,164 @@ function saveExpenseModal(){
 // ══════════════════════════════════════
 // RENDER ITINERARY
 // ══════════════════════════════════════
+<script>
+// ══════════════════════════════════════
+// RENDER ITINERARY
+// ══════════════════════════════════════
 function renderItin(){
-  const list = document.getElementById('itin-list'); list.innerHTML = '';
-  const itin = Array.isArray(S.itinerary) ? S.itinerary : Object.values(S.itinerary||{});
+  const list = document.getElementById('itin-list');
+  list.innerHTML = '';
+
+  const itin = Array.isArray(S.itinerary)
+    ? S.itinerary
+    : Object.values(S.itinerary || {});
+
   itin.forEach(day => {
-    const key   = day.date.slice(4);
-    const expArrI = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); const spent = expArrI.filter(e => e.date === key).reduce((s,e) => s + (e.usd||0), 0);
-    const vU=fUSD(spent), vB=fBRL(spent*S.usdRate);
-    const mU=S.visible?vU:mask(vU), mB=S.visible?vB:mask(vB);
+    if (!day || !day.date) return;
+
+    const activities = Array.isArray(day.activities)
+      ? day.activities
+      : (day.activities && typeof day.activities === 'object'
+          ? Object.values(day.activities)
+          : []);
+
+    const key = day.date.slice(4);
+    const expArrI = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses || {});
+    const spent = expArrI
+      .filter(e => e.date === key)
+      .reduce((s, e) => s + (e.usd || 0), 0);
+
+    const vU = fUSD(spent), vB = fBRL(spent * S.usdRate);
+    const mU = S.visible ? vU : mask(vU), mB = S.visible ? vB : mask(vB);
+
     const spentHtml = spent > 0
       ? `<div class="hidden-val" data-real="${vU}" style="font-size:13px;font-weight:700;color:#27AE60" onclick="toggleVisibility()">${mU}</div>
          <div class="hidden-val" data-real="${vB}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mB}</div>`
       : `<div style="font-size:12px;color:#D8DAE8">—</div>`;
-    const acts = day.activities.map((a,j) =>
-      `<div style="font-size:12px;color:#555E80;padding:4px 0;display:flex;align-items:center;gap:7px;${j<day.activities.length-1?'border-bottom:1px solid #F0F2F8':''}">
-        <span style="color:#D0D4E8;font-size:9px">●</span>${a}</div>`).join('');
+
+    const acts = activities.map((a, j) =>
+      `<div style="font-size:12px;color:#555E80;padding:4px 0;display:flex;align-items:center;gap:7px;${j < activities.length - 1 ? 'border-bottom:1px solid #F0F2F8' : ''}">
+        <span style="color:#D0D4E8;font-size:9px">●</span>${a}</div>`
+    ).join('');
+
     list.innerHTML += `<div class="itin-day">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
           <div style="font-size:13px;font-weight:700;color:#C0392B">${day.date}</div>
-          <div style="font-size:10px;color:#B0B8CC">${day.label}</div>
+          <div style="font-size:10px;color:#B0B8CC">${day.label || ''}</div>
         </div>
         <div style="text-align:right">${spentHtml}</div>
       </div>${acts}</div>`;
   });
 }
 
+// ══════════════════════════════════════
+// ITINERARY MODAL
+// ══════════════════════════════════════
+let itinDraft = [];
+
+function openItin(){
+  const itin = Array.isArray(S.itinerary)
+    ? S.itinerary
+    : Object.values(S.itinerary || {});
+
+  const cleanItin = itin.map(day => ({
+    ...day,
+    activities: Array.isArray(day?.activities)
+      ? day.activities
+      : (day?.activities && typeof day.activities === 'object'
+          ? Object.values(day.activities)
+          : [])
+  }));
+
+  itinDraft = JSON.parse(JSON.stringify(cleanItin));
+  renderItinEdit();
+  document.getElementById('modal-itin').classList.add('open');
+}
+
+function closeItin(){
+  document.getElementById('modal-itin').classList.remove('open');
+}
+
+function saveItin(){
+  const draft = Array.isArray(itinDraft)
+    ? itinDraft
+    : Object.values(itinDraft || {});
+
+  S.itinerary = JSON.parse(JSON.stringify(
+    draft.map(day => ({
+      ...day,
+      activities: Array.isArray(day?.activities)
+        ? day.activities
+        : (day?.activities && typeof day.activities === 'object'
+            ? Object.values(day.activities)
+            : [])
+    }))
+  ));
+
+  save();
+  renderAll();
+  closeItin();
+  showToast('Roteiro atualizado ✅');
+}
+
+function renderItinEdit(){
+  const list = document.getElementById('itin-edit-list');
+  list.innerHTML = '';
+
+  if (!Array.isArray(itinDraft)) {
+    itinDraft = Object.values(itinDraft || {});
+  }
+
+  itinDraft.forEach((day, di) => {
+    if (!day) return;
+
+    if (!Array.isArray(day.activities)) {
+      day.activities = day.activities && typeof day.activities === 'object'
+        ? Object.values(day.activities)
+        : [];
+    }
+
+    const acts = day.activities.map((a, ai) => `
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+        <div class="act-text">${a}</div>
+        <button class="act-del" onclick="removeAct(${di},${ai})">×</button>
+      </div>`).join('');
+
+    list.innerHTML += `<div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #E8EAF2">
+      <div style="font-size:12px;font-weight:700;color:#C0392B;margin-bottom:8px">${day.date}</div>
+      ${acts}
+      <div style="display:flex;gap:7px;margin-top:6px">
+        <input id="na-${di}" class="inp" placeholder="+ Nova atividade..." style="font-size:12px;padding:8px 10px" onkeydown="if(event.key==='Enter')addAct(${di})"/>
+        <button onclick="addAct(${di})" style="padding:8px 14px;background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;color:#C0392B;font-size:16px;cursor:pointer;flex-shrink:0">+</button>
+      </div>
+    </div>`;
+  });
+}
+
+function addAct(di){
+  const i = document.getElementById(`na-${di}`);
+  const v = i.value.trim();
+  if (!v) return;
+
+  if (!Array.isArray(itinDraft[di].activities)) {
+    itinDraft[di].activities = [];
+  }
+
+  itinDraft[di].activities.push(v);
+  i.value = '';
+  renderItinEdit();
+}
+
+function removeAct(di, ai){
+  if (!Array.isArray(itinDraft[di].activities)) {
+    itinDraft[di].activities = [];
+  }
+
+  itinDraft[di].activities.splice(ai, 1);
+  renderItinEdit();
+}
+</script>
 // ══════════════════════════════════════
 // RENDER TIPS
 // ══════════════════════════════════════
