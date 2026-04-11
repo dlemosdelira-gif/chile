@@ -341,7 +341,7 @@
     <input id="cfg-cash" class="inp" type="number" inputmode="decimal" step="1" placeholder="0" oninput="cfgConvert()"/>
     <div class="sub-conv" style="margin-top:8px">
       <div id="cfg-cash-brl">R$ 0,00</div>
-      <div id="cfg-cash-clp">$ 0 CLP</div>
+      <div id="cfg-cash-clp">US$ 0,00</div>
     </div>
   </div>
   <div class="card" style="margin-bottom:11px">
@@ -1153,8 +1153,8 @@ function cfgConvert(){
   const c=Number(document.getElementById('cfg-clp').value)||S.clpRate;
   document.getElementById('cfg-nomad-brl').textContent = fBRL(n*u);
   document.getElementById('cfg-nomad-clp').textContent = fCLP(n*u/c);
-  document.getElementById('cfg-cash-brl').textContent  = fBRL(ca*c);   // CLP→BRL
-  document.getElementById('cfg-cash-clp').textContent  = fCLP(ca);     // already CLP
+  document.getElementById('cfg-cash-brl').textContent  = fBRL(ca*c);         // CLP→BRL
+  document.getElementById('cfg-cash-clp').textContent  = fUSD((ca*c)/u);    // CLP→USD
 }
 function saveConfig(){
   S.nomadUSD = Number(document.getElementById('cfg-nomad').value) || S.nomadUSD;
@@ -1192,9 +1192,11 @@ function msConvert(){
   const ca = Number(document.getElementById('ms-cash').value)  || 0;
   const u  = Number(document.getElementById('ms-usd').value)   || S.usdRate;
   const c  = Number(document.getElementById('ms-clp').value)   || S.clpRate;
-  const cashBRL = ca * (Number(document.getElementById('ms-clp').value)||S.clpRate);
+  const clpRate2 = Number(document.getElementById('ms-clp').value)||S.clpRate;
+  const cashBRL = ca * clpRate2;
+  const cashUSD = cashBRL / u;
   document.getElementById('ms-preview').textContent =
-    (n > 0 || ca > 0) ? `Nomad: ${fUSD(n)} + Cash: ${fCLP(ca)} ≈ ${fBRL(n*u + cashBRL)}` : '';
+    (n > 0 || ca > 0) ? `Nomad: ${fUSD(n)} + Cash: ${fCLP(ca)} ≈ ${fUSD(n + cashUSD)}` : '';
 }
 
 
