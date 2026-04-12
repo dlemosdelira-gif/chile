@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
@@ -19,170 +20,173 @@
     html,body{height:100%;background:#F0F2F5}
     body{color:#1A1A2E;font-family:'Outfit',sans-serif;margin:0}
 
-    /* ── MOBILE: single column ── */
-    #app-left{width:100%}
-    #app-right{width:100%;padding-bottom:82px}
-    #bottom-nav{
-      position:fixed;bottom:0;left:0;width:100%;
-      background:#fff;border-top:1px solid #E8EAF2;
-      display:flex;z-index:100;
-    }
-    .nav-btn{
-      flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;
-      display:flex;flex-direction:column;align-items:center;gap:2px;
-      color:#B0B8CC;transition:color .2s;
-    }
-    .nav-btn.active{color:#C0392B}
-    .nav-btn span:first-child{font-size:17px}
-    .nav-btn span:last-child{font-size:9px;font-weight:400}
-    .nav-btn.active span:last-child{font-weight:700}
-    #fab{position:fixed;bottom:90px;right:18px;z-index:150}
+```
+/* ── MOBILE: single column ── */
+#app-left{width:100%}
+#app-right{width:100%;padding-bottom:82px}
+#bottom-nav{
+  position:fixed;bottom:0;left:0;width:100%;
+  background:#fff;border-top:1px solid #E8EAF2;
+  display:flex;z-index:100;
+}
+.nav-btn{
+  flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:#B0B8CC;transition:color .2s;
+}
+.nav-btn.active{color:#C0392B}
+.nav-btn span:first-child{font-size:17px}
+.nav-btn span:last-child{font-size:9px;font-weight:400}
+.nav-btn.active span:last-child{font-weight:700}
+#fab{position:fixed;bottom:90px;right:18px;z-index:150}
 
-    /* ── DESKTOP/TABLET (≥ 768px): two columns ── */
-    @media(min-width:768px){
-      body{display:flex;height:100vh;overflow:hidden}
+/* ── DESKTOP/TABLET (≥ 768px): two columns ── */
+@media(min-width:768px){
+  body{display:flex;height:100vh;overflow:hidden}
 
-      /* Left column: fixed width, full height, scrollable */
-      #app-left{
-        width:400px;min-width:400px;flex-shrink:0;
-        height:100vh;overflow-y:auto;
-        position:sticky;top:0;
-        display:flex;flex-direction:column;
-      }
-      #header{flex-shrink:0}
+  /* Left column: fixed width, full height, scrollable */
+  #app-left{
+    width:400px;min-width:400px;flex-shrink:0;
+    height:100vh;overflow-y:auto;
+    position:sticky;top:0;
+    display:flex;flex-direction:column;
+  }
+  #header{flex-shrink:0}
 
-      /* Right column: fills remaining space, scrollable */
-      #app-right{
-        flex:1;height:100vh;overflow-y:auto;
-        padding:28px 32px 40px;
-        background:#F0F2F5;
-        min-width:0;
-      }
+  /* Right column: fills remaining space, scrollable */
+  #app-right{
+    flex:1;height:100vh;overflow-y:auto;
+    padding:28px 32px 40px;
+    background:#F0F2F5;
+    min-width:0;
+  }
 
-      /* Nav sits below header in left column */
-      #bottom-nav{
-        position:static;
-        flex-direction:column;
-        border-top:1px solid #F0F2F5;
-        border-right:1px solid #F0F2F5;
-        background:#fff;
-        padding:8px 0 16px;
-        flex:1;
-      }
-      .nav-btn{
-        flex-direction:row;justify-content:flex-start;
-        padding:12px 20px;gap:12px;
-        border-radius:10px;margin:1px 8px;width:auto;flex:none;
-      }
-      .nav-btn span:first-child{font-size:20px}
-      .nav-btn span:last-child{font-size:13px;font-weight:500}
-      .nav-btn.active{background:#FEF0F0;color:#C0392B}
-      .nav-btn.active span:last-child{font-weight:700}
+  /* Nav sits below header in left column */
+  #bottom-nav{
+    position:static;
+    flex-direction:column;
+    border-top:1px solid #F0F2F5;
+    border-right:1px solid #F0F2F5;
+    background:#fff;
+    padding:8px 0 16px;
+    flex:1;
+  }
+  .nav-btn{
+    flex-direction:row;justify-content:flex-start;
+    padding:12px 20px;gap:12px;
+    border-radius:10px;margin:1px 8px;width:auto;flex:none;
+  }
+  .nav-btn span:first-child{font-size:20px}
+  .nav-btn span:last-child{font-size:13px;font-weight:500}
+  .nav-btn.active{background:#FEF0F0;color:#C0392B}
+  .nav-btn.active span:last-child{font-weight:700}
 
-      /* FAB fixed to bottom-right of viewport */
-      #fab{position:fixed;bottom:32px;right:32px}
+  /* FAB fixed to bottom-right of viewport */
+  #fab{position:fixed;bottom:32px;right:32px}
 
-      /* Tabs take full right column — remove inner padding since #app-right has padding */
-      .tab{padding:0}
+  /* Tabs take full right column — remove inner padding since #app-right has padding */
+  .tab{padding:0}
 
-      /* Modals centered */
-      .modal-overlay{align-items:center}
-      .modal-sheet{border-radius:18px;max-width:560px;margin:0 auto}
-    }
-    input,select,button{font-family:'Outfit',sans-serif}
-    .inp{background:#fff;border:1.5px solid #E0E4EE;border-radius:10px;padding:11px 12px;color:#1A1A2E;font-size:14px;width:100%}
-    .inp::placeholder{color:#B0B8CC}
-    .inp:focus{outline:none;border-color:#C0392B}
-    select.inp{font-size:13px;cursor:pointer}
-    input[type=number]{-moz-appearance:textfield}
-    input[type=number]::-webkit-outer-spin-button,
-    input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  /* Modals centered */
+  .modal-overlay{align-items:center}
+  .modal-sheet{border-radius:18px;max-width:560px;margin:0 auto}
+}
+input,select,button{font-family:'Outfit',sans-serif}
+.inp{background:#fff;border:1.5px solid #E0E4EE;border-radius:10px;padding:11px 12px;color:#1A1A2E;font-size:14px;width:100%}
+.inp::placeholder{color:#B0B8CC}
+.inp:focus{outline:none;border-color:#C0392B}
+select.inp{font-size:13px;cursor:pointer}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
-    /* header */
-    #header{background:linear-gradient(160deg,#9B1B10 0%,#C0392B 55%,#E74C3C 100%);padding:44px 20px 22px;position:relative;overflow:hidden}
-    #header::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07)}
-    #header::after{content:'★';position:absolute;bottom:18px;right:22px;font-size:64px;color:rgba(255,255,255,.08);line-height:1}
-    #nomad-card{background:rgba(0,0,0,.22);border-radius:16px;padding:15px 16px;margin-top:12px;border:1px solid rgba(255,255,255,.15)}
-    .sub-display{background:rgba(0,0,0,.18);border-radius:9px;padding:8px 10px;flex:1}
-    .sub-display .lbl{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px;margin-bottom:2px}
-    .sub-display .val{font-size:13px;font-weight:700;color:#fff}
-    .sub-display .sub{font-size:9px;color:rgba(255,255,255,.45);margin-top:1px}
+/* header */
+#header{background:linear-gradient(160deg,#9B1B10 0%,#C0392B 55%,#E74C3C 100%);padding:44px 20px 22px;position:relative;overflow:hidden}
+#header::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07)}
+#header::after{content:'★';position:absolute;bottom:18px;right:22px;font-size:64px;color:rgba(255,255,255,.08);line-height:1}
+#nomad-card{background:rgba(0,0,0,.22);border-radius:16px;padding:15px 16px;margin-top:12px;border:1px solid rgba(255,255,255,.15)}
+.sub-display{background:rgba(0,0,0,.18);border-radius:9px;padding:8px 10px;flex:1}
+.sub-display .lbl{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px;margin-bottom:2px}
+.sub-display .val{font-size:13px;font-weight:700;color:#fff}
+.sub-display .sub{font-size:9px;color:rgba(255,255,255,.45);margin-top:1px}
 
-    /* sync badge */
-    #sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.7);margin-left:6px;vertical-align:middle}
-    #sync-dot{width:7px;height:7px;border-radius:50%;background:#4FE89B;display:inline-block;transition:background .3s}
-    #sync-dot.syncing{background:#FFDD00;animation:pulse .8s infinite}
-    #sync-dot.error{background:#FF5555}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* sync badge */
+#sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.7);margin-left:6px;vertical-align:middle}
+#sync-dot{width:7px;height:7px;border-radius:50%;background:#4FE89B;display:inline-block;transition:background .3s}
+#sync-dot.syncing{background:#FFDD00;animation:pulse .8s infinite}
+#sync-dot.error{background:#FF5555}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* FAB */
-    #fab{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;color:#fff;font-size:26px;line-height:1;box-shadow:0 4px 16px rgba(192,57,43,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
-    #fab:active{transform:scale(.92)}
-    
+/* FAB */
+#fab{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;color:#fff;font-size:26px;line-height:1;box-shadow:0 4px 16px rgba(192,57,43,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+#fab:active{transform:scale(.92)}
 
-    /* nav-btn styles now in responsive block above */
 
-    /* tabs */
-    .tab{display:none;padding:14px 14px 0}
-    .tab.active{display:block}
-    @media(min-width:768px){.tab{padding:0}}
+/* nav-btn styles now in responsive block above */
 
-    /* cards */
-    .card{background:#fff;border-radius:14px;padding:12px 15px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-    .card-label{font-size:10px;color:#9AA0B8;letter-spacing:1px;margin-bottom:5px;text-transform:uppercase}
-    .section-title{font-size:11px;font-weight:700;color:#B0B8CC;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
-    .progress-wrap{background:#E8EAF2;border-radius:99px;overflow:hidden}
-    .progress-bar{height:100%;border-radius:99px;transition:width .5s}
+/* tabs */
+.tab{display:none;padding:14px 14px 0}
+.tab.active{display:block}
+@media(min-width:768px){.tab{padding:0}}
 
-    /* modals */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-end;justify-content:center}
-    .modal-overlay.open{display:flex}
-    .modal-sheet{background:#F5F6FA;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
-    .modal-title{font-size:15px;font-weight:800;color:#1A1A2E;margin-bottom:18px}
-    .btn-primary{background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;padding:12px;width:100%}
-    .btn-secondary{background:#EEF0F6;border:none;border-radius:10px;color:#555E80;font-size:14px;cursor:pointer;padding:12px;width:100%}
+/* cards */
+.card{background:#fff;border-radius:14px;padding:12px 15px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.card-label{font-size:10px;color:#9AA0B8;letter-spacing:1px;margin-bottom:5px;text-transform:uppercase}
+.section-title{font-size:11px;font-weight:700;color:#B0B8CC;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.progress-wrap{background:#E8EAF2;border-radius:99px;overflow:hidden}
+.progress-bar{height:100%;border-radius:99px;transition:width .5s}
 
-    /* toast */
-    #toast{display:none;position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#2ECC71;color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(46,204,113,.4);white-space:nowrap}
+/* modals */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:#F5F6FA;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:800;color:#1A1A2E;margin-bottom:18px}
+.btn-primary{background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;padding:12px;width:100%}
+.btn-secondary{background:#EEF0F6;border:none;border-radius:10px;color:#555E80;font-size:14px;cursor:pointer;padding:12px;width:100%}
 
-    /* expense items */
-    .expense-item{background:#fff;border-radius:13px;padding:11px 14px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-    #decolar-card{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:13px;border-left:4px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-    .tip-card{background:#fff;border-radius:13px;padding:14px 15px;margin-bottom:11px;border-left:3px solid #E67E22;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-    .itin-day{background:#fff;border-radius:13px;padding:13px 15px;margin-bottom:11px;border-top:3px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+/* toast */
+#toast{display:none;position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#2ECC71;color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(46,204,113,.4);white-space:nowrap}
 
-    /* form */
-    #expense-preview{background:#F0FDF7;border-radius:8px;padding:8px 11px;margin:8px 0 10px;font-size:12px;color:#1A7A4A;line-height:1.6;display:none;border:1px solid #C8F0DA}
-    .row2{display:flex;gap:8px;margin-bottom:10px}
-    .row2>div{flex:1}
-    .row2>div:first-child{flex:2}
-    .sub-conv{display:flex;gap:8px;margin-top:8px}
-    .sub-conv>div{flex:1;background:#F5F6FA;border-radius:8px;padding:7px 10px;font-size:11px;color:#555E80;border:1px solid #E8EAF2}
-    .sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #E8EAF2}
-    .sum-row:last-child{border:none}
-    .sum-label{font-size:12px;color:#9AA0B8}
-    .sum-val{font-size:13px;font-weight:700;color:#1A1A2E;text-align:right}
-    .sum-sub{font-size:9px;color:#B0B8CC}
-    .act-text{flex:1;font-size:12px;background:#F5F6FA;border-radius:8px;padding:7px 10px;color:#333;border:1px solid #E0E4EE}
-    .act-del{background:#FEF0F0;border:1px solid #FACACA;border-radius:7px;color:#C0392B;font-size:14px;cursor:pointer;padding:6px 10px;flex-shrink:0}
-    .del-exp{background:none;border:none;color:#E74C3C;font-size:18px;cursor:pointer;padding:0 0 0 4px;flex-shrink:0;line-height:1}
-    .edit-exp{background:none;border:none;color:#B0B8CC;font-size:15px;cursor:pointer;padding:0;flex-shrink:0;line-height:1}
-    #expense-empty{text-align:center;color:#C0C8DE;padding:40px;display:none}
-    .hidden-val{cursor:pointer;letter-spacing:.05em}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .weather-loading{display:inline-block;animation:spin 1s linear infinite}
-    #eye-btn{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:5px 10px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
+/* expense items */
+.expense-item{background:#fff;border-radius:13px;padding:11px 14px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+#decolar-card{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:13px;border-left:4px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.tip-card{background:#fff;border-radius:13px;padding:14px 15px;margin-bottom:11px;border-left:3px solid #E67E22;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.itin-day{background:#fff;border-radius:13px;padding:13px 15px;margin-bottom:11px;border-top:3px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 
-    /* simulador */
-    .sim-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-    .sim-inp-wrap{position:relative}
-    .sim-flag{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
-    .sim-inp{padding-left:38px!important}
-    .sim-result{background:#F5F6FA;border-radius:10px;padding:12px 14px;margin-top:10px}
-    .sim-result-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
-    .sim-result-row:not(:last-child){border-bottom:1px solid #E8EAF2}
-    .sim-cur{font-size:12px;color:#9AA0B8;display:flex;align-items:center;gap:5px}
-    .sim-val{font-size:15px;font-weight:700;color:#1A1A2E}
+/* form */
+#expense-preview{background:#F0FDF7;border-radius:8px;padding:8px 11px;margin:8px 0 10px;font-size:12px;color:#1A7A4A;line-height:1.6;display:none;border:1px solid #C8F0DA}
+.row2{display:flex;gap:8px;margin-bottom:10px}
+.row2>div{flex:1}
+.row2>div:first-child{flex:2}
+.sub-conv{display:flex;gap:8px;margin-top:8px}
+.sub-conv>div{flex:1;background:#F5F6FA;border-radius:8px;padding:7px 10px;font-size:11px;color:#555E80;border:1px solid #E8EAF2}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #E8EAF2}
+.sum-row:last-child{border:none}
+.sum-label{font-size:12px;color:#9AA0B8}
+.sum-val{font-size:13px;font-weight:700;color:#1A1A2E;text-align:right}
+.sum-sub{font-size:9px;color:#B0B8CC}
+.act-text{flex:1;font-size:12px;background:#F5F6FA;border-radius:8px;padding:7px 10px;color:#333;border:1px solid #E0E4EE}
+.act-del{background:#FEF0F0;border:1px solid #FACACA;border-radius:7px;color:#C0392B;font-size:14px;cursor:pointer;padding:6px 10px;flex-shrink:0}
+.del-exp{background:none;border:none;color:#E74C3C;font-size:18px;cursor:pointer;padding:0 0 0 4px;flex-shrink:0;line-height:1}
+.edit-exp{background:none;border:none;color:#B0B8CC;font-size:15px;cursor:pointer;padding:0;flex-shrink:0;line-height:1}
+#expense-empty{text-align:center;color:#C0C8DE;padding:40px;display:none}
+.hidden-val{cursor:pointer;letter-spacing:.05em}
+@keyframes spin{to{transform:rotate(360deg)}}
+.weather-loading{display:inline-block;animation:spin 1s linear infinite}
+#eye-btn{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:5px 10px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
+
+/* simulador */
+.sim-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.sim-inp-wrap{position:relative}
+.sim-flag{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+.sim-inp{padding-left:38px!important}
+.sim-result{background:#F5F6FA;border-radius:10px;padding:12px 14px;margin-top:10px}
+.sim-result-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.sim-result-row:not(:last-child){border-bottom:1px solid #E8EAF2}
+.sim-cur{font-size:12px;color:#9AA0B8;display:flex;align-items:center;gap:5px}
+.sim-val{font-size:15px;font-weight:700;color:#1A1A2E}
+```
+
   </style>
 </head>
 <body>
@@ -210,6 +214,7 @@
   </div>
 
   <!-- weather + subtitle -->
+
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
     <div style="font-size:10px;color:rgba(255,255,255,.6)">03 jul → 08 jul · Ida 10h20 · Volta 17h05</div>
     <div id="weather-pill" onclick="fetchWeather()" style="display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.18);border-radius:99px;padding:4px 10px;cursor:pointer">
@@ -220,6 +225,7 @@
   </div>
 
   <!-- SALDO PRINCIPAL -->
+
   <div id="nomad-card">
     <div style="margin-bottom:12px">
       <div style="font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1.5px;margin-bottom:4px">💰 SALDO DISPONÍVEL TOTAL</div>
@@ -267,6 +273,7 @@
 <button id="fab" onclick="openExpenseModal()" title="Adicionar gasto">＋</button>
 
 <!-- TAB: RESUMO -->
+
 <div id="tab-resumo" class="tab active">
   <div id="decolar-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
@@ -288,6 +295,7 @@
 </div>
 
 <!-- TAB: GASTOS -->
+
 <div id="tab-gastos" class="tab">
   <!-- filtro + ordenação -->
   <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -314,6 +322,7 @@
 </div>
 
 <!-- TAB: ROTEIRO -->
+
 <div id="tab-roteiro" class="tab">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
     <div class="section-title" style="margin-bottom:0">Roteiro & Gastos por Dia</div>
@@ -324,12 +333,14 @@
 </div>
 
 <!-- TAB: DICAS -->
+
 <div id="tab-dicas" class="tab">
   <div class="section-title">Dicas para a Viagem 🇨🇱</div>
   <div id="tips-list"></div>
 </div>
 
 <!-- TAB: SIMULADOR -->
+
 <div id="tab-simulador" class="tab">
   <div class="section-title">💱 Simulador de Câmbio</div>
 
@@ -383,13 +394,13 @@
   </div>
 
   <!-- atalhos rápidos -->
+
   <div class="section-title">⚡ Atalhos Rápidos</div>
   <div id="sim-shortcuts" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
 </div>
 
-
-
 <!-- TAB: CHECKLIST -->
+
 <div id="tab-checklist" class="tab">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
     <div class="section-title" style="margin-bottom:0">Checklist da Viagem</div>
@@ -399,6 +410,7 @@
 </div>
 
 <!-- TAB: CONFIG -->
+
 <div id="tab-config" class="tab">
   <div class="section-title">Configurações</div>
   <div class="card" style="margin-bottom:11px">
@@ -440,6 +452,7 @@
 </div>
 
 <!-- MODAL: Configurações (lápis) -->
+
 <div id="modal-settings" class="modal-overlay" onclick="if(event.target===this)closeSettings()">
   <div class="modal-sheet">
     <div class="modal-title">⚙️ Editar Configurações</div>
@@ -468,6 +481,7 @@
 </div>
 
 <!-- MODAL: Adicionar / Editar Gasto -->
+
 <div id="modal-expense" class="modal-overlay" onclick="if(event.target===this)closeExpenseModal()">
   <div class="modal-sheet">
     <div id="modal-expense-title" class="modal-title">➕ Novo Gasto</div>
@@ -503,6 +517,22 @@
         <select id="me-date" class="inp"></select>
       </div>
     </div>
+    <div style="margin-bottom:10px">
+      <div class="card-label">Forma de Pagamento</div>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="pay-nomad"  onclick="setPayment('nomad')"  class="pay-btn pay-active" style="flex:1;padding:9px 6px;border-radius:10px;border:1.5px solid #C0392B;background:#FEF0F0;color:#C0392B;font-size:12px;font-weight:700;cursor:pointer">💳 Nomad</button>
+        <button type="button" id="pay-cash"   onclick="setPayment('cash')"   class="pay-btn"            style="flex:1;padding:9px 6px;border-radius:10px;border:1.5px solid #E0E4EE;background:#fff;color:#9AA0B8;font-size:12px;font-weight:600;cursor:pointer">💵 Dinheiro</button>
+        <button type="button" id="pay-other"  onclick="setPayment('other')"  class="pay-btn"            style="flex:1;padding:9px 6px;border-radius:10px;border:1.5px solid #E0E4EE;background:#fff;color:#9AA0B8;font-size:12px;font-weight:600;cursor:pointer">🔄 Outro</button>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div class="card-label">Forma de Pagamento</div>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="pay-nomad" onclick="selectPayment('Nomad')" class="pay-btn pay-active" style="flex:1;padding:9px 6px;border-radius:10px;border:1.5px solid #C0392B;background:#FEF0F0;color:#C0392B;font-size:12px;font-weight:700;cursor:pointer">💳 Nomad</button>
+        <button type="button" id="pay-dinheiro" onclick="selectPayment('Dinheiro')" class="pay-btn" style="flex:1;padding:9px 6px;border-radius:10px;border:1.5px solid #E0E4EE;background:#fff;color:#9AA0B8;font-size:12px;font-weight:600;cursor:pointer">💵 Dinheiro</button>
+        <button type="button" id="pay-outro" onclick="selectPayment('Outro')" class="pay-btn" style="flex:1;padding:9px 6px;border-radius:10px;border:1.5px solid #E0E4EE;background:#fff;color:#9AA0B8;font-size:12px;font-weight:600;cursor:pointer">💸 Outro</button>
+      </div>
+    </div>
     <div style="margin-bottom:16px">
       <div class="card-label">Nota (opcional)</div>
       <input id="me-note" class="inp" placeholder="Observação..."/>
@@ -515,6 +545,7 @@
 </div>
 
 <!-- MODAL: Editar Roteiro -->
+
 <div id="modal-itin" class="modal-overlay" onclick="if(event.target===this)closeItin()">
   <div class="modal-sheet">
     <div class="modal-title">🗓️ Editar Roteiro</div>
@@ -526,9 +557,8 @@
   </div>
 </div>
 
-
-
 <!-- MODAL: Editar Checklist -->
+
 <div id="modal-checklist" class="modal-overlay" onclick="if(event.target===this)closeChecklist()">
   <div class="modal-sheet">
     <div class="modal-title">📋 Editar Checklist</div>
@@ -543,7 +573,6 @@
     </div>
   </div>
 </div>
-
 
 </div><!-- /app-right -->
 <!-- BOTTOM NAV -->
@@ -676,7 +705,24 @@ REF.on('value', snapshot => {
   S = { ...DEFAULT_STATE, ...normalized, visible: localVisible };
   if (!S.cashCLP) S.cashCLP = 0;
   // Migrate stale clpRate: old default was 0.057 (wrong), correct is 0.0057
-  if (S.clpRate >= 0.05) { S.clpRate = S.clpRate / 10; save(); }
+  if (S.clpRate >= 0.05) { S.clpRate = S.clpRate / 10; }
+  // Migrate CLP expenses saved with old rate (usd is 10x too high)
+  // Detect: if currency=CLP and usd = amount * 0.057 / usdRate (old), recalculate with new rate
+  let needsSave = false;
+  const expArr = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{});
+  expArr.forEach(exp => {
+    if(exp.currency === 'CLP' && exp.amount && exp.usd) {
+      const correctUSD = (exp.amount * S.clpRate) / S.usdRate;
+      const ratio = exp.usd / correctUSD;
+      // If saved value is ~10x the correct value, it was saved with old rate
+      if(ratio > 5 && ratio < 20) {
+        exp.usd = correctUSD;
+        needsSave = true;
+      }
+    }
+  });
+  S.expenses = expArr;
+  if(needsSave) save();
   renderAll();
   setSyncStatus('ok');
 }, err => {
@@ -708,20 +754,28 @@ const fBRL = v => `R$ ${Number(v).toLocaleString('pt-BR',{minimumFractionDigits:
 const fCLP = v => `$ ${Math.round(Number(v)).toLocaleString('pt-BR')} CLP`;
 
 
-// Parse numeric input that may use comma OR dot as decimal separator
+// Parse numeric input — handles both locales and thousands separators
 function parseNum(val){
   if(val === null || val === undefined || val === '') return 0;
   const s = String(val).trim().replace(/\s/g,'');
-  // If both comma and dot present, last one is decimal separator
   const lastComma = s.lastIndexOf(',');
   const lastDot   = s.lastIndexOf('.');
   let normalized;
   if(lastComma > lastDot){
-    // comma is decimal separator: "1.234,56" → "1234.56"
+    // comma is decimal separator: "1.234,56" or "20.000,00" → remove dots, replace comma
     normalized = s.replace(/\./g,'').replace(',','.');
+  } else if(lastDot !== -1){
+    // dot present — is it decimal or thousands?
+    // If pattern like "20.000" or "1.000.000" (dot + exactly 3 digits groups) → thousands
+    if(/^\d{1,3}(\.\d{3})+$/.test(s)){
+      normalized = s.replace(/\./g,'');  // "20.000" → "20000"
+    } else {
+      // dot is decimal: "20.5", "1.25"
+      normalized = s.replace(/,/g,'');
+    }
   } else {
-    // dot is decimal separator (or no separator): "1,234.56" → "1234.56"
-    normalized = s.replace(/,/g,'');
+    // no dot, no comma: plain integer "20000"
+    normalized = s;
   }
   const n = parseFloat(normalized);
   return isNaN(n) ? 0 : n;
@@ -921,7 +975,7 @@ function renderExpenses(){
         <span style="font-size:20px;flex-shrink:0">${icon}</span>
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600;color:#1A1A2E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${exp.desc}</div>
-          <div style="font-size:10px;color:#B0B8CC">${exp.category} · ${exp.date}/07</div>${note}
+          <div style="font-size:10px;color:#B0B8CC">${exp.category} · ${exp.date}/07 · <span>${ {'Nomad':'💳 Nomad','Dinheiro':'💵 Dinheiro','Outro':'💸 Outro'}[exp.payment||'Nomad'] || '💳 Nomad' }</span></div>${note}
         </div>
         <div style="text-align:right;flex-shrink:0">
           <div class="hidden-val" data-real="${vUSD}" style="font-size:14px;font-weight:800;color:${color}" onclick="toggleVisibility()">${mU}</div>
@@ -967,17 +1021,27 @@ function openExpenseModal(id){
     document.getElementById('me-note').value     = exp.note || '';
     document.getElementById('me-category').value = exp.category;
     document.getElementById('me-date').value     = exp.date;
+    selectPayment(exp.payment || 'Nomad');
   } else {
     document.getElementById('modal-expense-title').textContent = '➕ Novo Gasto';
     document.getElementById('modal-expense-save').textContent  = '✓ Salvar';
     ['me-desc','me-amount','me-note'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('me-currency').value = 'USD';
     document.getElementById('modal-expense-preview').style.display = 'none';
+    selectPayment('Nomad');
+    setPayment('nomad');
   }
   updateModalPreview();
   document.getElementById('modal-expense').classList.add('open');
 }
 function closeExpenseModal(){ document.getElementById('modal-expense').classList.remove('open'); editingId=null; }
+ else {
+      btn.style.borderColor = '#E0E4EE';
+      btn.style.background  = '#fff';
+      btn.style.color       = '#9AA0B8';
+    }
+  });
+}
 function updateModalPreview(){
   const amount   = parseNum(document.getElementById('me-amount').value);
   const currency = document.getElementById('me-currency').value;
@@ -988,6 +1052,25 @@ function updateModalPreview(){
   document.getElementById('mprev-brl-clp').textContent   = fBRL(usd*S.usdRate) + ' · ' + fCLP(usd*S.usdRate/S.clpRate);
   prev.style.display = 'block';
 }
+let selectedPayment = 'Nomad';
+
+function selectPayment(method){
+  selectedPayment = method;
+  ['Nomad','Dinheiro','Outro'].forEach(m => {
+    const btn = document.getElementById('pay-' + m.toLowerCase());
+    if(!btn) return;
+    if(m === method){
+      btn.style.borderColor = '#C0392B';
+      btn.style.background  = '#FEF0F0';
+      btn.style.color       = '#C0392B';
+    } else {
+      btn.style.borderColor = '#E0E4EE';
+      btn.style.background  = '#fff';
+      btn.style.color       = '#9AA0B8';
+    }
+  });
+}
+
 function saveExpenseModal(){
   const desc     = document.getElementById('me-desc').value.trim();
   const amount   = parseNum(document.getElementById('me-amount').value);
@@ -995,13 +1078,14 @@ function saveExpenseModal(){
   const category = document.getElementById('me-category').value;
   const date     = document.getElementById('me-date').value;
   const note     = document.getElementById('me-note').value.trim();
+  const payment = selectedPayment;
   if(!desc || !amount){ showToast('Preencha descrição e valor ⚠️'); return; }
   const usd = toUSD(amount, currency);
   if(editingId){
-    const expArrE = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); const idx = expArrE.findIndex(e => e.id === editingId); if(idx !== -1) expArrE[idx] = {...expArrE[idx], desc, amount, currency, category, date, note, usd}; S.expenses = expArrE;
+    const expArrE = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); const idx = expArrE.findIndex(e => e.id === editingId); if(idx !== -1) expArrE[idx] = {...expArrE[idx], desc, amount, currency, category, date, note, payment, usd}; S.expenses = expArrE;
     showToast('Gasto atualizado ✅');
   } else {
-    const expArrU = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); expArrU.unshift({id: Date.now(), desc, amount, currency, category, date, note, usd}); S.expenses = expArrU;
+    const expArrU = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); expArrU.unshift({id: Date.now(), desc, amount, currency, category, date, note, payment, usd}); S.expenses = expArrU;
     showToast('Gasto adicionado ✅');
   }
   save(); renderAll(); closeExpenseModal();
@@ -1642,5 +1726,6 @@ renderAll();
 fetchWeather();
 setInterval(fetchWeather, 10*60*1000);
 </script>
+
 </body>
 </html>
