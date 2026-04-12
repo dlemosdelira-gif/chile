@@ -1019,6 +1019,16 @@ function selectPayment(method){
       btn.style.color       = '#9AA0B8';
     }
   });
+
+  // Troca automática de moeda baseado no método de pagamento selecionado
+  const curSelect = document.getElementById('me-currency');
+  if (method === 'Dinheiro') {
+    curSelect.value = 'CLP';
+    updateModalPreview();
+  } else if (method === 'Nomad' && curSelect.value === 'CLP') {
+    curSelect.value = 'USD';
+    updateModalPreview();
+  }
 }
 
 function saveExpenseModal(){
