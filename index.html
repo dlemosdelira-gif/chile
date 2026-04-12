@@ -319,6 +319,7 @@
     <div class="section-title" style="margin-bottom:0">Roteiro & Gastos por Dia</div>
     <button onclick="openItin()" style="background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;padding:5px 11px;color:#C0392B;font-size:11px;cursor:pointer;font-weight:600">✏️ Editar</button>
   </div>
+  <div id="itin-summary"></div>
   <div id="itin-list"></div>
 </div>
 
@@ -394,7 +395,6 @@
     <div class="section-title" style="margin-bottom:0">Checklist da Viagem</div>
     <button onclick="openChecklist()" style="background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;padding:5px 11px;color:#C0392B;font-size:11px;cursor:pointer;font-weight:600">✏️ Editar</button>
   </div>
-  <div id="checklist-alert-banner"></div>
   <div id="checklist-list"></div>
 </div>
 
@@ -1015,34 +1015,99 @@ function renderItin(){
   list.innerHTML = '';
 
   const itin = Array.isArray(S.itinerary)
-    ? S.itinerary
-    : Object.values(S.itinerary || {});
+    ? S.itinerary : Object.values(S.itinerary || {});
 
+  const expArrI = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses || {});
+
+  // ── Budget: saldo restante ÷ dias restantes, carrega sobra/déficit ──
+  const totalBudgetUSD = S.nomadUSD + ((S.cashCLP||0) * S.clpRate);
+  const numDays        = itin.length || 1;
+  const fixedDailyUSD  = totalBudgetUSD / numDays; // só para o card de resumo
+
+  // Pre-compute spending per day
+  const daySpentMap = {};
   itin.forEach(day => {
+    if(!day || !day.date) return;
+    const key = day.date.slice(4);
+    daySpentMap[key] = expArrI.filter(e => e.date === key).reduce((a,e) => a+(e.usd||0), 0);
+  });
+
+  let budgetRemaining = totalBudgetUSD; // saldo que vai diminuindo a cada dia
+
+  itin.forEach((day, dayIdx) => {
     if (!day || !day.date) return;
 
     const activities = Array.isArray(day.activities)
       ? day.activities
       : (day.activities && typeof day.activities === 'object'
-          ? Object.values(day.activities)
-          : []);
+          ? Object.values(day.activities) : []);
 
-    const key = day.date.slice(4);
-    const expArrI = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses || {});
-    const spent = expArrI
-      .filter(e => e.date === key)
-      .reduce((s, e) => s + (e.usd || 0), 0);
+    const key          = day.date.slice(4);
+    const spent        = daySpentMap[key] || 0;
+    const daysLeft     = numDays - dayIdx; // inclui o dia atual
 
+    // Budget deste dia = saldo disponível ÷ dias restantes (incluindo hoje)
+    const effectiveBudget = budgetRemaining / daysLeft;
+    const remaining       = effectiveBudget - spent;
+    const overBudget      = remaining < 0;
+    const pctUsed         = effectiveBudget > 0 ? Math.min((spent / effectiveBudget) * 100, 100) : 0;
+
+    // Subtrai o gasto real do saldo — a sobra (ou falta) vai para os próximos dias
+    budgetRemaining -= spent;
+    if(budgetRemaining < 0) budgetRemaining = 0;
+
+    // Conversions
+    const budgetCLP   = effectiveBudget * S.usdRate / S.clpRate;
+    const budgetBRL   = effectiveBudget * S.usdRate;
+    const remainCLP   = Math.abs(remaining) * S.usdRate / S.clpRate;
+    const remainBRL   = Math.abs(remaining) * S.usdRate;
+
+    const budgetColor = overBudget ? '#E74C3C' : '#27AE60';
+    const barColor    = overBudget ? '#E74C3C' : '#2ECC71';
+
+    const remainLabel = overBudget
+      ? `▲ ${fCLP(remainCLP)} acima`
+      : `${fCLP(remainCLP)} disponível`;
+
+    // Spent display
     const vU = fUSD(spent), vB = fBRL(spent * S.usdRate);
     const mU = S.visible ? vU : mask(vU), mB = S.visible ? vB : mask(vB);
 
     const spentHtml = spent > 0
-      ? `<div class="hidden-val" data-real="${vU}" style="font-size:13px;font-weight:700;color:#27AE60" onclick="toggleVisibility()">${mU}</div>
+      ? `<div class="hidden-val" data-real="${vU}" style="font-size:14px;font-weight:800;color:${overBudget?'#E74C3C':'#27AE60'}" onclick="toggleVisibility()">${mU}</div>
          <div class="hidden-val" data-real="${vB}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mB}</div>`
       : `<div style="font-size:12px;color:#D8DAE8">—</div>`;
 
+    // Budget block inside card
+    const bCLP_str  = fCLP(budgetCLP);
+    const bUSD_str  = fUSD(effectiveBudget);
+    const bBRL_str  = fBRL(budgetBRL);
+    const rLabel    = S.visible ? remainLabel : mask(remainLabel);
+    const mBudgCLP  = S.visible ? bCLP_str : mask(bCLP_str);
+    const mBudgUSD  = S.visible ? bUSD_str : mask(bUSD_str);
+    const mBudgBRL  = S.visible ? bBRL_str : mask(bBRL_str);
+
+    const budgetBlock = `
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #F0F2F8">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px">
+          <div>
+            <div style="font-size:9px;color:#B0B8CC;letter-spacing:1px;margin-bottom:3px">💰 BUDGET DO DIA</div>
+            <div class="hidden-val" data-real="${bCLP_str}" style="font-size:17px;font-weight:800;color:#1A1A2E;line-height:1" onclick="toggleVisibility()">${mBudgCLP}</div>
+            <div style="display:flex;gap:6px;margin-top:2px">
+              <span class="hidden-val" data-real="${bUSD_str}" style="font-size:10px;color:#9AA0B8" onclick="toggleVisibility()">${mBudgUSD}</span>
+              <span style="font-size:10px;color:#D0D4E0">·</span>
+              <span class="hidden-val" data-real="${bBRL_str}" style="font-size:10px;color:#9AA0B8" onclick="toggleVisibility()">${mBudgBRL}</span>
+            </div>
+          </div>
+          <div class="hidden-val" data-real="${remainLabel}" style="font-size:11px;font-weight:700;color:${budgetColor};text-align:right" onclick="toggleVisibility()">${rLabel}</div>
+        </div>
+        <div style="background:#EEF0F6;border-radius:99px;height:6px;overflow:hidden">
+          <div style="height:100%;width:${pctUsed}%;background:${barColor};border-radius:99px;transition:width .5s"></div>
+        </div>
+      </div>`;
+
     const acts = activities.map((a, j) =>
-      `<div style="font-size:12px;color:#555E80;padding:4px 0;display:flex;align-items:center;gap:7px;${j < activities.length - 1 ? 'border-bottom:1px solid #F0F2F8' : ''}">
+      `<div style="font-size:12px;color:#555E80;padding:4px 0;display:flex;align-items:center;gap:7px;${j < activities.length-1 ? 'border-bottom:1px solid #F0F2F8' : ''}">
         <span style="color:#D0D4E8;font-size:9px">●</span>${a}</div>`
     ).join('');
 
@@ -1053,8 +1118,44 @@ function renderItin(){
           <div style="font-size:10px;color:#B0B8CC">${day.label || ''}</div>
         </div>
         <div style="text-align:right">${spentHtml}</div>
-      </div>${acts}</div>`;
+      </div>
+      ${acts}
+      ${budgetBlock}
+    </div>`;
   });
+
+  // ── Summary card ──
+  const totalSpentUSD  = expArrI.reduce((s,e) => s+(e.usd||0), 0);
+  const totalRemaining = totalBudgetUSD - totalSpentUSD;
+  const dailyCLP       = fixedDailyUSD * S.usdRate / S.clpRate;
+  const sColor         = totalRemaining >= 0 ? '#27AE60' : '#E74C3C';
+
+  const summary = document.getElementById('itin-summary');
+  if(summary){
+    const sdCLP = S.visible ? fCLP(dailyCLP)         : mask(fCLP(dailyCLP));
+    const sdUSD = S.visible ? fUSD(fixedDailyUSD)    : mask(fUSD(fixedDailyUSD));
+    const sdBRL = S.visible ? fBRL(fixedDailyUSD*S.usdRate) : mask(fBRL(fixedDailyUSD*S.usdRate));
+    const srUSD = S.visible ? fUSD(totalRemaining)   : mask(fUSD(totalRemaining));
+    summary.innerHTML = `
+      <div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-size:9px;color:#9AA0B8;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Budget fixo / dia</div>
+            <div class="hidden-val" data-real="${fCLP(dailyCLP)}" style="font-size:22px;font-weight:800;color:#1A1A2E;line-height:1" onclick="toggleVisibility()">${sdCLP}</div>
+            <div style="display:flex;gap:6px;margin-top:3px">
+              <span class="hidden-val" data-real="${fUSD(fixedDailyUSD)}" style="font-size:11px;color:#9AA0B8" onclick="toggleVisibility()">${sdUSD}</span>
+              <span style="font-size:11px;color:#D0D4E0">·</span>
+              <span class="hidden-val" data-real="${fBRL(fixedDailyUSD*S.usdRate)}" style="font-size:11px;color:#9AA0B8" onclick="toggleVisibility()">${sdBRL}</span>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:9px;color:#9AA0B8;margin-bottom:4px">Saldo total</div>
+            <div class="hidden-val" data-real="${fUSD(totalRemaining)}" style="font-size:16px;font-weight:700;color:${sColor}" onclick="toggleVisibility()">${srUSD}</div>
+            <div style="font-size:10px;color:#B0B8CC;margin-top:1px">${numDays} dias · compensa automaticamente</div>
+          </div>
+        </div>
+      </div>`;
+  }
 }
 
 // ══════════════════════════════════════
@@ -1334,25 +1435,6 @@ function renderChecklist(){
 
   const arr = getChecklistArr();
 
-  // Alert banner
-  const banner = document.getElementById('checklist-alert-banner');
-  if(banner){
-    const today2 = new Date(); today2.setHours(0,0,0,0);
-    const urgent = arr.filter(item => !item.done && item.due).filter(item => {
-      const d = new Date(item.due+'T00:00:00');
-      return Math.round((d - today2)/86400000) <= 3;
-    });
-    if(urgent.length > 0){
-      const overdue = urgent.filter(item => new Date(item.due+'T00:00:00') < today2).length;
-      const soon    = urgent.length - overdue;
-      let msg = '';
-      if(overdue > 0) msg += `⚠️ ${overdue} item${overdue>1?'s':''} vencido${overdue>1?'s':''}  `;
-      if(soon > 0)    msg += `⏰ ${soon} item${soon>1?'s':''} vence${soon>1?'m':''} em breve`;
-      banner.innerHTML = `<div style="background:#FFF3CD;border:1px solid #FFEAA0;border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:12px;font-weight:600;color:#856404">${msg.trim()}</div>`;
-    } else {
-      banner.innerHTML = '';
-    }
-  }
 
   if(arr.length === 0){
     list.innerHTML = `<div class="card" style="text-align:center;color:#B0B8CC">Nenhum item ainda.</div>`;
@@ -1362,28 +1444,13 @@ function renderChecklist(){
   const today = new Date(); today.setHours(0,0,0,0);
 
   arr.forEach(item => {
-    let dueBadge = '';
-    if(item.due && !item.done){
-      const dueDate = new Date(item.due + 'T00:00:00');
-      const diffDays = Math.round((dueDate - today) / 86400000);
-      if(diffDays < 0){
-        dueBadge = `<span style="font-size:9px;background:#FFECEC;color:#C0392B;padding:2px 7px;border-radius:99px;font-weight:700;flex-shrink:0">⚠️ Vencido</span>`;
-      } else if(diffDays === 0){
-        dueBadge = `<span style="font-size:9px;background:#FFF8EC;color:#E67E22;padding:2px 7px;border-radius:99px;font-weight:700;flex-shrink:0">🔔 Hoje</span>`;
-      } else if(diffDays <= 3){
-        dueBadge = `<span style="font-size:9px;background:#FFF8EC;color:#E67E22;padding:2px 7px;border-radius:99px;font-weight:600;flex-shrink:0">⏰ ${diffDays}d</span>`;
-      } else {
-        dueBadge = `<span style="font-size:9px;background:#F5F6FA;color:#B0B8CC;padding:2px 7px;border-radius:99px;flex-shrink:0">📅 ${dueDate.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</span>`;
-      }
-    }
+
     list.innerHTML += `<div class="card" style="padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleChecklistItem(${item.id})">
       <div style="width:20px;height:20px;border-radius:6px;border:1.5px solid ${item.done ? '#27AE60' : '#D6DBEA'};background:${item.done ? '#27AE60' : '#fff'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;flex-shrink:0">${item.done ? '✓' : ''}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;color:${item.done ? '#9AA0B8' : '#1A1A2E'};text-decoration:${item.done ? 'line-through' : 'none'}">${item.text}</div>
-        ${item.due && !item.done ? `<div style="font-size:10px;color:#B0B8CC;margin-top:2px">até ${new Date(item.due+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}</div>` : ''}
-      </div>
-      ${dueBadge}
-    </div>`;
+
+      </div>    </div>`;
   });
 }
 
@@ -1427,7 +1494,7 @@ function renderChecklistEdit(){
       <button onclick="toggleChecklistDraft(${i})" style="width:22px;height:22px;border-radius:7px;border:1.5px solid ${item.done?'#27AE60':'#D6DBEA'};background:${item.done?'#27AE60':'#fff'};color:#fff;font-size:12px;cursor:pointer;flex-shrink:0">${item.done?'✓':''}</button>
       <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0">
         <input class="inp" value="${safe}" style="font-size:12px;padding:8px 10px" oninput="updateChecklistText(${i}, this.value)"/>
-        <input type="date" class="inp" value="${item.due||''}" style="font-size:11px;padding:5px 8px;color:#9AA0B8" onchange="updateChecklistDue(${i}, this.value)" title="Data limite"/>
+
       </div>
       <button onclick="removeChecklistItem(${i})" style="padding:8px 11px;background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;color:#C0392B;font-size:16px;cursor:pointer;flex-shrink:0">×</button>`;
     // Drag events
@@ -1486,7 +1553,7 @@ function addChecklistItem(){
   const input = document.getElementById('new-check-item');
   const value = (input.value || '').trim();
   if(!value) return;
-  checklistDraft.push({ id: Date.now(), text: value, done: false, due: null });
+  checklistDraft.push({ id: Date.now(), text: value, done: false });
   input.value = '';
   renderChecklistEdit();
 }
@@ -1507,17 +1574,12 @@ function updateChecklistText(i, value){
   checklistDraft[i].text = value;
 }
 
-function updateChecklistDue(i, value){
-  if(!checklistDraft[i]) return;
-  checklistDraft[i].due = value;
-}
 
 function saveChecklist(){
   S.checklist = checklistDraft.map(item => ({
     id: item.id || Date.now(),
     text: String(item.text || '').trim(),
     done: !!item.done,
-    due:  item.due || null
   })).filter(item => item.text);
   save();
   renderChecklist();
