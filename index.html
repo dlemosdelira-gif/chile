@@ -15,31 +15,79 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{background:#E0E2EA;min-height:100vh}
-    body{
-      color:#1A1A2E;font-family:'Outfit',sans-serif;
-      min-height:100vh;background:#F5F6FA;
-      /* Center on desktop like a mobile app */
-      max-width:520px;
-      margin:0 auto;
-      padding-bottom:82px;
-      /* subtle shadow on desktop so it looks like a card */
-      box-shadow:0 0 0 1px rgba(0,0,0,.06), 0 8px 40px rgba(0,0,0,.12);
-    }
+    /* ── BASE ── */
+    html,body{height:100%;background:#F0F2F5}
+    body{color:#1A1A2E;font-family:'Outfit',sans-serif;margin:0}
 
-    /* Desktop & tablet: give it some breathing room */
-    @media(min-width:560px){
-      html{padding:24px 0 32px}
-      body{border-radius:20px;overflow:hidden;min-height:calc(100vh - 56px)}
-      #bottom-nav{border-radius:0 0 20px 20px}
+    /* ── MOBILE: single column ── */
+    #app-left{width:100%}
+    #app-right{width:100%;padding-bottom:82px}
+    #bottom-nav{
+      position:fixed;bottom:0;left:0;width:100%;
+      background:#fff;border-top:1px solid #E8EAF2;
+      display:flex;z-index:100;
+    }
+    .nav-btn{
+      flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+      color:#B0B8CC;transition:color .2s;
+    }
+    .nav-btn.active{color:#C0392B}
+    .nav-btn span:first-child{font-size:17px}
+    .nav-btn span:last-child{font-size:9px;font-weight:400}
+    .nav-btn.active span:last-child{font-weight:700}
+    #fab{position:fixed;bottom:90px;right:18px;z-index:150}
+
+    /* ── DESKTOP/TABLET (≥ 768px): two columns ── */
+    @media(min-width:768px){
+      body{display:flex;height:100vh;overflow:hidden}
+
+      /* Left column: fixed width, full height, scrollable */
+      #app-left{
+        width:320px;min-width:320px;flex-shrink:0;
+        height:100vh;overflow-y:auto;
+        position:sticky;top:0;
+        display:flex;flex-direction:column;
+      }
+      #header{flex-shrink:0}
+
+      /* Right column: fills remaining space, scrollable */
+      #app-right{
+        flex:1;height:100vh;overflow-y:auto;
+        padding:28px 32px 40px;
+        background:#F0F2F5;
+        min-width:0;
+      }
+
+      /* Nav sits below header in left column */
+      #bottom-nav{
+        position:static;
+        flex-direction:column;
+        border-top:1px solid #F0F2F5;
+        border-right:1px solid #F0F2F5;
+        background:#fff;
+        padding:8px 0 16px;
+        flex:1;
+      }
+      .nav-btn{
+        flex-direction:row;justify-content:flex-start;
+        padding:12px 20px;gap:12px;
+        border-radius:10px;margin:1px 8px;width:auto;flex:none;
+      }
+      .nav-btn span:first-child{font-size:20px}
+      .nav-btn span:last-child{font-size:13px;font-weight:500}
+      .nav-btn.active{background:#FEF0F0;color:#C0392B}
+      .nav-btn.active span:last-child{font-weight:700}
+
+      /* FAB fixed to bottom-right of viewport */
+      #fab{position:fixed;bottom:32px;right:32px}
+
+      /* Tabs take full right column — remove inner padding since #app-right has padding */
+      .tab{padding:0}
+
+      /* Modals centered */
       .modal-overlay{align-items:center}
-      .modal-sheet{border-radius:18px;max-width:520px;margin:0 auto}
-    }
-
-    /* Mobile: full screen, no frills */
-    @media(max-width:559px){
-      html{background:#F5F6FA;padding:0}
-      body{box-shadow:none;max-width:100%}
+      .modal-sheet{border-radius:18px;max-width:560px;margin:0 auto}
     }
     input,select,button{font-family:'Outfit',sans-serif}
     .inp{background:#fff;border:1.5px solid #E0E4EE;border-radius:10px;padding:11px 12px;color:#1A1A2E;font-size:14px;width:100%}
@@ -68,21 +116,16 @@
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
     /* FAB */
-    #fab{position:fixed;bottom:90px;right:calc(50% - 246px);width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;color:#fff;font-size:26px;line-height:1;box-shadow:0 4px 16px rgba(192,57,43,.45);cursor:pointer;z-index:150;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+    #fab{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;color:#fff;font-size:26px;line-height:1;box-shadow:0 4px 16px rgba(192,57,43,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
     #fab:active{transform:scale(.92)}
-    @media(max-width:559px){#fab{right:18px}}
+    
 
-    /* bottom nav */
-    #bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:#fff;border-top:1px solid #E8EAF2;display:flex;z-index:100}
-    .nav-btn{flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#B0B8CC;transition:color .2s}
-    .nav-btn.active{color:#C0392B}
-    .nav-btn span:first-child{font-size:17px}
-    .nav-btn span:last-child{font-size:9px;font-weight:400}
-    .nav-btn.active span:last-child{font-weight:700}
+    /* nav-btn styles now in responsive block above */
 
     /* tabs */
     .tab{display:none;padding:14px 14px 0}
     .tab.active{display:block}
+    @media(min-width:768px){.tab{padding:0}}
 
     /* cards */
     .card{background:#fff;border-radius:14px;padding:12px 15px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
@@ -144,6 +187,7 @@
 </head>
 <body>
 
+<div id="app-left">
 <!-- HEADER -->
 <div id="header">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
@@ -215,7 +259,10 @@
     </div>
   </div>
 </div>
+<!-- bottom nav goes here via JS move, see below -->
+</div><!-- /app-left -->
 
+<div id="app-right">
 <!-- FAB -->
 <button id="fab" onclick="openExpenseModal()" title="Adicionar gasto">＋</button>
 
@@ -296,7 +343,7 @@
       </select>
     </div>
     <div class="sim-inp-wrap">
-      <input id="sim-amount" class="inp sim-inp" type="number" inputmode="decimal" step="any" placeholder="0,00" oninput="calcSim()" style="font-size:22px;font-weight:700;padding-left:44px"/>
+      <input id="sim-amount" class="inp sim-inp" type="text" inputmode="decimal" placeholder="0,00" oninput="calcSim()" style="font-size:22px;font-weight:700;padding-left:44px" autocomplete="off"/>
       <span id="sim-flag" class="sim-flag">🇺🇸</span>
     </div>
     <div class="sim-result" id="sim-result" style="display:none">
@@ -355,7 +402,7 @@
   <div class="section-title">Configurações</div>
   <div class="card" style="margin-bottom:11px">
     <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💳 Saldo Nomad (USD)</div>
-    <input id="cfg-nomad" class="inp" type="number" inputmode="decimal" step="any" placeholder="1000" oninput="cfgConvert()"/>
+    <input id="cfg-nomad" class="inp" type="text" inputmode="decimal" step="any" placeholder="1000" oninput="cfgConvert()"/>
     <div class="sub-conv" style="margin-top:8px">
       <div id="cfg-nomad-brl">R$ 5.110,00</div>
       <div id="cfg-nomad-clp">$ 89.649.123 CLP</div>
@@ -363,7 +410,7 @@
   </div>
   <div class="card" style="margin-bottom:11px">
     <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💵 Peso Chileno em Espécie (CLP)</div>
-    <input id="cfg-cash" class="inp" type="number" inputmode="decimal" step="any" placeholder="0" oninput="cfgConvert()"/>
+    <input id="cfg-cash" class="inp" type="text" inputmode="decimal" step="any" placeholder="0" oninput="cfgConvert()"/>
     <div class="sub-conv" style="margin-top:8px">
       <div id="cfg-cash-brl">R$ 0,00</div>
       <div id="cfg-cash-clp">US$ 0,00</div>
@@ -373,11 +420,11 @@
     <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:13px">💱 Taxas de Câmbio</div>
     <div style="margin-bottom:11px">
       <div class="card-label">🇺🇸 US$ 1 em Reais (R$)</div>
-      <input id="cfg-usd" class="inp" type="number" inputmode="decimal" step="any" oninput="cfgConvert()"/>
+      <input id="cfg-usd" class="inp" type="text" inputmode="decimal" step="any" oninput="cfgConvert()"/>
     </div>
     <div>
       <div class="card-label">🇨🇱 $ 1 CLP em Reais (R$)</div>
-      <input id="cfg-clp" class="inp" type="number" inputmode="decimal" step="any" oninput="cfgConvert()"/>
+      <input id="cfg-clp" class="inp" type="text" inputmode="decimal" step="any" oninput="cfgConvert()"/>
     </div>
   </div>
   <div class="card" style="margin-bottom:16px">
@@ -397,19 +444,19 @@
     <div class="modal-title">⚙️ Editar Configurações</div>
     <div style="margin-bottom:13px">
       <div class="card-label">💳 Saldo Nomad (USD)</div>
-      <input id="ms-nomad" class="inp" type="number" inputmode="decimal" step="any" oninput="msConvert()"/>
+      <input id="ms-nomad" class="inp" type="text" inputmode="decimal" step="any" oninput="msConvert()"/>
     </div>
     <div style="margin-bottom:13px">
       <div class="card-label">💵 Peso Chileno em espécie (CLP)</div>
-      <input id="ms-cash" class="inp" type="number" inputmode="decimal" step="any" oninput="msConvert()"/>
+      <input id="ms-cash" class="inp" type="text" inputmode="decimal" step="any" oninput="msConvert()"/>
     </div>
     <div style="margin-bottom:13px">
       <div class="card-label">🇺🇸 US$ 1 em Reais (R$)</div>
-      <input id="ms-usd" class="inp" type="number" inputmode="decimal" step="any" oninput="msConvert()"/>
+      <input id="ms-usd" class="inp" type="text" inputmode="decimal" step="any" oninput="msConvert()"/>
     </div>
     <div style="margin-bottom:8px">
       <div class="card-label">🇨🇱 $ 1 CLP em Reais (R$)</div>
-      <input id="ms-clp" class="inp" type="number" inputmode="decimal" step="any"/>
+      <input id="ms-clp" class="inp" type="text" inputmode="decimal" step="any"/>
     </div>
     <div id="ms-preview" style="font-size:11px;color:#9AA0B8;margin-bottom:16px;min-height:16px"></div>
     <div style="display:flex;gap:10px">
@@ -430,7 +477,7 @@
     <div class="row2">
       <div>
         <div class="card-label">Valor</div>
-        <input id="me-amount" class="inp" type="number" inputmode="decimal" step="any" placeholder="0" oninput="updateModalPreview()"/>
+        <input id="me-amount" class="inp" type="text" inputmode="decimal" placeholder="0" oninput="updateModalPreview()" autocomplete="off" autocorrect="off"/>
       </div>
       <div style="flex:1!important">
         <div class="card-label">Moeda</div>
@@ -497,6 +544,7 @@
 </div>
 
 
+</div><!-- /app-right -->
 <!-- BOTTOM NAV -->
 <div id="bottom-nav">
   <button class="nav-btn active" onclick="setTab('resumo',this)"><span>📊</span><span>Resumo</span></button>
@@ -508,6 +556,22 @@
 </div>
 
 <div id="toast"></div>
+<script>
+// On desktop: move bottom-nav inside app-left for sidebar layout
+function positionNav(){
+  if(window.innerWidth >= 768){
+    const left = document.getElementById('app-left');
+    const nav  = document.getElementById('bottom-nav');
+    if(left && nav && nav.parentNode !== left) left.appendChild(nav);
+  } else {
+    const body = document.body;
+    const nav  = document.getElementById('bottom-nav');
+    if(nav && nav.parentNode !== body) body.appendChild(nav);
+  }
+}
+positionNav();
+window.addEventListener('resize', positionNav);
+</script>
 
 <script>
 // ══════════════════════════════════════
@@ -642,8 +706,27 @@ const fUSD = v => `US$ ${Number(v).toLocaleString('pt-BR',{minimumFractionDigits
 const fBRL = v => `R$ ${Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
 const fCLP = v => `$ ${Math.round(Number(v)).toLocaleString('pt-BR')} CLP`;
 
+
+// Parse numeric input that may use comma OR dot as decimal separator
+function parseNum(val){
+  if(val === null || val === undefined || val === '') return 0;
+  const s = String(val).trim().replace(/\s/g,'');
+  // If both comma and dot present, last one is decimal separator
+  const lastComma = s.lastIndexOf(',');
+  const lastDot   = s.lastIndexOf('.');
+  let normalized;
+  if(lastComma > lastDot){
+    // comma is decimal separator: "1.234,56" → "1234.56"
+    normalized = s.replace(/\./g,'').replace(',','.');
+  } else {
+    // dot is decimal separator (or no separator): "1,234.56" → "1234.56"
+    normalized = s.replace(/,/g,'');
+  }
+  const n = parseFloat(normalized);
+  return isNaN(n) ? 0 : n;
+}
 function toUSD(amount, currency){
-  const n = Number(amount);
+  const n = (typeof amount === 'string') ? parseNum(amount) : Number(amount);
   if(currency==='USD') return n;
   if(currency==='BRL') return n / S.usdRate;
   if(currency==='CLP') return (n * S.clpRate) / S.usdRate;
@@ -895,7 +978,7 @@ function openExpenseModal(id){
 }
 function closeExpenseModal(){ document.getElementById('modal-expense').classList.remove('open'); editingId=null; }
 function updateModalPreview(){
-  const amount   = Number(document.getElementById('me-amount').value);
+  const amount   = parseNum(document.getElementById('me-amount').value);
   const currency = document.getElementById('me-currency').value;
   const prev     = document.getElementById('modal-expense-preview');
   if(!amount){ prev.style.display='none'; return; }
@@ -906,7 +989,7 @@ function updateModalPreview(){
 }
 function saveExpenseModal(){
   const desc     = document.getElementById('me-desc').value.trim();
-  const amount   = Number(document.getElementById('me-amount').value);
+  const amount   = parseNum(document.getElementById('me-amount').value);
   const currency = document.getElementById('me-currency').value;
   const category = document.getElementById('me-category').value;
   const date     = document.getElementById('me-date').value;
@@ -1105,7 +1188,7 @@ const SIM_SHORTCUTS_BRL = [10, 20, 50, 100, 200, 500];
 
 function calcSim(){
   const from   = document.getElementById('sim-from').value;
-  const amount = Number(document.getElementById('sim-amount').value);
+  const amount = parseNum(document.getElementById('sim-amount').value);
   const flag   = document.getElementById('sim-flag');
   flag.textContent = SIM_FLAGS[from];
 
@@ -1175,20 +1258,20 @@ function renderConfig(){
     <div class="sum-row"><span class="sum-label">Taxa: $ 1 CLP =</span><div class="sum-val">R$ ${S.clpRate}</div></div>`;
 }
 function cfgConvert(){
-  const n=Number(document.getElementById('cfg-nomad').value)||0;
-  const ca=Number(document.getElementById('cfg-cash').value)||0;  // now CLP
-  const u=Number(document.getElementById('cfg-usd').value)||S.usdRate;
-  const c=Number(document.getElementById('cfg-clp').value)||S.clpRate;
+  const n=parseNum(document.getElementById('cfg-nomad').value)||0;
+  const ca=parseNum(document.getElementById('cfg-cash').value)||0;  // now CLP
+  const u=parseNum(document.getElementById('cfg-usd').value)||S.usdRate;
+  const c=parseNum(document.getElementById('cfg-clp').value)||S.clpRate;
   document.getElementById('cfg-nomad-brl').textContent = fBRL(n*u);
   document.getElementById('cfg-nomad-clp').textContent = fCLP(n*u/c);
   document.getElementById('cfg-cash-brl').textContent  = fBRL(ca*c);         // CLP→BRL
   document.getElementById('cfg-cash-clp').textContent  = fUSD((ca*c)/u);    // CLP→USD
 }
 function saveConfig(){
-  S.nomadUSD = Number(document.getElementById('cfg-nomad').value) || S.nomadUSD;
-  S.cashCLP  = Number(document.getElementById('cfg-cash').value)  || 0;
-  S.usdRate  = Number(document.getElementById('cfg-usd').value)   || S.usdRate;
-  S.clpRate  = Number(document.getElementById('cfg-clp').value)   || S.clpRate;
+  S.nomadUSD = parseNum(document.getElementById('cfg-nomad').value) || S.nomadUSD;
+  S.cashCLP  = parseNum(document.getElementById('cfg-cash').value)  || 0;
+  S.usdRate  = parseNum(document.getElementById('cfg-usd').value)   || S.usdRate;
+  S.clpRate  = parseNum(document.getElementById('cfg-clp').value)   || S.clpRate;
   save(); renderAll(); showToast('Configurações salvas ✅');
 }
 function clearExpenses(){
@@ -1209,18 +1292,18 @@ function openSettings(){
 }
 function closeSettings(){ document.getElementById('modal-settings').classList.remove('open'); }
 function saveSettings(){
-  S.nomadUSD = Number(document.getElementById('ms-nomad').value) || S.nomadUSD;
-  S.cashCLP  = Number(document.getElementById('ms-cash').value)  || 0;
-  S.usdRate  = Number(document.getElementById('ms-usd').value)   || S.usdRate;
-  S.clpRate  = Number(document.getElementById('ms-clp').value)   || S.clpRate;
+  S.nomadUSD = parseNum(document.getElementById('ms-nomad').value) || S.nomadUSD;
+  S.cashCLP  = parseNum(document.getElementById('ms-cash').value)  || 0;
+  S.usdRate  = parseNum(document.getElementById('ms-usd').value)   || S.usdRate;
+  S.clpRate  = parseNum(document.getElementById('ms-clp').value)   || S.clpRate;
   save(); renderAll(); closeSettings(); showToast('Configurações salvas ✅');
 }
 function msConvert(){
-  const n  = Number(document.getElementById('ms-nomad').value) || 0;
-  const ca = Number(document.getElementById('ms-cash').value)  || 0;
-  const u  = Number(document.getElementById('ms-usd').value)   || S.usdRate;
-  const c  = Number(document.getElementById('ms-clp').value)   || S.clpRate;
-  const clpRate2 = Number(document.getElementById('ms-clp').value)||S.clpRate;
+  const n  = parseNum(document.getElementById('ms-nomad').value) || 0;
+  const ca = parseNum(document.getElementById('ms-cash').value)  || 0;
+  const u  = parseNum(document.getElementById('ms-usd').value)   || S.usdRate;
+  const c  = parseNum(document.getElementById('ms-clp').value)   || S.clpRate;
+  const clpRate2 = parseNum(document.getElementById('ms-clp').value)||S.clpRate;
   const cashBRL = ca * clpRate2;
   const cashUSD = cashBRL / u;
   document.getElementById('ms-preview').textContent =
