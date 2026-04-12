@@ -3,219 +3,154 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Finance App</title>
+  <title>Controle de Gastos</title>
 
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: Arial, sans-serif;
       margin: 0;
-      background: #f5f6fa;
+      background: #f5f5f5;
+    }
+
+    header {
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
     }
 
     .container {
-      padding: 16px;
-      padding-bottom: 90px;
+      padding: 20px;
     }
 
-    .hidden { display: none; }
+    .total {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .gasto {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
 
     .fab {
       position: fixed;
       bottom: 80px;
       right: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: #C0392B;
+      background: red;
       color: white;
-      font-size: 28px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 30px;
       border: none;
-      cursor: pointer;
     }
 
-    .bottom-nav {
+    .nav {
       position: fixed;
       bottom: 0;
       width: 100%;
       display: flex;
+      justify-content: space-around;
       background: white;
-      border-top: 1px solid #ddd;
-    }
-
-    .nav-btn {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      background: none;
-      cursor: pointer;
-    }
-
-    .nav-btn.active {
-      color: #C0392B;
-      font-weight: bold;
-    }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal.open {
-      display: flex;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
+      padding: 10px 0;
+      border-top: 1px solid #ccc;
     }
 
     input {
       width: 100%;
+      padding: 10px;
       margin-bottom: 10px;
-      padding: 10px;
     }
 
-    .pay-btn {
-      flex: 1;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      cursor: pointer;
-    }
-
-    .pay-active {
-      background: #FEF0F0;
-      border-color: #C0392B;
-      color: #C0392B;
-      font-weight: bold;
+    .form {
+      display: none;
+      background: white;
+      padding: 20px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
     }
   </style>
 </head>
-
 <body>
 
+<header>Resumo</header>
+
 <div class="container">
-
-  <div id="home">
-    <h2>Resumo</h2>
-    <p id="total"></p>
-  </div>
-
-  <div id="expenses" class="hidden">
-    <h2>Gastos</h2>
-    <ul id="expense-list"></ul>
-  </div>
-
-  <div id="settings" class="hidden">
-    <h2>Configurações</h2>
-  </div>
-
+  <div class="total" id="total">Total: R$ 0</div>
+  <div id="lista"></div>
 </div>
 
-<button class="fab" id="fab">+</button>
+<button class="fab" onclick="abrirForm()">+</button>
 
-<div class="bottom-nav" id="bottom-nav">
-  <button class="nav-btn active" onclick="setTab('home', this)">Home</button>
-  <button class="nav-btn" onclick="setTab('expenses', this)">Gastos</button>
-  <button class="nav-btn" onclick="setTab('settings', this)">Config</button>
+<div class="form" id="form">
+  <input type="text" id="descricao" placeholder="Descrição"/>
+  <input type="number" id="valor" placeholder="Valor"/>
+  <button onclick="salvar()">Salvar</button>
 </div>
 
-<!-- MODAL -->
-<div class="modal" id="modal-expense">
-  <div class="modal-content">
-    <h3>Novo Gasto</h3>
-
-    <input type="text" id="desc" placeholder="Descrição" />
-    <input type="number" id="value" placeholder="Valor" />
-
-    <div style="display:flex; gap:8px; margin-bottom:10px;">
-      <button id="pay-nomad" class="pay-btn pay-active" onclick="selectPayment('Nomad')">💳 Nomad</button>
-      <button id="pay-dinheiro" class="pay-btn" onclick="selectPayment('Dinheiro')">💵 Dinheiro</button>
-      <button id="pay-outro" class="pay-btn" onclick="selectPayment('Outro')">💸 Outro</button>
-    </div>
-
-    <button onclick="saveExpense()">Salvar</button>
-    <button onclick="closeExpenseModal()">Cancelar</button>
-  </div>
+<div class="nav">
+  <div>Home</div>
+  <div>Gastos</div>
+  <div>Config</div>
 </div>
 
 <script>
-let expenses = [];
-let payment = "Nomad";
+  let gastos = JSON.parse(localStorage.getItem("gastos")) || [];
 
-function renderAll(){
-  const list = document.getElementById("expense-list");
-  list.innerHTML = "";
+  function render() {
+    const lista = document.getElementById("lista");
+    const totalEl = document.getElementById("total");
 
-  let total = 0;
+    lista.innerHTML = "";
 
-  expenses.forEach(e => {
-    total += e.value;
+    let total = 0;
 
-    const li = document.createElement("li");
-    li.innerText = `${e.desc} - R$ ${e.value} (${e.payment})`;
-    list.appendChild(li);
-  });
+    gastos.forEach((g, index) => {
+      total += Number(g.valor);
 
-  document.getElementById("total").innerText = "Total: R$ " + total;
-}
+      const div = document.createElement("div");
+      div.className = "gasto";
+      div.innerHTML = `
+        <span>${g.descricao}</span>
+        <span>R$ ${g.valor}</span>
+      `;
 
-function openExpenseModal(){
-  document.getElementById("modal-expense").classList.add("open");
-  document.getElementById("desc").value = "";
-  document.getElementById("value").value = "";
-  selectPayment("Nomad");
-}
+      lista.appendChild(div);
+    });
 
-function closeExpenseModal(){
-  document.getElementById("modal-expense").classList.remove("open");
-}
+    totalEl.innerText = "Total: R$ " + total;
+  }
 
-function selectPayment(method){
-  payment = method;
+  function abrirForm() {
+    document.getElementById("form").style.display = "block";
+  }
 
-  document.querySelectorAll(".pay-btn").forEach(btn => {
-    btn.classList.remove("pay-active");
-  });
+  function salvar() {
+    const descricao = document.getElementById("descricao").value;
+    const valor = document.getElementById("valor").value;
 
-  if(method === "Nomad") document.getElementById("pay-nomad").classList.add("pay-active");
-  if(method === "Dinheiro") document.getElementById("pay-dinheiro").classList.add("pay-active");
-  if(method === "Outro") document.getElementById("pay-outro").classList.add("pay-active");
-}
+    if (!descricao || !valor) {
+      alert("Preencha tudo");
+      return;
+    }
 
-function saveExpense(){
-  const desc = document.getElementById("desc").value;
-  const value = parseFloat(document.getElementById("value").value);
+    gastos.push({ descricao, valor });
 
-  if(!desc || !value) return;
+    localStorage.setItem("gastos", JSON.stringify(gastos));
 
-  expenses.push({ desc, value, payment });
+    document.getElementById("form").style.display = "none";
+    document.getElementById("descricao").value = "";
+    document.getElementById("valor").value = "";
 
-  closeExpenseModal();
-  renderAll();
-}
+    render();
+  }
 
-function setTab(tab, el){
-  document.querySelectorAll(".container > div").forEach(div => {
-    div.classList.add("hidden");
-  });
-
-  document.getElementById(tab).classList.remove("hidden");
-
-  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
-  el.classList.add("active");
-}
-
-document.getElementById("fab").addEventListener("click", openExpenseModal);
-
-renderAll();
+  render();
 </script>
 
 </body>
