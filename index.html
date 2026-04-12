@@ -1,907 +1,222 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Minha Viagem Sync</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finance App</title>
+
   <style>
-    :root{
-      --bg:#ffffff;
-      --card:#ffffff;
-      --text:#8d8d8d;
-      --text-strong:#2c2c2c;
-      --muted:#bfbfbf;
-      --accent:#d24b3f;
-      --accent-soft:#fce7e4;
-      --line:#ececec;
-      --shadow: 0 10px 30px rgba(0,0,0,.06);
-      --radius: 22px;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      background: #f5f6fa;
     }
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text-strong)}
-    body{min-height:100vh;padding-bottom:110px}
-    .app{max-width:980px;margin:0 auto;padding:28px 20px 24px}
-    .topline{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px}
-    .brand{display:flex;align-items:center;gap:10px;color:var(--muted);letter-spacing:.18em;font-size:12px;text-transform:uppercase}
-    .flag{font-size:26px}
-    h1{margin:4px 0 8px;font-size:clamp(2rem,4vw,3.6rem);line-height:1.04;color:#6f6f6f}
-    .subtitle{color:#c1c1c1;font-size:15px}
-    .hero{display:grid;grid-template-columns:1.5fr .9fr;gap:24px;align-items:start;margin:38px 0 24px}
-    .balance, .spent, .wallet{
-      background:transparent;
+
+    .container {
+      padding: 16px;
+      padding-bottom: 90px;
     }
-    .label{font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:#c4c4c4;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-    .big{font-size:clamp(2.4rem,5vw,4.4rem);font-weight:800;line-height:1;color:#a6a6a6}
-    .subnums{margin-top:10px;color:#c0c0c0;font-size:15px;line-height:1.8}
-    .right-panel{justify-self:end;text-align:right;padding-top:22px}
-    .right-panel .big{font-size:2.15rem}
-    .mini-note{margin-top:24px;color:#a0a0a0;font-weight:600}
-    .wallets{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
-    .wallet-card{padding:8px 0}
-    .wallet-card .big{font-size:1.55rem}
-    .wallet-card .subnums{font-size:13px;margin-top:7px}
-    .section-card{
-      background:var(--card);
-      border:1px solid rgba(211,211,211,.55);
-      border-left:5px solid var(--accent);
-      border-radius:28px;
-      box-shadow:var(--shadow);
-      padding:20px 22px;
-      margin:28px 0 12px;
-      display:flex;justify-content:space-between;gap:20px;align-items:flex-start;
+
+    .hidden { display: none; }
+
+    .fab {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #C0392B;
+      color: white;
+      font-size: 28px;
+      border: none;
+      cursor: pointer;
     }
-    .section-title{font-size:18px;font-weight:800;color:#2c2c2c;margin:0 0 8px}
-    .section-desc{margin:0;color:#b2b2b2;line-height:1.6}
-    .section-money{font-size:1.8rem;font-weight:800;color:var(--accent);text-align:right}
-    .section-status{margin-top:8px;color:#a0a0a0;font-weight:700;text-align:right}
-    .section-list{margin:14px 0 0;padding:0;list-style:none;color:#bbcbff}
-    .section-list li{margin:10px 0;display:flex;gap:10px;align-items:center}
-    .content-wrap{margin-top:18px}
-    .tab-page{display:none;animation:fade .18s ease-out}
-    .tab-page.active{display:block}
-    @keyframes fade{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:none}}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .metric{
-      background:#fafafa;border:1px solid var(--line);border-radius:20px;padding:16px 18px;min-height:104px;
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      background: white;
+      border-top: 1px solid #ddd;
     }
-    .metric h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:#b8b8b8}
-    .metric .value{font-size:1.85rem;font-weight:800;color:#8f8f8f}
-    .metric .caption{margin-top:8px;color:#bdbdbd;font-size:13px;line-height:1.5}
-    .items{display:grid;gap:12px}
-    .item{
-      background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
-      box-shadow:0 4px 18px rgba(0,0,0,.03)
+
+    .nav-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: none;
+      cursor: pointer;
     }
-    .item strong{display:block;margin-bottom:4px}
-    .item small{color:#b8b8b8}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:#f6f6f6;color:#7d7d7d;font-size:12px;font-weight:700}
-    .progress{height:10px;background:#f1f1f1;border-radius:999px;overflow:hidden;margin-top:10px}
-    .progress > span{display:block;height:100%;background:linear-gradient(90deg,#ef6b5d,var(--accent));width:0%}
-    .nav{
-      position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.98);backdrop-filter:saturate(160%) blur(12px);
-      border-top:1px solid var(--line);padding:10px 12px 12px;z-index:20;
+
+    .nav-btn.active {
+      color: #C0392B;
+      font-weight: bold;
     }
-    .nav-inner{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;align-items:end}
-    .nav-btn{
-      appearance:none;border:0;background:transparent;padding:8px 4px 6px;border-radius:16px;color:#b7b7b7;cursor:pointer;
-      display:flex;flex-direction:column;align-items:center;gap:3px;font:inherit;transition:.15s ease;
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
     }
-    .nav-btn .icon{font-size:22px;line-height:1}
-    .nav-btn .txt{font-size:12px;font-weight:700}
-    .nav-btn.active{color:var(--accent)}
-    .nav-btn.active .icon{transform:translateY(-1px)}
-    .fab{
-      position:fixed;right:26px;bottom:94px;width:72px;height:72px;border-radius:50%;
-      border:none;background:#fff;box-shadow:0 8px 26px rgba(210,75,63,.23),0 0 0 10px rgba(210,75,63,.05);
-      font-size:44px;line-height:1;color:#bcbcbc;cursor:pointer;z-index:25
+
+    .modal.open {
+      display: flex;
     }
-    .fab:hover{transform:translateY(-1px)}
-    .modal-backdrop{
-      position:fixed;inset:0;background:rgba(255,255,255,.72);backdrop-filter:blur(2px);display:none;align-items:flex-end;justify-content:center;z-index:40;
-      padding:18px;
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
     }
-    .modal-backdrop.open{display:flex}
-    .sheet{
-      width:min(100%,640px);background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.12);overflow:hidden
+
+    input {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
     }
-    .sheet-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-    .sheet-head h2{margin:0;font-size:18px}
-    .close{border:none;background:#f5f5f5;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:20px;color:#777}
-    .sheet-body{padding:18px}
-    .action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .action{
-      border:1px solid var(--line);background:#fafafa;border-radius:18px;padding:16px;cursor:pointer;text-align:left;
+
+    .pay-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      cursor: pointer;
     }
-    .action strong{display:block;margin-bottom:6px}
-    .action small{color:#a8a8a8;line-height:1.4}
-    .form{
-      display:grid;gap:12px
-    }
-    .field{display:grid;gap:6px}
-    .field label{font-size:13px;color:#8f8f8f;font-weight:700}
-    .field input,.field select,.field textarea{
-      width:100%;border:1px solid #e7e7e7;background:#fff;border-radius:14px;padding:12px 14px;font:inherit;outline:none
-    }
-    .field textarea{resize:vertical;min-height:90px}
-    .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
-    .btn{
-      border:none;border-radius:14px;padding:12px 16px;font:inherit;font-weight:700;cursor:pointer
-    }
-    .btn.secondary{background:#f1f1f1;color:#666}
-    .btn.primary{background:var(--accent);color:#fff}
-    .empty{
-      padding:22px;border:1px dashed #e2e2e2;border-radius:18px;color:#a9a9a9;background:#fcfcfc
-    }
-    @media (max-width: 800px){
-      .hero{grid-template-columns:1fr;gap:18px}
-      .right-panel{text-align:left;justify-self:start;padding-top:0}
-      .wallets{grid-template-columns:1fr}
-      .grid{grid-template-columns:1fr}
-      .nav-inner{grid-template-columns:repeat(3,1fr)}
-      .fab{bottom:126px}
-      .action-grid{grid-template-columns:1fr}
+
+    .pay-active {
+      background: #FEF0F0;
+      border-color: #C0392B;
+      color: #C0392B;
+      font-weight: bold;
     }
   </style>
 </head>
+
 <body>
-  <main class="app">
-    <div class="topline">
-      <div>
-        <div class="brand"><span class="flag">🇨🇱</span><span>Minha Viagem</span><span>Sync</span></div>
-        <h1 id="tripName">Chile 2025</h1>
-        <div class="subtitle" id="tripDates">03 jul → 08 jul · Ida 10h20 · Volta 17h05 · Santiago</div>
-      </div>
-      <div class="pill" id="syncStatus">Salvo localmente</div>
-    </div>
 
-    <div id="page-resumo" class="tab-page active">
-      <section class="hero">
-        <div>
-          <div class="label">💰 Saldo disponível total</div>
-          <div class="big" id="totalBudgetFormatted">US$ 1.000,00</div>
-          <div class="subnums">
-            <div id="budgetBRL">R$ 5.110,00</div>
-            <div id="budgetCLP">$ 0 CLP</div>
-          </div>
-          <div class="subnums" style="margin-top:18px" id="usageLine">0,0% usado</div>
-        </div>
+<div class="container">
 
-        <div class="right-panel">
-          <div class="label">Gasto até agora</div>
-          <div class="big" id="spentBudgetFormatted">US$ 0,00</div>
-          <div class="subnums">
-            <div id="spentBRL">R$ 0,00</div>
-          </div>
-          <div class="mini-note" id="remainingLine">Saldo: US$ 1.000,00</div>
-        </div>
-      </section>
-
-      <section class="wallets">
-        <div class="wallet-card">
-          <div class="label">🏦 Nomad</div>
-          <div class="big" id="nomadBalance">US$ 1.000,00</div>
-          <div class="subnums">
-            <div id="nomadBRL">R$ 5.110,00</div>
-            <div id="nomadSpent">gasto: R$ 0,00</div>
-          </div>
-        </div>
-        <div class="wallet-card">
-          <div class="label">💵 Cash (peso)</div>
-          <div class="big" id="cashBalance">US$ 0,00</div>
-          <div class="subnums">
-            <div id="cashBRL">R$ 0,00</div>
-            <div id="cashCLP">$ 0 CLP</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-card">
-        <div>
-          <h2 class="section-title">📦 Pacote Decolar</h2>
-          <p class="section-desc">Já pago — não sai da Nomad</p>
-          <ul class="section-list">
-            <li>✈️ Passagens Aéreas</li>
-            <li>🏨 Hospedagem</li>
-            <li>🛡️ Seguro Viagem</li>
-          </ul>
-        </div>
-        <div>
-          <div class="section-money" id="packageValue">R$ 11.984,00</div>
-          <div class="section-status">✓ PAGO</div>
-        </div>
-      </section>
-
-      <h3 style="margin:18px 0 10px;color:#cfd7f7;letter-spacing:.18em;text-transform:uppercase">Gastos por categoria</h3>
-      <div class="grid" id="categoryGrid"></div>
-    </div>
-
-    <div id="page-gastos" class="tab-page">
-      <div class="grid" style="margin-bottom:18px">
-        <div class="metric">
-          <h3>Total gasto</h3>
-          <div class="value" id="gastosTotal">US$ 0,00</div>
-          <div class="caption">Todas as despesas registradas nesta viagem.</div>
-        </div>
-        <div class="metric">
-          <h3>Maior categoria</h3>
-          <div class="value" id="topCategory">—</div>
-          <div class="caption">Categoria com maior valor acumulado.</div>
-        </div>
-      </div>
-      <div class="items" id="expensesList"></div>
-    </div>
-
-    <div id="page-roteiro" class="tab-page">
-      <div class="items" id="itineraryList"></div>
-    </div>
-
-    <div id="page-cambio" class="tab-page">
-      <div class="grid">
-        <div class="metric">
-          <h3>Cotação base</h3>
-          <div class="value" id="rateBRLUSD">R$ 5,11</div>
-          <div class="caption">Usada para converter os valores exibidos em reais.</div>
-        </div>
-        <div class="metric">
-          <h3>Cotação CLP</h3>
-          <div class="value" id="rateCLPUSD">$ 0</div>
-          <div class="caption">Edite a cotação para trabalhar com pesos chilenos.</div>
-        </div>
-      </div>
-      <div class="items" id="exchangeList" style="margin-top:18px"></div>
-    </div>
-
-    <div id="page-lista" class="tab-page">
-      <div class="items" id="packingList"></div>
-    </div>
-
-    <div id="page-config" class="tab-page">
-      <div class="items">
-        <div class="item">
-          <div>
-            <strong>Nome da viagem</strong>
-            <small id="configTripName">Chile 2025</small>
-          </div>
-          <button class="btn secondary" id="editTripBtn">Editar</button>
-        </div>
-        <div class="item">
-          <div>
-            <strong>Limpar dados salvos</strong>
-            <small>Apaga os dados gravados no navegador.</small>
-          </div>
-          <button class="btn secondary" id="clearDataBtn">Limpar</button>
-        </div>
-        <div class="item">
-          <div>
-            <strong>Exportar JSON</strong>
-            <small>Baixa os dados da viagem em arquivo.</small>
-          </div>
-          <button class="btn secondary" id="exportBtn">Exportar</button>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <button class="fab" id="fabBtn" aria-label="Adicionar">+</button>
-
-  <nav class="nav" aria-label="Navegação principal">
-    <div class="nav-inner" id="navBar">
-      <button class="nav-btn active" data-tab="resumo"><span class="icon">📊</span><span class="txt">Resumo</span></button>
-      <button class="nav-btn" data-tab="gastos"><span class="icon">💰</span><span class="txt">Gastos</span></button>
-      <button class="nav-btn" data-tab="roteiro"><span class="icon">🗓️</span><span class="txt">Roteiro</span></button>
-      <button class="nav-btn" data-tab="cambio"><span class="icon">💱</span><span class="txt">Câmbio</span></button>
-      <button class="nav-btn" data-tab="lista"><span class="icon">📋</span><span class="txt">Lista</span></button>
-      <button class="nav-btn" data-tab="config"><span class="icon">⚙️</span><span class="txt">Config</span></button>
-    </div>
-  </nav>
-
-  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="sheet">
-      <div class="sheet-head">
-        <h2 id="modalTitle">Adicionar</h2>
-        <button class="close" id="closeModalBtn" aria-label="Fechar">×</button>
-      </div>
-      <div class="sheet-body" id="modalBody"></div>
-    </div>
+  <div id="home">
+    <h2>Resumo</h2>
+    <p id="total"></p>
   </div>
 
-  <script>
-    const STORAGE_KEY = 'travel-sync-v1';
+  <div id="expenses" class="hidden">
+    <h2>Gastos</h2>
+    <ul id="expense-list"></ul>
+  </div>
 
-    const defaultState = {
-      trip: {
-        name: 'Chile 2025',
-        dates: '03 jul → 08 jul · Ida 10h20 · Volta 17h05 · Santiago',
-        packageValueBRL: 11984,
-      },
-      budget: {
-        totalUSD: 1000,
-        brlRate: 5.11,
-        clpRate: 0,
-      },
-      expenses: [
-        // {id, title, category, amount, currency, date, note}
-      ],
-      itinerary: [
-        { id: cryptoId(), title: 'Chegada em Santiago', date: '03 jul', note: 'Check-in e organização da viagem.' },
-        { id: cryptoId(), title: 'Passeio centro + gastronomia', date: '05 jul', note: 'Reservar tempo para almoço e compras.' },
-      ],
-      packing: [
-        { id: cryptoId(), title: 'Passaporte / documento', done: true },
-        { id: cryptoId(), title: 'Adaptador universal', done: false },
-        { id: cryptoId(), title: 'Carregadores', done: false },
-      ],
-      exchange: [
-        { id: cryptoId(), pair: 'USD/BRL', value: 5.11, label: '1 US$ = R$ 5,11' },
-        { id: cryptoId(), pair: 'USD/CLP', value: 0, label: 'Ainda não configurado' },
-      ]
-    };
+  <div id="settings" class="hidden">
+    <h2>Configurações</h2>
+  </div>
 
-    function cryptoId() {
-      if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-      return 'id-' + Math.random().toString(16).slice(2) + Date.now().toString(16);
-    }
+</div>
 
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return structuredClone(defaultState);
-        const parsed = JSON.parse(raw);
-        return {
-          ...structuredClone(defaultState),
-          ...parsed,
-          trip: { ...structuredClone(defaultState.trip), ...(parsed.trip || {}) },
-          budget: { ...structuredClone(defaultState.budget), ...(parsed.budget || {}) },
-          expenses: Array.isArray(parsed.expenses) ? parsed.expenses : [],
-          itinerary: Array.isArray(parsed.itinerary) ? parsed.itinerary : structuredClone(defaultState.itinerary),
-          packing: Array.isArray(parsed.packing) ? parsed.packing : structuredClone(defaultState.packing),
-          exchange: Array.isArray(parsed.exchange) ? parsed.exchange : structuredClone(defaultState.exchange),
-        };
-      } catch {
-        return structuredClone(defaultState);
-      }
-    }
+<button class="fab" id="fab">+</button>
 
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      syncStatus.textContent = 'Salvo localmente';
-    }
+<div class="bottom-nav" id="bottom-nav">
+  <button class="nav-btn active" onclick="setTab('home', this)">Home</button>
+  <button class="nav-btn" onclick="setTab('expenses', this)">Gastos</button>
+  <button class="nav-btn" onclick="setTab('settings', this)">Config</button>
+</div>
 
-    let state = loadState();
-    let activeTab = 'resumo';
+<!-- MODAL -->
+<div class="modal" id="modal-expense">
+  <div class="modal-content">
+    <h3>Novo Gasto</h3>
 
-    const syncStatus = document.getElementById('syncStatus');
-    const navBar = document.getElementById('navBar');
-    const fabBtn = document.getElementById('fabBtn');
-    const modalBackdrop = document.getElementById('modalBackdrop');
-    const modalBody = document.getElementById('modalBody');
-    const modalTitle = document.getElementById('modalTitle');
-    const closeModalBtn = document.getElementById('closeModalBtn');
+    <input type="text" id="desc" placeholder="Descrição" />
+    <input type="number" id="value" placeholder="Valor" />
 
-    const currencyBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-    const currencyUSD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-    const currencyCLP = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 });
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+      <button id="pay-nomad" class="pay-btn pay-active" onclick="selectPayment('Nomad')">💳 Nomad</button>
+      <button id="pay-dinheiro" class="pay-btn" onclick="selectPayment('Dinheiro')">💵 Dinheiro</button>
+      <button id="pay-outro" class="pay-btn" onclick="selectPayment('Outro')">💸 Outro</button>
+    </div>
 
-    function money(amount, currency='USD') {
-      if (currency === 'BRL') return currencyBRL.format(amount);
-      if (currency === 'CLP') return currencyCLP.format(amount) + ' CLP';
-      return currencyUSD.format(amount);
-    }
+    <button onclick="saveExpense()">Salvar</button>
+    <button onclick="closeExpenseModal()">Cancelar</button>
+  </div>
+</div>
 
-    function usdToBrl(usd) {
-      return usd * state.budget.brlRate;
-    }
+<script>
+let expenses = [];
+let payment = "Nomad";
 
-    function getExpensesTotalUSD() {
-      return state.expenses.reduce((sum, e) => sum + convertToUSD(e.amount, e.currency), 0);
-    }
+function renderAll(){
+  const list = document.getElementById("expense-list");
+  list.innerHTML = "";
 
-    function convertToUSD(amount, currency) {
-      if (currency === 'USD') return Number(amount) || 0;
-      if (currency === 'BRL') return (Number(amount) || 0) / (state.budget.brlRate || 1);
-      if (currency === 'CLP') return state.budget.clpRate ? (Number(amount) || 0) / state.budget.clpRate : 0;
-      return Number(amount) || 0;
-    }
+  let total = 0;
 
-    function topCategory() {
-      const totals = {};
-      for (const e of state.expenses) {
-        const usd = convertToUSD(e.amount, e.currency);
-        totals[e.category] = (totals[e.category] || 0) + usd;
-      }
-      const entries = Object.entries(totals).sort((a,b) => b[1]-a[1]);
-      return entries[0] || null;
-    }
+  expenses.forEach(e => {
+    total += e.value;
 
-    function formatPercent(n) {
-      return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n) + '%';
-    }
+    const li = document.createElement("li");
+    li.innerText = `${e.desc} - R$ ${e.value} (${e.payment})`;
+    list.appendChild(li);
+  });
 
-    function setActiveTab(tab) {
-      activeTab = tab;
-      document.querySelectorAll('.tab-page').forEach(page => page.classList.remove('active'));
-      document.getElementById(`page-${tab}`).classList.add('active');
+  document.getElementById("total").innerText = "Total: R$ " + total;
+}
 
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tab);
-      });
-    }
+function openExpenseModal(){
+  document.getElementById("modal-expense").classList.add("open");
+  document.getElementById("desc").value = "";
+  document.getElementById("value").value = "";
+  selectPayment("Nomad");
+}
 
-    function renderSummary() {
-      document.getElementById('tripName').textContent = state.trip.name;
-      document.getElementById('tripDates').textContent = state.trip.dates;
-      document.getElementById('configTripName').textContent = state.trip.name;
+function closeExpenseModal(){
+  document.getElementById("modal-expense").classList.remove("open");
+}
 
-      document.getElementById('totalBudgetFormatted').textContent = money(state.budget.totalUSD, 'USD');
-      document.getElementById('budgetBRL').textContent = money(usdToBrl(state.budget.totalUSD), 'BRL');
-      document.getElementById('budgetCLP').textContent = money(0, 'CLP');
+function selectPayment(method){
+  payment = method;
 
-      const spentUSD = getExpensesTotalUSD();
-      const remainingUSD = Math.max(state.budget.totalUSD - spentUSD, 0);
+  document.querySelectorAll(".pay-btn").forEach(btn => {
+    btn.classList.remove("pay-active");
+  });
 
-      document.getElementById('spentBudgetFormatted').textContent = money(spentUSD, 'USD');
-      document.getElementById('spentBRL').textContent = money(usdToBrl(spentUSD), 'BRL');
-      document.getElementById('usageLine').textContent = formatPercent((spentUSD / state.budget.totalUSD) * 100) + ' usado';
-      document.getElementById('remainingLine').textContent = `Saldo: ${money(remainingUSD, 'USD')}`;
+  if(method === "Nomad") document.getElementById("pay-nomad").classList.add("pay-active");
+  if(method === "Dinheiro") document.getElementById("pay-dinheiro").classList.add("pay-active");
+  if(method === "Outro") document.getElementById("pay-outro").classList.add("pay-active");
+}
 
-      document.getElementById('nomadBalance').textContent = money(remainingUSD, 'USD');
-      document.getElementById('nomadBRL').textContent = money(usdToBrl(remainingUSD), 'BRL');
-      document.getElementById('nomadSpent').textContent = `gasto: ${money(usdToBrl(spentUSD), 'BRL')}`;
+function saveExpense(){
+  const desc = document.getElementById("desc").value;
+  const value = parseFloat(document.getElementById("value").value);
 
-      document.getElementById('cashBalance').textContent = money(0, 'USD');
-      document.getElementById('cashBRL').textContent = money(0, 'BRL');
-      document.getElementById('cashCLP').textContent = money(0, 'CLP');
+  if(!desc || !value) return;
 
-      document.getElementById('packageValue').textContent = money(state.trip.packageValueBRL, 'BRL');
+  expenses.push({ desc, value, payment });
 
-      const categories = state.expenses.reduce((acc, e) => {
-        const usd = convertToUSD(e.amount, e.currency);
-        acc[e.category] = (acc[e.category] || 0) + usd;
-        return acc;
-      }, {});
-      const entries = Object.entries(categories);
-      const totalSpent = entries.reduce((s, [,v]) => s + v, 0);
+  closeExpenseModal();
+  renderAll();
+}
 
-      const grid = document.getElementById('categoryGrid');
-      grid.innerHTML = '';
-      const categoryNames = entries.length ? entries : [
-        ['Transporte', 0], ['Alimentação', 0], ['Hospedagem', 0], ['Compras', 0]
-      ];
-      for (const [cat, val] of categoryNames) {
-        const pct = totalSpent ? (val / totalSpent) * 100 : 0;
-        const card = document.createElement('div');
-        card.className = 'metric';
-        card.innerHTML = `
-          <h3>${escapeHTML(cat)}</h3>
-          <div class="value">${money(val, 'USD')}</div>
-          <div class="caption">${formatPercent(pct)} do total gasto</div>
-          <div class="progress"><span style="width:${Math.max(4, pct)}%"></span></div>
-        `;
-        grid.appendChild(card);
-      }
-    }
+function setTab(tab, el){
+  document.querySelectorAll(".container > div").forEach(div => {
+    div.classList.add("hidden");
+  });
 
-    function renderExpenses() {
-      const list = document.getElementById('expensesList');
-      const total = getExpensesTotalUSD();
-      document.getElementById('gastosTotal').textContent = money(total, 'USD');
-      const top = topCategory();
-      document.getElementById('topCategory').textContent = top ? `${top[0]} (${money(top[1], 'USD')})` : '—';
+  document.getElementById(tab).classList.remove("hidden");
 
-      if (!state.expenses.length) {
-        list.innerHTML = `<div class="empty">Nenhum gasto registrado ainda. Use o botão + para adicionar a primeira despesa.</div>`;
-        return;
-      }
+  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+  el.classList.add("active");
+}
 
-      list.innerHTML = '';
-      [...state.expenses].sort((a,b) => (b.date || '').localeCompare(a.date || '')).forEach(exp => {
-        const row = document.createElement('div');
-        row.className = 'item';
-        row.innerHTML = `
-          <div>
-            <strong>${escapeHTML(exp.title)}</strong>
-            <small>${escapeHTML(exp.category)} · ${escapeHTML(exp.date || 'sem data')}</small>
-            ${exp.note ? `<div style="margin-top:6px;color:#b2b2b2">${escapeHTML(exp.note)}</div>` : ''}
-          </div>
-          <div style="text-align:right">
-            <div style="font-weight:800">${money(exp.amount, exp.currency)}</div>
-            <button class="btn secondary" data-remove-expense="${exp.id}" style="margin-top:8px;padding:8px 10px">Remover</button>
-          </div>
-        `;
-        list.appendChild(row);
-      });
+document.getElementById("fab").addEventListener("click", openExpenseModal);
 
-      list.querySelectorAll('[data-remove-expense]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          state.expenses = state.expenses.filter(e => e.id !== btn.dataset.removeExpense);
-          saveState();
-          renderAll();
-        });
-      });
-    }
+renderAll();
+</script>
 
-    function renderItinerary() {
-      const list = document.getElementById('itineraryList');
-      if (!state.itinerary.length) {
-        list.innerHTML = `<div class="empty">Ainda não há itens no roteiro. Clique no + para adicionar atividades.</div>`;
-        return;
-      }
-      list.innerHTML = '';
-      state.itinerary.forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'item';
-        row.innerHTML = `
-          <div>
-            <strong>${escapeHTML(item.title)}</strong>
-            <small>${escapeHTML(item.date || '')}</small>
-            ${item.note ? `<div style="margin-top:6px;color:#b2b2b2">${escapeHTML(item.note)}</div>` : ''}
-          </div>
-          <button class="btn secondary" data-remove-itinerary="${item.id}">Remover</button>
-        `;
-        list.appendChild(row);
-      });
-      list.querySelectorAll('[data-remove-itinerary]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          state.itinerary = state.itinerary.filter(i => i.id !== btn.dataset.removeItinerary);
-          saveState();
-          renderAll();
-        });
-      });
-    }
-
-    function renderExchange() {
-      document.getElementById('rateBRLUSD').textContent = `R$ ${state.budget.brlRate.toFixed(2).replace('.', ',')}`;
-      document.getElementById('rateCLPUSD').textContent = state.budget.clpRate ? `$ ${Math.round(state.budget.clpRate).toLocaleString('es-CL')}` : '$ 0';
-
-      const list = document.getElementById('exchangeList');
-      list.innerHTML = '';
-      state.exchange.forEach(rate => {
-        const row = document.createElement('div');
-        row.className = 'item';
-        row.innerHTML = `
-          <div>
-            <strong>${escapeHTML(rate.pair)}</strong>
-            <small>${escapeHTML(rate.label)}</small>
-          </div>
-          <button class="btn secondary" data-edit-rate="${rate.id}">Editar</button>
-        `;
-        list.appendChild(row);
-      });
-      list.querySelectorAll('[data-edit-rate]').forEach(btn => {
-        btn.addEventListener('click', () => openRateEditor(btn.dataset.editRate));
-      });
-    }
-
-    function renderPacking() {
-      const list = document.getElementById('packingList');
-      if (!state.packing.length) {
-        list.innerHTML = `<div class="empty">Sua lista está vazia. Adicione itens com o botão +.</div>`;
-        return;
-      }
-      list.innerHTML = '';
-      state.packing.forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'item';
-        row.innerHTML = `
-          <div>
-            <strong>${item.done ? '✅ ' : '⬜ '}${escapeHTML(item.title)}</strong>
-            <small>${item.done ? 'Concluído' : 'Pendente'}</small>
-          </div>
-          <button class="btn secondary" data-toggle-pack="${item.id}">${item.done ? 'Desmarcar' : 'Marcar'}</button>
-        `;
-        list.appendChild(row);
-      });
-      list.querySelectorAll('[data-toggle-pack]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const item = state.packing.find(p => p.id === btn.dataset.togglePack);
-          if (item) item.done = !item.done;
-          saveState();
-          renderAll();
-        });
-      });
-    }
-
-    function renderAll() {
-      renderSummary();
-      renderExpenses();
-      renderItinerary();
-      renderExchange();
-      renderPacking();
-      syncStatus.textContent = 'Salvo localmente';
-    }
-
-    function escapeHTML(str) {
-      return String(str ?? '').replace(/[&<>"']/g, s => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-      }[s]));
-    }
-
-    function openModal(title, bodyHTML) {
-      modalTitle.textContent = title;
-      modalBody.innerHTML = bodyHTML;
-      modalBackdrop.classList.add('open');
-    }
-
-    function closeModal() {
-      modalBackdrop.classList.remove('open');
-      modalBody.innerHTML = '';
-    }
-
-    function openAddMenu() {
-      openModal('Adicionar', `
-        <div class="action-grid">
-          <button class="action" data-action="expense"><strong>Despesa</strong><small>Registrar gasto em USD, BRL ou CLP.</small></button>
-          <button class="action" data-action="itinerary"><strong>Roteiro</strong><small>Adicionar atividade ou compromisso.</small></button>
-          <button class="action" data-action="packing"><strong>Lista</strong><small>Adicionar item de mala ou checklist.</small></button>
-          <button class="action" data-action="rate"><strong>Câmbio</strong><small>Ajustar a cotação do dólar.</small></button>
-        </div>
-      `);
-
-      modalBody.querySelectorAll('[data-action]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const action = btn.dataset.action;
-          if (action === 'expense') openExpenseForm();
-          if (action === 'itinerary') openItineraryForm();
-          if (action === 'packing') openPackingForm();
-          if (action === 'rate') openRateEditor();
-        });
-      });
-    }
-
-    function openExpenseForm() {
-      openModal('Nova despesa', `
-        <form class="form" id="expenseForm">
-          <div class="field">
-            <label>Título</label>
-            <input name="title" required placeholder="Ex.: almoço, taxi, ingresso" />
-          </div>
-          <div class="field">
-            <label>Categoria</label>
-            <select name="category">
-              <option>Alimentação</option>
-              <option>Transporte</option>
-              <option>Hospedagem</option>
-              <option>Compras</option>
-              <option>Passeios</option>
-              <option>Outro</option>
-            </select>
-          </div>
-          <div class="grid" style="grid-template-columns: 1fr 1fr">
-            <div class="field">
-              <label>Valor</label>
-              <input name="amount" type="number" step="0.01" min="0" required />
-            </div>
-            <div class="field">
-              <label>Moeda</label>
-              <select name="currency">
-                <option value="USD">USD</option>
-                <option value="BRL">BRL</option>
-                <option value="CLP">CLP</option>
-              </select>
-            </div>
-          </div>
-          <div class="field">
-            <label>Data</label>
-            <input name="date" type="date" />
-          </div>
-          <div class="field">
-            <label>Observação</label>
-            <textarea name="note" placeholder="Detalhes extras"></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn secondary" id="cancelExpense">Cancelar</button>
-            <button type="submit" class="btn primary">Salvar</button>
-          </div>
-        </form>
-      `);
-      document.getElementById('cancelExpense').addEventListener('click', closeModal);
-      document.getElementById('expenseForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        state.expenses.push({
-          id: cryptoId(),
-          title: fd.get('title'),
-          category: fd.get('category'),
-          amount: Number(fd.get('amount')),
-          currency: fd.get('currency'),
-          date: fd.get('date'),
-          note: fd.get('note')
-        });
-        saveState();
-        closeModal();
-        renderAll();
-      });
-    }
-
-    function openItineraryForm() {
-      openModal('Novo item do roteiro', `
-        <form class="form" id="itineraryForm">
-          <div class="field">
-            <label>Título</label>
-            <input name="title" required placeholder="Ex.: jantar, museu, passeio" />
-          </div>
-          <div class="field">
-            <label>Data</label>
-            <input name="date" placeholder="Ex.: 04 jul" />
-          </div>
-          <div class="field">
-            <label>Observação</label>
-            <textarea name="note" placeholder="Detalhes do plano"></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn secondary" id="cancelItinerary">Cancelar</button>
-            <button type="submit" class="btn primary">Salvar</button>
-          </div>
-        </form>
-      `);
-      document.getElementById('cancelItinerary').addEventListener('click', closeModal);
-      document.getElementById('itineraryForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        state.itinerary.push({
-          id: cryptoId(),
-          title: fd.get('title'),
-          date: fd.get('date'),
-          note: fd.get('note')
-        });
-        saveState();
-        closeModal();
-        renderAll();
-      });
-    }
-
-    function openPackingForm() {
-      openModal('Novo item da lista', `
-        <form class="form" id="packingForm">
-          <div class="field">
-            <label>Item</label>
-            <input name="title" required placeholder="Ex.: remédio, tênis, adaptador" />
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn secondary" id="cancelPacking">Cancelar</button>
-            <button type="submit" class="btn primary">Salvar</button>
-          </div>
-        </form>
-      `);
-      document.getElementById('cancelPacking').addEventListener('click', closeModal);
-      document.getElementById('packingForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        state.packing.push({ id: cryptoId(), title: fd.get('title'), done: false });
-        saveState();
-        closeModal();
-        renderAll();
-      });
-    }
-
-    function openRateEditor(rateId = null) {
-      const current = rateId ? state.exchange.find(r => r.id === rateId) : state.exchange[0];
-      const isBRL = current?.pair === 'USD/BRL';
-      const isCLP = current?.pair === 'USD/CLP';
-      openModal('Editar câmbio', `
-        <form class="form" id="rateForm">
-          <div class="field">
-            <label>Par</label>
-            <select name="pair">
-              <option value="USD/BRL" ${isBRL ? 'selected' : ''}>USD/BRL</option>
-              <option value="USD/CLP" ${isCLP ? 'selected' : ''}>USD/CLP</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Valor</label>
-            <input name="value" type="number" step="0.01" min="0" required value="${current?.value ?? 0}" />
-          </div>
-          <div class="field">
-            <label>Descrição</label>
-            <textarea name="label">${escapeHTML(current?.label ?? '')}</textarea>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn secondary" id="cancelRate">Cancelar</button>
-            <button type="submit" class="btn primary">Salvar</button>
-          </div>
-        </form>
-      `);
-      document.getElementById('cancelRate').addEventListener('click', closeModal);
-      document.getElementById('rateForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const pair = fd.get('pair');
-        const value = Number(fd.get('value'));
-        const label = fd.get('label');
-
-        const existing = state.exchange.find(r => r.pair === pair);
-        if (existing) {
-          existing.value = value;
-          existing.label = label || existing.label;
-        } else {
-          state.exchange.push({ id: cryptoId(), pair, value, label });
-        }
-
-        if (pair === 'USD/BRL') state.budget.brlRate = value;
-        if (pair === 'USD/CLP') state.budget.clpRate = value;
-
-        saveState();
-        closeModal();
-        renderAll();
-      });
-    }
-
-    navBar.addEventListener('click', (e) => {
-      const btn = e.target.closest('.nav-btn');
-      if (!btn) return;
-      setActiveTab(btn.dataset.tab);
-    });
-
-    fabBtn.addEventListener('click', openAddMenu);
-    closeModalBtn.addEventListener('click', closeModal);
-    modalBackdrop.addEventListener('click', (e) => {
-      if (e.target === modalBackdrop) closeModal();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
-    });
-
-    document.getElementById('editTripBtn').addEventListener('click', () => {
-      openModal('Editar viagem', `
-        <form class="form" id="tripForm">
-          <div class="field">
-            <label>Nome</label>
-            <input name="name" required value="${escapeHTML(state.trip.name)}" />
-          </div>
-          <div class="field">
-            <label>Datas</label>
-            <input name="dates" required value="${escapeHTML(state.trip.dates)}" />
-          </div>
-          <div class="field">
-            <label>Valor do pacote (BRL)</label>
-            <input name="packageValueBRL" type="number" min="0" step="0.01" required value="${state.trip.packageValueBRL}" />
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn secondary" id="cancelTrip">Cancelar</button>
-            <button type="submit" class="btn primary">Salvar</button>
-          </div>
-        </form>
-      `);
-      document.getElementById('cancelTrip').addEventListener('click', closeModal);
-      document.getElementById('tripForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        state.trip.name = fd.get('name');
-        state.trip.dates = fd.get('dates');
-        state.trip.packageValueBRL = Number(fd.get('packageValueBRL'));
-        saveState();
-        closeModal();
-        renderAll();
-      });
-    });
-
-    document.getElementById('clearDataBtn').addEventListener('click', () => {
-      const ok = confirm('Tem certeza que deseja apagar os dados salvos neste navegador?');
-      if (!ok) return;
-      localStorage.removeItem(STORAGE_KEY);
-      state = loadState();
-      renderAll();
-      setActiveTab('resumo');
-    });
-
-    document.getElementById('exportBtn').addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'minha-viagem-sync.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    renderAll();
-    setActiveTab('resumo');
-  </script>
 </body>
 </html>
-'''
-out = Path('/mnt/data/index.html')
-out.write_text(html, encoding='utf-8')
-print(out, out.stat().st_size)
