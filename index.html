@@ -1019,10 +1019,12 @@ function renderItin(){
 
   const expArrI = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses || {});
 
-  // ── Budget: saldo restante ÷ dias restantes, carrega sobra/déficit ──
-  const totalBudgetUSD = S.nomadUSD + ((S.cashCLP||0) * S.clpRate);
+  // ── Budget: total original ÷ dias, saldo real diminui com gastos ──
+  // Usa o saldo ATUAL da Nomad (já descontados os gastos), não o valor original configurado
+  const {left: nomadLeftNow} = totals();
+  const totalBudgetUSD = Math.max(nomadLeftNow, 0) + ((S.cashCLP||0) * S.clpRate); // saldo real disponível
   const numDays        = itin.length || 1;
-  const fixedDailyUSD  = totalBudgetUSD / numDays; // só para o card de resumo
+  const fixedDailyUSD  = totalBudgetUSD / numDays; // divisão fixa para o card de resumo
 
   // Pre-compute spending per day
   const daySpentMap = {};
@@ -1032,7 +1034,10 @@ function renderItin(){
     daySpentMap[key] = expArrI.filter(e => e.date === key).reduce((a,e) => a+(e.usd||0), 0);
   });
 
-  let budgetRemaining = totalBudgetUSD; // saldo que vai diminuindo a cada dia
+  // budgetRemaining começa com o total ORIGINAL e diminui dia a dia
+  // Cada dia mostra: saldo disponível ÷ dias restantes (incluindo hoje)
+  // Isso representa o budget IDEAL para aquele dia dado o que já foi gasto nos anteriores
+  let budgetRemaining = totalBudgetUSD;
 
   itin.forEach((day, dayIdx) => {
     if (!day || !day.date) return;
@@ -1126,7 +1131,7 @@ function renderItin(){
 
   // ── Summary card ──
   const totalSpentUSD  = expArrI.reduce((s,e) => s+(e.usd||0), 0);
-  const totalRemaining = totalBudgetUSD - totalSpentUSD;
+  const totalRemaining = totalBudgetUSD; // already uses current nomad balance
   const dailyCLP       = fixedDailyUSD * S.usdRate / S.clpRate;
   const sColor         = totalRemaining >= 0 ? '#27AE60' : '#E74C3C';
 
