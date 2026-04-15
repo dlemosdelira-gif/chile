@@ -13,6 +13,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     /* ── BASE ── */
@@ -617,6 +618,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const REF = db.ref('chile2025');
+firebase.auth().signInAnonymously().catch(err => console.warn('Auth error:', err));
 
 // ══════════════════════════════════════
 // STATE
