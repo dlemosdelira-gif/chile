@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
@@ -13,177 +14,179 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     /* ── BASE ── */
     html,body{height:100%;background:#F0F2F5}
     body{color:#1A1A2E;font-family:'Outfit',sans-serif;margin:0}
 
-    /* ── MOBILE: single column ── */
-    #app-left{width:100%}
-    #app-right{width:100%;padding-bottom:82px}
-    #bottom-nav{
-      position:fixed;bottom:0;left:0;width:100%;
-      background:#fff;border-top:1px solid #E8EAF2;
-      display:flex;z-index:100;
-    }
-    .nav-btn{
-      flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;
-      display:flex;flex-direction:column;align-items:center;gap:2px;
-      color:#B0B8CC;transition:color .2s;
-    }
-    .nav-btn.active{color:#C0392B}
-    .nav-btn span:first-child{font-size:17px}
-    .nav-btn span:last-child{font-size:9px;font-weight:400}
-    .nav-btn.active span:last-child{font-weight:700}
-    #fab{position:fixed;bottom:90px;right:18px;z-index:150}
+```
+/* ── MOBILE: single column ── */
+#app-left{width:100%}
+#app-right{width:100%;padding-bottom:82px}
+#bottom-nav{
+  position:fixed;bottom:0;left:0;width:100%;
+  background:#fff;border-top:1px solid #E8EAF2;
+  display:flex;z-index:100;
+}
+.nav-btn{
+  flex:1;padding:10px 0 12px;background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:#B0B8CC;transition:color .2s;
+}
+.nav-btn.active{color:#C0392B}
+.nav-btn span:first-child{font-size:17px}
+.nav-btn span:last-child{font-size:9px;font-weight:400}
+.nav-btn.active span:last-child{font-weight:700}
+#fab{position:fixed;bottom:90px;right:18px;z-index:150}
 
-    /* ── DESKTOP/TABLET (≥ 768px): two columns ── */
-    @media(min-width:768px){
-      body{display:flex;height:100vh;overflow:hidden}
+/* ── DESKTOP/TABLET (≥ 768px): two columns ── */
+@media(min-width:768px){
+  body{display:flex;height:100vh;overflow:hidden}
 
-      /* Left column: fixed width, full height, scrollable */
-      #app-left{
-        width:400px;min-width:400px;flex-shrink:0;
-        height:100vh;overflow-y:auto;
-        position:sticky;top:0;
-        display:flex;flex-direction:column;
-      }
-      #header{flex-shrink:0}
+  /* Left column: fixed width, full height, scrollable */
+  #app-left{
+    width:400px;min-width:400px;flex-shrink:0;
+    height:100vh;overflow-y:auto;
+    position:sticky;top:0;
+    display:flex;flex-direction:column;
+  }
+  #header{flex-shrink:0}
 
-      /* Right column: fills remaining space, scrollable */
-      #app-right{
-        flex:1;height:100vh;overflow-y:auto;
-        padding:28px 32px 40px;
-        background:#F0F2F5;
-        min-width:0;
-      }
+  /* Right column: fills remaining space, scrollable */
+  #app-right{
+    flex:1;height:100vh;overflow-y:auto;
+    padding:28px 32px 40px;
+    background:#F0F2F5;
+    min-width:0;
+  }
 
-      /* Nav sits below header in left column */
-      #bottom-nav{
-        position:static;
-        flex-direction:column;
-        border-top:1px solid #F0F2F5;
-        border-right:1px solid #F0F2F5;
-        background:#fff;
-        padding:8px 0 16px;
-        flex:1;
-      }
-      .nav-btn{
-        flex-direction:row;justify-content:flex-start;
-        padding:12px 20px;gap:12px;
-        border-radius:10px;margin:1px 8px;width:auto;flex:none;
-      }
-      .nav-btn span:first-child{font-size:20px}
-      .nav-btn span:last-child{font-size:13px;font-weight:500}
-      .nav-btn.active{background:#FEF0F0;color:#C0392B}
-      .nav-btn.active span:last-child{font-weight:700}
+  /* Nav sits below header in left column */
+  #bottom-nav{
+    position:static;
+    flex-direction:column;
+    border-top:1px solid #F0F2F5;
+    border-right:1px solid #F0F2F5;
+    background:#fff;
+    padding:8px 0 16px;
+    flex:1;
+  }
+  .nav-btn{
+    flex-direction:row;justify-content:flex-start;
+    padding:12px 20px;gap:12px;
+    border-radius:10px;margin:1px 8px;width:auto;flex:none;
+  }
+  .nav-btn span:first-child{font-size:20px}
+  .nav-btn span:last-child{font-size:13px;font-weight:500}
+  .nav-btn.active{background:#FEF0F0;color:#C0392B}
+  .nav-btn.active span:last-child{font-weight:700}
 
-      /* FAB fixed to bottom-right of viewport */
-      #fab{position:fixed;bottom:32px;right:32px}
+  /* FAB fixed to bottom-right of viewport */
+  #fab{position:fixed;bottom:32px;right:32px}
 
-      /* Tabs take full right column — remove inner padding since #app-right has padding */
-      .tab{padding:0}
+  /* Tabs take full right column — remove inner padding since #app-right has padding */
+  .tab{padding:0}
 
-      /* Modals centered */
-      .modal-overlay{align-items:center}
-      .modal-sheet{border-radius:18px;max-width:560px;margin:0 auto}
-    }
-    input,select,button{font-family:'Outfit',sans-serif}
-    .inp{background:#fff;border:1.5px solid #E0E4EE;border-radius:10px;padding:11px 12px;color:#1A1A2E;font-size:14px;width:100%}
-    .inp::placeholder{color:#B0B8CC}
-    .inp:focus{outline:none;border-color:#C0392B}
-    select.inp{font-size:13px;cursor:pointer}
-    input[type=number]{-moz-appearance:textfield}
-    input[type=number]::-webkit-outer-spin-button,
-    input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  /* Modals centered */
+  .modal-overlay{align-items:center}
+  .modal-sheet{border-radius:18px;max-width:560px;margin:0 auto}
+}
+input,select,button{font-family:'Outfit',sans-serif}
+.inp{background:#fff;border:1.5px solid #E0E4EE;border-radius:10px;padding:11px 12px;color:#1A1A2E;font-size:14px;width:100%}
+.inp::placeholder{color:#B0B8CC}
+.inp:focus{outline:none;border-color:#C0392B}
+select.inp{font-size:13px;cursor:pointer}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
-    /* header */
-    #header{background:linear-gradient(160deg,#9B1B10 0%,#C0392B 55%,#E74C3C 100%);padding:44px 20px 22px;position:relative;overflow:hidden}
-    #header::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07)}
-    #header::after{content:'★';position:absolute;bottom:18px;right:22px;font-size:64px;color:rgba(255,255,255,.08);line-height:1}
-    #nomad-card{background:rgba(0,0,0,.22);border-radius:16px;padding:15px 16px;margin-top:12px;border:1px solid rgba(255,255,255,.15)}
-    .sub-display{background:rgba(0,0,0,.18);border-radius:9px;padding:8px 10px;flex:1}
-    .sub-display .lbl{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px;margin-bottom:2px}
-    .sub-display .val{font-size:13px;font-weight:700;color:#fff}
-    .sub-display .sub{font-size:9px;color:rgba(255,255,255,.45);margin-top:1px}
+/* header */
+#header{background:linear-gradient(160deg,#9B1B10 0%,#C0392B 55%,#E74C3C 100%);padding:44px 20px 22px;position:relative;overflow:hidden}
+#header::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07)}
+#header::after{content:'★';position:absolute;bottom:18px;right:22px;font-size:64px;color:rgba(255,255,255,.08);line-height:1}
+#nomad-card{background:rgba(0,0,0,.22);border-radius:16px;padding:15px 16px;margin-top:12px;border:1px solid rgba(255,255,255,.15)}
+.sub-display{background:rgba(0,0,0,.18);border-radius:9px;padding:8px 10px;flex:1}
+.sub-display .lbl{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px;margin-bottom:2px}
+.sub-display .val{font-size:13px;font-weight:700;color:#fff}
+.sub-display .sub{font-size:9px;color:rgba(255,255,255,.45);margin-top:1px}
 
-    /* sync badge */
-    #sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.7);margin-left:6px;vertical-align:middle}
-    #sync-dot{width:7px;height:7px;border-radius:50%;background:#4FE89B;display:inline-block;transition:background .3s}
-    #sync-dot.syncing{background:#FFDD00;animation:pulse .8s infinite}
-    #sync-dot.error{background:#FF5555}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* sync badge */
+#sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.7);margin-left:6px;vertical-align:middle}
+#sync-dot{width:7px;height:7px;border-radius:50%;background:#4FE89B;display:inline-block;transition:background .3s}
+#sync-dot.syncing{background:#FFDD00;animation:pulse .8s infinite}
+#sync-dot.error{background:#FF5555}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* FAB */
-    #fab{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;color:#fff;font-size:26px;line-height:1;box-shadow:0 4px 16px rgba(192,57,43,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
-    #fab:active{transform:scale(.92)}
-    
+/* FAB */
+#fab{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;color:#fff;font-size:26px;line-height:1;box-shadow:0 4px 16px rgba(192,57,43,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+#fab:active{transform:scale(.92)}
 
-    /* nav-btn styles now in responsive block above */
 
-    /* tabs */
-    .tab{display:none;padding:14px 14px 0}
-    .tab.active{display:block}
-    @media(min-width:768px){.tab{padding:0}}
+/* nav-btn styles now in responsive block above */
 
-    /* cards */
-    .card{background:#fff;border-radius:14px;padding:12px 15px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-    .card-label{font-size:10px;color:#9AA0B8;letter-spacing:1px;margin-bottom:5px;text-transform:uppercase}
-    .section-title{font-size:11px;font-weight:700;color:#B0B8CC;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
-    .progress-wrap{background:#E8EAF2;border-radius:99px;overflow:hidden}
-    .progress-bar{height:100%;border-radius:99px;transition:width .5s}
+/* tabs */
+.tab{display:none;padding:14px 14px 0}
+.tab.active{display:block}
+@media(min-width:768px){.tab{padding:0}}
 
-    /* modals */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-end;justify-content:center}
-    .modal-overlay.open{display:flex}
-    .modal-sheet{background:#F5F6FA;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
-    .modal-title{font-size:15px;font-weight:800;color:#1A1A2E;margin-bottom:18px}
-    .btn-primary{background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;padding:12px;width:100%}
-    .btn-secondary{background:#EEF0F6;border:none;border-radius:10px;color:#555E80;font-size:14px;cursor:pointer;padding:12px;width:100%}
+/* cards */
+.card{background:#fff;border-radius:14px;padding:12px 15px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.card-label{font-size:10px;color:#9AA0B8;letter-spacing:1px;margin-bottom:5px;text-transform:uppercase}
+.section-title{font-size:11px;font-weight:700;color:#B0B8CC;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.progress-wrap{background:#E8EAF2;border-radius:99px;overflow:hidden}
+.progress-bar{height:100%;border-radius:99px;transition:width .5s}
 
-    /* toast */
-    #toast{display:none;position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#2ECC71;color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(46,204,113,.4);white-space:nowrap}
+/* modals */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:#F5F6FA;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:800;color:#1A1A2E;margin-bottom:18px}
+.btn-primary{background:linear-gradient(135deg,#C0392B,#E74C3C);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;padding:12px;width:100%}
+.btn-secondary{background:#EEF0F6;border:none;border-radius:10px;color:#555E80;font-size:14px;cursor:pointer;padding:12px;width:100%}
 
-    /* expense items */
-    .expense-item{background:#fff;border-radius:13px;padding:11px 14px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-    #decolar-card{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:13px;border-left:4px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-    .tip-card{background:#fff;border-radius:13px;padding:14px 15px;margin-bottom:11px;border-left:3px solid #E67E22;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-    .itin-day{background:#fff;border-radius:13px;padding:13px 15px;margin-bottom:11px;border-top:3px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+/* toast */
+#toast{display:none;position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#2ECC71;color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(46,204,113,.4);white-space:nowrap}
 
-    /* form */
-    #expense-preview{background:#F0FDF7;border-radius:8px;padding:8px 11px;margin:8px 0 10px;font-size:12px;color:#1A7A4A;line-height:1.6;display:none;border:1px solid #C8F0DA}
-    .row2{display:flex;gap:8px;margin-bottom:10px}
-    .row2>div{flex:1}
-    .row2>div:first-child{flex:2}
-    .sub-conv{display:flex;gap:8px;margin-top:8px}
-    .sub-conv>div{flex:1;background:#F5F6FA;border-radius:8px;padding:7px 10px;font-size:11px;color:#555E80;border:1px solid #E8EAF2}
-    .sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #E8EAF2}
-    .sum-row:last-child{border:none}
-    .sum-label{font-size:12px;color:#9AA0B8}
-    .sum-val{font-size:13px;font-weight:700;color:#1A1A2E;text-align:right}
-    .sum-sub{font-size:9px;color:#B0B8CC}
-    .act-text{flex:1;font-size:12px;background:#F5F6FA;border-radius:8px;padding:7px 10px;color:#333;border:1px solid #E0E4EE}
-    .act-del{background:#FEF0F0;border:1px solid #FACACA;border-radius:7px;color:#C0392B;font-size:14px;cursor:pointer;padding:6px 10px;flex-shrink:0}
-    .del-exp{background:none;border:none;color:#E74C3C;font-size:18px;cursor:pointer;padding:0 0 0 4px;flex-shrink:0;line-height:1}
-    .edit-exp{background:none;border:none;color:#B0B8CC;font-size:15px;cursor:pointer;padding:0;flex-shrink:0;line-height:1}
-    #expense-empty{text-align:center;color:#C0C8DE;padding:40px;display:none}
-    .hidden-val{cursor:pointer;letter-spacing:.05em}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .weather-loading{display:inline-block;animation:spin 1s linear infinite}
-    #eye-btn{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:5px 10px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
+/* expense items */
+.expense-item{background:#fff;border-radius:13px;padding:11px 14px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+#decolar-card{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:13px;border-left:4px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.tip-card{background:#fff;border-radius:13px;padding:14px 15px;margin-bottom:11px;border-left:3px solid #E67E22;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.itin-day{background:#fff;border-radius:13px;padding:13px 15px;margin-bottom:11px;border-top:3px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 
-    /* simulador */
-    .sim-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-    .sim-inp-wrap{position:relative}
-    .sim-flag{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
-    .sim-inp{padding-left:38px!important}
-    .sim-result{background:#F5F6FA;border-radius:10px;padding:12px 14px;margin-top:10px}
-    .sim-result-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
-    .sim-result-row:not(:last-child){border-bottom:1px solid #E8EAF2}
-    .sim-cur{font-size:12px;color:#9AA0B8;display:flex;align-items:center;gap:5px}
-    .sim-val{font-size:15px;font-weight:700;color:#1A1A2E}
+/* form */
+#expense-preview{background:#F0FDF7;border-radius:8px;padding:8px 11px;margin:8px 0 10px;font-size:12px;color:#1A7A4A;line-height:1.6;display:none;border:1px solid #C8F0DA}
+.row2{display:flex;gap:8px;margin-bottom:10px}
+.row2>div{flex:1}
+.row2>div:first-child{flex:2}
+.sub-conv{display:flex;gap:8px;margin-top:8px}
+.sub-conv>div{flex:1;background:#F5F6FA;border-radius:8px;padding:7px 10px;font-size:11px;color:#555E80;border:1px solid #E8EAF2}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #E8EAF2}
+.sum-row:last-child{border:none}
+.sum-label{font-size:12px;color:#9AA0B8}
+.sum-val{font-size:13px;font-weight:700;color:#1A1A2E;text-align:right}
+.sum-sub{font-size:9px;color:#B0B8CC}
+.act-text{flex:1;font-size:12px;background:#F5F6FA;border-radius:8px;padding:7px 10px;color:#333;border:1px solid #E0E4EE}
+.act-del{background:#FEF0F0;border:1px solid #FACACA;border-radius:7px;color:#C0392B;font-size:14px;cursor:pointer;padding:6px 10px;flex-shrink:0}
+.del-exp{background:none;border:none;color:#E74C3C;font-size:18px;cursor:pointer;padding:0 0 0 4px;flex-shrink:0;line-height:1}
+.edit-exp{background:none;border:none;color:#B0B8CC;font-size:15px;cursor:pointer;padding:0;flex-shrink:0;line-height:1}
+#expense-empty{text-align:center;color:#C0C8DE;padding:40px;display:none}
+.hidden-val{cursor:pointer;letter-spacing:.05em}
+@keyframes spin{to{transform:rotate(360deg)}}
+.weather-loading{display:inline-block;animation:spin 1s linear infinite}
+#eye-btn{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:5px 10px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
+
+/* simulador */
+.sim-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.sim-inp-wrap{position:relative}
+.sim-flag{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+.sim-inp{padding-left:38px!important}
+.sim-result{background:#F5F6FA;border-radius:10px;padding:12px 14px;margin-top:10px}
+.sim-result-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.sim-result-row:not(:last-child){border-bottom:1px solid #E8EAF2}
+.sim-cur{font-size:12px;color:#9AA0B8;display:flex;align-items:center;gap:5px}
+.sim-val{font-size:15px;font-weight:700;color:#1A1A2E}
+```
+
   </style>
 </head>
 <body>
@@ -211,6 +214,7 @@
   </div>
 
   <!-- weather + subtitle -->
+
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
     <div style="font-size:10px;color:rgba(255,255,255,.6)">03 jul → 08 jul · Ida 10h20 · Volta 17h05</div>
     <div id="weather-pill" onclick="fetchWeather()" style="display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.18);border-radius:99px;padding:4px 10px;cursor:pointer">
@@ -221,6 +225,7 @@
   </div>
 
   <!-- SALDO PRINCIPAL -->
+
   <div id="nomad-card">
     <div style="margin-bottom:12px">
       <div style="font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1.5px;margin-bottom:4px">💰 SALDO DISPONÍVEL TOTAL</div>
@@ -287,6 +292,7 @@
 <button id="fab" onclick="openExpenseModal()" title="Adicionar gasto">＋</button>
 
 <!-- TAB: RESUMO -->
+
 <div id="tab-resumo" class="tab active">
   <div id="decolar-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
@@ -308,6 +314,7 @@
 </div>
 
 <!-- TAB: GASTOS -->
+
 <div id="tab-gastos" class="tab">
   <!-- filtro + ordenação -->
   <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -334,6 +341,7 @@
 </div>
 
 <!-- TAB: ROTEIRO -->
+
 <div id="tab-roteiro" class="tab">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
     <div class="section-title" style="margin-bottom:0">Roteiro & Gastos por Dia</div>
@@ -344,12 +352,14 @@
 </div>
 
 <!-- TAB: DICAS -->
+
 <div id="tab-dicas" class="tab">
   <div class="section-title">Dicas para a Viagem 🇨🇱</div>
   <div id="tips-list"></div>
 </div>
 
 <!-- TAB: SIMULADOR -->
+
 <div id="tab-simulador" class="tab">
   <div class="section-title">💱 Simulador de Câmbio</div>
 
@@ -403,13 +413,13 @@
   </div>
 
   <!-- atalhos rápidos -->
+
   <div class="section-title">⚡ Atalhos Rápidos</div>
   <div id="sim-shortcuts" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
 </div>
 
-
-
 <!-- TAB: CHECKLIST -->
+
 <div id="tab-checklist" class="tab">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
     <div class="section-title" style="margin-bottom:0">Checklist da Viagem</div>
@@ -419,6 +429,7 @@
 </div>
 
 <!-- TAB: CONFIG -->
+
 <div id="tab-config" class="tab">
   <div class="section-title">Configurações</div>
   <div class="card" style="margin-bottom:11px">
@@ -460,6 +471,7 @@
 </div>
 
 <!-- MODAL: Configurações (lápis) -->
+
 <div id="modal-settings" class="modal-overlay" onclick="if(event.target===this)closeSettings()">
   <div class="modal-sheet">
     <div class="modal-title">⚙️ Editar Configurações</div>
@@ -488,6 +500,7 @@
 </div>
 
 <!-- MODAL: Adicionar / Editar Gasto -->
+
 <div id="modal-expense" class="modal-overlay" onclick="if(event.target===this)closeExpenseModal()">
   <div class="modal-sheet">
     <div id="modal-expense-title" class="modal-title">➕ Novo Gasto</div>
@@ -543,6 +556,7 @@
 </div>
 
 <!-- MODAL: Editar Roteiro -->
+
 <div id="modal-itin" class="modal-overlay" onclick="if(event.target===this)closeItin()">
   <div class="modal-sheet">
     <div class="modal-title">🗓️ Editar Roteiro</div>
@@ -554,9 +568,8 @@
   </div>
 </div>
 
-
-
 <!-- MODAL: Editar Checklist -->
+
 <div id="modal-checklist" class="modal-overlay" onclick="if(event.target===this)closeChecklist()">
   <div class="modal-sheet">
     <div class="modal-title">📋 Editar Checklist</div>
@@ -571,7 +584,6 @@
     </div>
   </div>
 </div>
-
 
 </div><!-- /app-right -->
 <!-- BOTTOM NAV -->
@@ -618,7 +630,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const REF = db.ref('chile2025');
-firebase.auth().signInAnonymously().catch(err => console.warn('Auth error:', err));
 
 // ══════════════════════════════════════
 // STATE
@@ -789,23 +800,22 @@ function toUSD(amount, currency){
 }
 function totals(){
   const expArr = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{});
-  
+  // Gastos Nomad: tudo que não é Espécie (legacy sem payment também conta como Nomad)
   const spentNomadUSD = expArr
     .filter(e => (e.payment || 'Nomad') !== 'Espécie')
     .reduce((s,e) => s + (e.usd||0), 0);
-    
+  // Gastos Espécie: subtraídos diretamente em CLP
   const spentEspecieCLP = expArr
     .filter(e => (e.payment || 'Nomad') === 'Espécie')
-    .reduce((s,e) => s + ((e.usd * S.usdRate) / S.clpRate || 0), 0);
-
+    .reduce((s,e) => s + (e.clp||0), 0);
   const nomadLeft     = S.nomadUSD - spentNomadUSD;
   const cashLeft      = (S.cashCLP||0) - spentEspecieCLP;
-  const spent         = spentNomadUSD; 
+  const spent         = spentNomadUSD; // para compatibilidade (barra progresso)
   const left          = nomadLeft;
   const pct           = Math.min((spentNomadUSD / (S.nomadUSD||1)) * 100, 100);
-  
   return {spent, left, pct, nomadLeft, cashLeft, spentNomadUSD, spentEspecieCLP};
 }
+
 // ══════════════════════════════════════
 // VISIBILITY
 // ══════════════════════════════════════
@@ -1084,7 +1094,7 @@ let selectedPayment = 'Nomad';
 
 function selectPayment(method){
   selectedPayment = method;
-  
+  // Reset both buttons
   ['nomad','especie'].forEach(id => {
     const btn = document.getElementById('pay-' + id);
     if(!btn) return;
@@ -1092,7 +1102,7 @@ function selectPayment(method){
     btn.style.background  = '#fff';
     btn.style.color       = '#9AA0B8';
   });
-  
+  // Highlight active
   const activeId = method === 'Espécie' ? 'pay-especie' : 'pay-nomad';
   const activeBtn = document.getElementById(activeId);
   if(activeBtn){
@@ -1100,13 +1110,7 @@ function selectPayment(method){
     activeBtn.style.background  = method === 'Espécie' ? '#EFF6FF' : '#FEF0F0';
     activeBtn.style.color       = method === 'Espécie' ? '#2563EB' : '#C0392B';
   }
-
-  if(method === 'Espécie'){
-    const curSel = document.getElementById('me-currency');
-    if(curSel) curSel.value = 'CLP';
-    if(typeof updateModalPreview === 'function') updateModalPreview();
-  }
-
+  // Show available balance hint
   const {nomadLeft, cashLeft} = totals();
   const hint = document.getElementById('pay-hint');
   if(hint){
@@ -1121,7 +1125,9 @@ function selectPayment(method){
     }
     hint.style.display = 'block';
   }
-}function saveExpenseModal(){
+}
+
+function saveExpenseModal(){
   const desc     = document.getElementById('me-desc').value.trim();
   const amount   = parseNum(document.getElementById('me-amount').value);
   const currency = document.getElementById('me-currency').value;
@@ -1347,6 +1353,8 @@ function saveItin(){
   showToast('Roteiro atualizado ✅');
 }
 
+let actDragSrc = { di: -1, ai: -1 };
+
 function renderItinEdit(){
   const list = document.getElementById('itin-edit-list');
   list.innerHTML = '';
@@ -1360,24 +1368,104 @@ function renderItinEdit(){
 
     if (!Array.isArray(day.activities)) {
       day.activities = day.activities && typeof day.activities === 'object'
-        ? Object.values(day.activities)
-        : [];
+        ? Object.values(day.activities) : [];
     }
 
-    const acts = day.activities.map((a, ai) => `
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
-        <div class="act-text">${a}</div>
-        <button class="act-del" onclick="removeAct(${di},${ai})">×</button>
-      </div>`).join('');
+    // Day wrapper
+    const dayDiv = document.createElement('div');
+    dayDiv.style.cssText = 'margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #E8EAF2';
 
-    list.innerHTML += `<div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #E8EAF2">
-      <div style="font-size:12px;font-weight:700;color:#C0392B;margin-bottom:8px">${day.date}</div>
-      ${acts}
-      <div style="display:flex;gap:7px;margin-top:6px">
-        <input id="na-${di}" class="inp" placeholder="+ Nova atividade..." style="font-size:12px;padding:8px 10px" onkeydown="if(event.key==='Enter')addAct(${di})"/>
-        <button onclick="addAct(${di})" style="padding:8px 14px;background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;color:#C0392B;font-size:16px;cursor:pointer;flex-shrink:0">+</button>
-      </div>
-    </div>`;
+    const title = document.createElement('div');
+    title.style.cssText = 'font-size:12px;font-weight:700;color:#C0392B;margin-bottom:8px';
+    title.textContent = day.date;
+    dayDiv.appendChild(title);
+
+    // Activity list container
+    const actsWrap = document.createElement('div');
+    actsWrap.dataset.di = di;
+
+    const buildActRow = (a, ai) => {
+      const row = document.createElement('div');
+      row.dataset.ai = ai;
+      row.style.cssText = 'display:flex;align-items:center;gap:7px;margin-bottom:6px;transition:opacity .15s';
+      row.draggable = true;
+
+      row.innerHTML = `
+        <span class="drag-handle" style="cursor:grab;font-size:18px;color:#D0D4E0;flex-shrink:0;touch-action:none;user-select:none" title="Arraste para reordenar">⠿</span>
+        <div class="act-text" style="flex:1">${a}</div>
+        <button class="act-del" onclick="removeAct(${di},${ai})">×</button>`;
+
+      // ── Mouse drag ──
+      row.addEventListener('dragstart', e => {
+        actDragSrc = { di, ai };
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => row.style.opacity = '0.4', 0);
+      });
+      row.addEventListener('dragend', () => { row.style.opacity = '1'; });
+      row.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+      row.addEventListener('drop', e => {
+        e.preventDefault();
+        if (actDragSrc.di !== di || actDragSrc.ai === ai) return;
+        const arr = itinDraft[di].activities;
+        const [moved] = arr.splice(actDragSrc.ai, 1);
+        arr.splice(ai, 0, moved);
+        actDragSrc = { di: -1, ai: -1 };
+        renderItinEdit();
+      });
+
+      // ── Touch drag (mobile) ──
+      const handle = row.querySelector('.drag-handle');
+      let touchStartY = 0;
+      handle.addEventListener('touchstart', e => {
+        touchStartY = e.touches[0].clientY;
+        row.style.opacity = '0.5';
+        e.preventDefault();
+      }, { passive: false });
+      handle.addEventListener('touchmove', e => {
+        const y = e.touches[0].clientY;
+        const rows = [...actsWrap.children];
+        let target = null, minDist = Infinity;
+        rows.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          const mid  = rect.top + rect.height / 2;
+          const dist = Math.abs(y - mid);
+          if (dist < minDist) { minDist = dist; target = el; }
+        });
+        if (target && target !== row) {
+          const rect = target.getBoundingClientRect();
+          actsWrap.insertBefore(row, y < rect.top + rect.height / 2 ? target : target.nextSibling);
+        }
+        e.preventDefault();
+      }, { passive: false });
+      handle.addEventListener('touchend', () => {
+        row.style.opacity = '1';
+        // Sync DOM order back to draft
+        const newActs = [...actsWrap.children].map(el => {
+          const oldAi = Number(el.dataset.ai);
+          return itinDraft[di].activities[oldAi];
+        }).filter(Boolean);
+        // Rebuild unique by value (activities are plain strings)
+        itinDraft[di].activities = [...actsWrap.children].map(el =>
+          el.querySelector('.act-text').textContent
+        );
+        renderItinEdit();
+      });
+
+      return row;
+    };
+
+    day.activities.forEach((a, ai) => actsWrap.appendChild(buildActRow(a, ai)));
+    dayDiv.appendChild(actsWrap);
+
+    // Add new activity row
+    const addRow = document.createElement('div');
+    addRow.style.cssText = 'display:flex;gap:7px;margin-top:6px';
+    addRow.innerHTML = `
+      <input id="na-${di}" class="inp" placeholder="+ Nova atividade..." style="font-size:12px;padding:8px 10px" onkeydown="if(event.key==='Enter')addAct(${di})"/>
+      <button onclick="addAct(${di})" style="padding:8px 14px;background:#FEF0F0;border:1px solid #FACACA;border-radius:8px;color:#C0392B;font-size:16px;cursor:pointer;flex-shrink:0">+</button>`;
+    dayDiv.appendChild(addRow);
+
+    list.appendChild(dayDiv);
   });
 }
 
@@ -1777,5 +1865,6 @@ renderAll();
 fetchWeather();
 setInterval(fetchWeather, 10*60*1000);
 </script>
+
 </body>
 </html>
