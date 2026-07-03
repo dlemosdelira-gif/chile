@@ -519,7 +519,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
         <select id="me-currency" class="inp" onchange="updateModalPreview()">
           <option value="USD">$ USD</option>
           <option value="BRL">R$ BRL</option>
-          <option value="CLP">$ CLP</option>
+          <option value="CLP" selected>$ CLP</option>
         </select>
       </div>
     </div>
@@ -857,26 +857,29 @@ function renderHeader(){
   const barColor      = pctNomad > 90 ? '#FF5555' : pctNomad > 70 ? '#FFDD00' : '#fff';
   const el            = id => document.getElementById(id);
 
-  setHV(el('hd-total-combined'), fUSD(total));
+  setHV(el('hd-total-combined'), fCLP(totalCLP));
   setHV(el('hd-total-brl'),      fBRL(totalBRL));
-  setHV(el('hd-total-clp'),      fCLP(totalCLP));
-  setHV(el('hd-spent-usd'),      fUSD(spentNomadUSD));
-  setHV(el('hd-spent-brl'),      fBRL(spentNomadUSD * S.usdRate));
+  setHV(el('hd-total-clp'),      fUSD(total));
+  const spentNomadCLP = spentNomadUSD * S.usdRate / S.clpRate;
+  setHV(el('hd-spent-usd'),      fCLP(spentNomadCLP));
+  setHV(el('hd-spent-brl'),      fUSD(spentNomadUSD) + ' · ' + fBRL(spentNomadUSD * S.usdRate));
   el('hd-bar').style.width       = pctNomad + '%';
   el('hd-bar').style.background  = barColor;
   setHV(el('hd-pct'),  pctNomad.toFixed(1) + '% da Nomad usado');
-  const saldo = (total >= 0 ? 'Saldo: ' : 'Excedeu: ') + fUSD(Math.abs(total));
+  const totalAbsCLP = Math.abs(total) * S.usdRate / S.clpRate;
+  const saldo = (total >= 0 ? 'Saldo: ' : 'Excedeu: ') + fCLP(totalAbsCLP);
   const se = el('hd-saldo');
   setHV(se, saldo); se.style.color = total > 0 ? '#fff' : '#FFD0D0';
   // Nomad sub-card
-  setHV(el('hd-left-usd'),   fUSD(nomadLeftSafe));
-  setHV(el('hd-brl'),        fBRL(nomadLeftSafe * S.usdRate));
-  setHV(el('hd-brl-gasto'),  'gasto: ' + fBRL(spentNomadUSD * S.usdRate));
+  const nomadLeftCLP = nomadLeftSafe * S.usdRate / S.clpRate;
+  setHV(el('hd-left-usd'),   fCLP(nomadLeftCLP));
+  setHV(el('hd-brl'),        fUSD(nomadLeftSafe) + ' · ' + fBRL(nomadLeftSafe * S.usdRate));
+  setHV(el('hd-brl-gasto'),  'gasto: ' + fCLP(spentNomadCLP));
   // Cash sub-card — mostra saldo restante (cashLeft) em vez do total configurado
   const cashUSDval = cashLeftSafe * S.clpRate;
   setHV(el('hd-cash-usd'),   fCLP(cashLeftSafe));
   setHV(el('hd-cash-brl'),   fBRL(cashUSDval));
-  setHV(el('hd-clp'),        fBRL(cashUSDval));
+  setHV(el('hd-clp'),        fUSD(cashUSDval));
   // Mostrar gasto em espécie se existir
   const cashGastoEl = el('hd-cash-gasto');
   if(cashGastoEl) setHV(cashGastoEl, 'gasto: ' + fCLP(spentEspecieCLP));
@@ -894,9 +897,9 @@ function renderCategories(){
     const bar = cat.budgeted > 0
       ? `<div style="background:#EEF0F6;border-radius:99px;height:5px;margin-top:8px"><div style="height:100%;width:${p}%;background:${cat.color};border-radius:99px;transition:width .4s"></div></div>` : '';
     const prevSub = cat.budgeted > 0
-      ? `${fUSD(cat.budgeted)} <span style="color:#C0C8DC">· ${fBRL(cat.budgeted*S.usdRate)}</span>` : '—';
-    const spUSD=fUSD(spent), spBRL=fBRL(spent*S.usdRate);
-    const mU=S.visible?spUSD:mask(spUSD), mB=S.visible?spBRL:mask(spBRL);
+      ? `${fCLP(cat.budgeted*S.usdRate/S.clpRate)} <span style="color:#C0C8DC">· ${fUSD(cat.budgeted)} · ${fBRL(cat.budgeted*S.usdRate)}</span>` : '—';
+    const spCLP=fCLP(spent*S.usdRate/S.clpRate), spSecondary=fUSD(spent)+' · '+fBRL(spent*S.usdRate);
+    const mU=S.visible?spCLP:mask(spCLP), mB=S.visible?spSecondary:mask(spSecondary);
     list.innerHTML += `<div class="card" style="cursor:pointer" onclick="goToCategory('${cat.category}')">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:8px">
@@ -907,8 +910,8 @@ function renderCategories(){
           </div>
         </div>
         <div style="text-align:right">
-          <div class="hidden-val" data-real="${spUSD}" style="font-size:14px;font-weight:700;color:${cat.color}">${mU}</div>
-          <div class="hidden-val" data-real="${spBRL}" style="font-size:10px;color:#B0B8CC">${mB}</div>
+          <div class="hidden-val" data-real="${spCLP}" style="font-size:14px;font-weight:700;color:${cat.color}">${mU}</div>
+          <div class="hidden-val" data-real="${spSecondary}" style="font-size:10px;color:#B0B8CC">${mB}</div>
           ${cat.budgeted>0?`<div style="font-size:9px;color:#C0C8DC">${p.toFixed(0)}% do prev.</div>`:''}
           <div style="font-size:9px;color:#C0C8DC;margin-top:2px">ver gastos →</div>
         </div>
@@ -997,8 +1000,8 @@ function renderExpenses(){
     const cat   = S.categories.find(c => c.category === exp.category) || {};
     const color = cat.color || '#C0392B', icon = cat.icon || '💸';
     const note  = exp.note ? `<div style="font-size:10px;color:#B0B8CC;font-style:italic">${exp.note}</div>` : '';
-    const vUSD=fUSD(exp.usd), vBRL=fBRL(exp.usd*S.usdRate), vCLP=fCLP(exp.usd*S.usdRate/S.clpRate);
-    const mU=S.visible?vUSD:mask(vUSD), mB=S.visible?vBRL:mask(vBRL), mC=S.visible?vCLP:mask(vCLP);
+    const vCLP=fCLP(exp.usd*S.usdRate/S.clpRate), vUSD=fUSD(exp.usd), vBRL=fBRL(exp.usd*S.usdRate);
+    const mC=S.visible?vCLP:mask(vCLP), mU=S.visible?vUSD:mask(vUSD), mB=S.visible?vBRL:mask(vBRL);
     list.innerHTML += `
       <div class="expense-item" style="border-left:3px solid ${color}">
         <span style="font-size:20px;flex-shrink:0">${icon}</span>
@@ -1007,9 +1010,9 @@ function renderExpenses(){
           <div style="font-size:10px;color:#B0B8CC">${exp.category} · ${exp.date}/07 · ${ (exp.payment||'Nomad')==='Espécie' ? '<span style=\'color:#2563EB;font-weight:600\'>💵 Espécie</span>' : '<span style=\'color:#C0392B;font-weight:600\'>💳 Nomad</span>' }</div>${note}
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <div class="hidden-val" data-real="${vUSD}" style="font-size:14px;font-weight:800;color:${color}" onclick="toggleVisibility()">${mU}</div>
-          <div class="hidden-val" data-real="${vBRL}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mB}</div>
-          <div class="hidden-val" data-real="${vCLP}" style="font-size:9px;color:#C0C8DC" onclick="toggleVisibility()">${mC}</div>
+          <div class="hidden-val" data-real="${vCLP}" style="font-size:14px;font-weight:800;color:${color}" onclick="toggleVisibility()">${mC}</div>
+          <div class="hidden-val" data-real="${vUSD}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mU}</div>
+          <div class="hidden-val" data-real="${vBRL}" style="font-size:9px;color:#C0C8DC" onclick="toggleVisibility()">${mB}</div>
         </div>
         <button class="edit-exp" onclick="openExpenseModal(${exp.id})" title="Editar">✏️</button>
         <button class="del-exp"  onclick="deleteExpense(${exp.id})" title="Apagar">×</button>
@@ -1055,7 +1058,7 @@ function openExpenseModal(id){
     document.getElementById('modal-expense-title').textContent = '➕ Novo Gasto';
     document.getElementById('modal-expense-save').textContent  = '✓ Salvar';
     ['me-desc','me-amount','me-note'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('me-currency').value = 'USD';
+    document.getElementById('me-currency').value = 'CLP';
     document.getElementById('modal-expense-preview').style.display = 'none';
     selectPayment('Nomad');
   }
@@ -1088,8 +1091,8 @@ function updateModalPreview(){
   const prev     = document.getElementById('modal-expense-preview');
   if(!amount){ prev.style.display='none'; return; }
   const usd = toUSD(amount, currency);
-  document.getElementById('mprev-usd').textContent       = fUSD(usd);
-  document.getElementById('mprev-brl-clp').textContent   = fBRL(usd*S.usdRate) + ' · ' + fCLP(usd*S.usdRate/S.clpRate);
+  document.getElementById('mprev-usd').textContent       = fCLP(usd*S.usdRate/S.clpRate);
+  document.getElementById('mprev-brl-clp').textContent   = fUSD(usd) + ' · ' + fBRL(usd*S.usdRate);
   prev.style.display = 'block';
 }
 let selectedPayment = 'Nomad';
@@ -1122,7 +1125,7 @@ function selectPayment(method){
       hint.style.color = cl > 0 ? '#2563EB' : '#EF4444';
     } else {
       const nl = Math.max(nomadLeft, 0);
-      hint.textContent = 'Disponível na Nomad: ' + fUSD(nl);
+      hint.textContent = 'Disponível na Nomad: ' + fCLP(nl * S.usdRate / S.clpRate);
       hint.style.color = nl > 0 ? '#C0392B' : '#EF4444';
     }
     hint.style.display = 'block';
@@ -1217,12 +1220,12 @@ function renderItin(){
       : `${fCLP(remainCLP)} disponível`;
 
     // Spent display
-    const vU = fUSD(spent), vB = fBRL(spent * S.usdRate);
-    const mU = S.visible ? vU : mask(vU), mB = S.visible ? vB : mask(vB);
+    const vC = fCLP(spent * S.usdRate / S.clpRate), vSec = fUSD(spent) + ' · ' + fBRL(spent * S.usdRate);
+    const mC = S.visible ? vC : mask(vC), mSec = S.visible ? vSec : mask(vSec);
 
     const spentHtml = spent > 0
-      ? `<div class="hidden-val" data-real="${vU}" style="font-size:14px;font-weight:800;color:${overBudget?'#E74C3C':'#27AE60'}" onclick="toggleVisibility()">${mU}</div>
-         <div class="hidden-val" data-real="${vB}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mB}</div>`
+      ? `<div class="hidden-val" data-real="${vC}" style="font-size:14px;font-weight:800;color:${overBudget?'#E74C3C':'#27AE60'}" onclick="toggleVisibility()">${mC}</div>
+         <div class="hidden-val" data-real="${vSec}" style="font-size:10px;color:#B0B8CC" onclick="toggleVisibility()">${mSec}</div>`
       : `<div style="font-size:12px;color:#D8DAE8">—</div>`;
 
     // Budget block inside card
@@ -1282,7 +1285,8 @@ function renderItin(){
     const sdCLP = S.visible ? fCLP(dailyCLP)         : mask(fCLP(dailyCLP));
     const sdUSD = S.visible ? fUSD(fixedDailyUSD)    : mask(fUSD(fixedDailyUSD));
     const sdBRL = S.visible ? fBRL(fixedDailyUSD*S.usdRate) : mask(fBRL(fixedDailyUSD*S.usdRate));
-    const srUSD = S.visible ? fUSD(totalRemaining)   : mask(fUSD(totalRemaining));
+    const totalRemainingCLP = totalRemaining * S.usdRate / S.clpRate;
+    const srCLP = S.visible ? fCLP(totalRemainingCLP) : mask(fCLP(totalRemainingCLP));
     summary.innerHTML = `
       <div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -1297,7 +1301,7 @@ function renderItin(){
           </div>
           <div style="text-align:right">
             <div style="font-size:9px;color:#9AA0B8;margin-bottom:4px">Saldo total</div>
-            <div class="hidden-val" data-real="${fUSD(totalRemaining)}" style="font-size:16px;font-weight:700;color:${sColor}" onclick="toggleVisibility()">${srUSD}</div>
+            <div class="hidden-val" data-real="${fCLP(totalRemainingCLP)}" style="font-size:16px;font-weight:700;color:${sColor}" onclick="toggleVisibility()">${srCLP}</div>
             <div style="font-size:10px;color:#B0B8CC;margin-top:1px">${numDays} dias · compensa automaticamente</div>
           </div>
         </div>
@@ -1585,7 +1589,7 @@ function renderConfig(){
   document.getElementById('cfg-summary').innerHTML = `
     <div class="sum-row"><span class="sum-label">💳 Nomad — saldo</span><div><div class="sum-val">${fUSD(nL)}</div><div class="sum-sub">gasto: ${fUSD(spentNomadUSD)}</div></div></div>
     <div class="sum-row"><span class="sum-label">💵 Espécie — saldo</span><div><div class="sum-val">${fCLP(cL)}</div><div class="sum-sub">gasto: ${fCLP(spentEspecieCLP)}</div></div></div>
-    <div class="sum-row"><span class="sum-label">Saldo total</span><div><div class="sum-val">${fUSD(totalUSD)}</div><div class="sum-sub">${fBRL(totalUSD*S.usdRate)}</div></div></div>
+    <div class="sum-row"><span class="sum-label">Saldo total</span><div><div class="sum-val">${fCLP(totalUSD*S.usdRate/S.clpRate)}</div><div class="sum-sub">${fUSD(totalUSD)} · ${fBRL(totalUSD*S.usdRate)}</div></div></div>
     <div class="sum-row"><span class="sum-label">Taxa: US$ 1 =</span><div class="sum-val">${fBRL(S.usdRate)}</div></div>
     <div class="sum-row"><span class="sum-label">Taxa: $ 1 CLP =</span><div class="sum-val">R$ ${S.clpRate}</div></div>`;
 }
@@ -1639,7 +1643,7 @@ function msConvert(){
   const cashBRL = ca * clpRate2;
   const cashUSD = cashBRL / u;
   document.getElementById('ms-preview').textContent =
-    (n > 0 || ca > 0) ? `Nomad: ${fUSD(n)} + Cash: ${fCLP(ca)} ≈ ${fUSD(n + cashUSD)}` : '';
+    (n > 0 || ca > 0) ? `Nomad: ${fUSD(n)} + Cash: ${fCLP(ca)} ≈ ${fCLP((n + cashUSD) * u / c)}` : '';
 }
 
 
