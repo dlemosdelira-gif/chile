@@ -519,7 +519,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
         <select id="me-currency" class="inp" onchange="updateModalPreview()">
           <option value="USD">$ USD</option>
           <option value="BRL">R$ BRL</option>
-          <option value="CLP">$ CLP</option>
+          <option value="CLP" selected>$ CLP</option>
         </select>
       </div>
     </div>
@@ -1055,7 +1055,7 @@ function openExpenseModal(id){
     document.getElementById('modal-expense-title').textContent = '➕ Novo Gasto';
     document.getElementById('modal-expense-save').textContent  = '✓ Salvar';
     ['me-desc','me-amount','me-note'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('me-currency').value = 'USD';
+    document.getElementById('me-currency').value = 'CLP';
     document.getElementById('modal-expense-preview').style.display = 'none';
     selectPayment('Nomad');
   }
