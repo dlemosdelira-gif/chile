@@ -150,7 +150,6 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
 /* expense items */
 .expense-item{background:#fff;border-radius:13px;padding:11px 14px;margin-bottom:9px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-#decolar-card{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:13px;border-left:4px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .tip-card{background:#fff;border-radius:13px;padding:14px 15px;margin-bottom:11px;border-left:3px solid #E67E22;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .itin-day{background:#fff;border-radius:13px;padding:13px 15px;margin-bottom:11px;border-top:3px solid #C0392B;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 
@@ -295,21 +294,6 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 <!-- TAB: RESUMO -->
 
 <div id="tab-resumo" class="tab active">
-  <div id="decolar-card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
-      <div>
-        <div style="font-size:13px;font-weight:700;color:#1A1A2E">📦 Pacote Decolar</div>
-        <div style="font-size:10px;color:#9AA0B8;margin-top:2px">Já pago — não sai da Nomad</div>
-      </div>
-      <div style="text-align:right">
-        <div id="decolar-val" class="hidden-val" data-real="R$ 11.984,00" style="font-size:15px;font-weight:800;color:#C0392B" onclick="toggleVisibility()">R$ 11.984,00</div>
-        <div style="font-size:9px;background:#C0392B;color:#fff;padding:2px 8px;border-radius:99px;font-weight:700;margin-top:4px;display:inline-block">✓ PAGO</div>
-      </div>
-    </div>
-    <div style="font-size:11px;color:#9AA0B8;padding:2px 0">· ✈️ Passagens Aéreas</div>
-    <div style="font-size:11px;color:#9AA0B8;padding:2px 0">· 🏨 Hospedagem</div>
-    <div style="font-size:11px;color:#9AA0B8;padding:2px 0">· 🛡️ Seguro Viagem</div>
-  </div>
   <div class="section-title">Gastos por Categoria</div>
   <div id="cat-list"></div>
 </div>
@@ -733,6 +717,13 @@ REF.on('value', snapshot => {
         needsSave = true;
       }
     }
+    // Migrate: expenses saved before the "clp" field existed never counted
+    // against the saldo em espécie. Backfill it from usd so old gastos pagos
+    // em espécie voltam a descontar do saldo em pesos.
+    if(exp.clp === undefined && exp.usd !== undefined) {
+      exp.clp = exp.usd * S.usdRate / S.clpRate;
+      needsSave = true;
+    }
   });
   S.expenses = expArr;
   if(needsSave) save();
@@ -849,7 +840,7 @@ function renderHeader(){
   const {spent, nomadLeft, cashLeft, spentNomadUSD, spentEspecieCLP} = totals();
   const nomadLeftSafe = Math.max(nomadLeft, 0);
   const cashLeftSafe  = Math.max(cashLeft, 0);
-  const cashInUSD     = cashLeftSafe * S.clpRate;
+  const cashInUSD     = cashLeftSafe * S.clpRate / S.usdRate;
   const total         = nomadLeftSafe + cashInUSD;
   const totalBRL      = total * S.usdRate;
   const totalCLP      = totalBRL / S.clpRate;
@@ -876,14 +867,13 @@ function renderHeader(){
   setHV(el('hd-brl'),        fUSD(nomadLeftSafe) + ' · ' + fBRL(nomadLeftSafe * S.usdRate));
   setHV(el('hd-brl-gasto'),  'gasto: ' + fCLP(spentNomadCLP));
   // Cash sub-card — mostra saldo restante (cashLeft) em vez do total configurado
-  const cashUSDval = cashLeftSafe * S.clpRate;
+  const cashBRLval = cashLeftSafe * S.clpRate;
   setHV(el('hd-cash-usd'),   fCLP(cashLeftSafe));
-  setHV(el('hd-cash-brl'),   fBRL(cashUSDval));
-  setHV(el('hd-clp'),        fUSD(cashUSDval));
+  setHV(el('hd-cash-brl'),   fBRL(cashBRLval));
+  setHV(el('hd-clp'),        fUSD(cashBRLval / S.usdRate));
   // Mostrar gasto em espécie se existir
   const cashGastoEl = el('hd-cash-gasto');
   if(cashGastoEl) setHV(cashGastoEl, 'gasto: ' + fCLP(spentEspecieCLP));
-  const dv = el('decolar-val'); if(dv) setHV(dv, 'R$ 11.984,00');
 }
 
 // ══════════════════════════════════════
@@ -1142,11 +1132,12 @@ function saveExpenseModal(){
   const payment = selectedPayment;
   if(!desc || !amount){ showToast('Preencha descrição e valor ⚠️'); return; }
   const usd = toUSD(amount, currency);
+  const clp = usd * S.usdRate / S.clpRate;
   if(editingId){
-    const expArrE = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); const idx = expArrE.findIndex(e => e.id === editingId); if(idx !== -1) expArrE[idx] = {...expArrE[idx], desc, amount, currency, category, date, note, payment, usd}; S.expenses = expArrE;
+    const expArrE = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); const idx = expArrE.findIndex(e => e.id === editingId); if(idx !== -1) expArrE[idx] = {...expArrE[idx], desc, amount, currency, category, date, note, payment, usd, clp}; S.expenses = expArrE;
     showToast('Gasto atualizado ✅');
   } else {
-    const expArrU = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); expArrU.unshift({id: Date.now(), desc, amount, currency, category, date, note, payment, usd}); S.expenses = expArrU;
+    const expArrU = Array.isArray(S.expenses) ? S.expenses : Object.values(S.expenses||{}); expArrU.unshift({id: Date.now(), desc, amount, currency, category, date, note, payment, usd, clp}); S.expenses = expArrU;
     showToast('Gasto adicionado ✅');
   }
   save(); renderAll(); closeExpenseModal();
@@ -1167,7 +1158,7 @@ function renderItin(){
   // ── Budget: total original ÷ dias, saldo real diminui com gastos ──
   // Usa o saldo ATUAL da Nomad (já descontados os gastos), não o valor original configurado
   const {nomadLeft: nomadLeftNow, cashLeft: cashLeftNow} = totals();
-  const totalBudgetUSD = Math.max(nomadLeftNow, 0) + (Math.max(cashLeftNow,0) * S.clpRate); // saldo real disponível
+  const totalBudgetUSD = Math.max(nomadLeftNow, 0) + (Math.max(cashLeftNow,0) * S.clpRate / S.usdRate); // saldo real disponível
   const numDays        = itin.length || 1;
   const fixedDailyUSD  = totalBudgetUSD / numDays; // divisão fixa para o card de resumo
 
@@ -1585,7 +1576,7 @@ function renderConfig(){
   cfgConvert();
   const {nomadLeft, cashLeft, spentNomadUSD, spentEspecieCLP} = totals();
   const nL = Math.max(nomadLeft, 0), cL = Math.max(cashLeft, 0);
-  const totalUSD = nL + cL * S.clpRate;
+  const totalUSD = nL + cL * S.clpRate / S.usdRate;
   document.getElementById('cfg-summary').innerHTML = `
     <div class="sum-row"><span class="sum-label">💳 Nomad — saldo</span><div><div class="sum-val">${fUSD(nL)}</div><div class="sum-sub">gasto: ${fUSD(spentNomadUSD)}</div></div></div>
     <div class="sum-row"><span class="sum-label">💵 Espécie — saldo</span><div><div class="sum-val">${fCLP(cL)}</div><div class="sum-sub">gasto: ${fCLP(spentEspecieCLP)}</div></div></div>
