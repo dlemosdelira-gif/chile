@@ -1027,7 +1027,11 @@ function populateModalSelects(){
   const ds=document.getElementById('me-date'); ds.innerHTML='';
   const itinArr = Array.isArray(S.itinerary) ? S.itinerary : Object.values(S.itinerary||{});
   itinArr.forEach(d => { const o=document.createElement('option'); o.value=d.date.slice(4); o.textContent=d.date; ds.appendChild(o); });
-  if(ds.options.length > 1) ds.selectedIndex = 1;
+  const today = new Date();
+  const todayKey = String(today.getDate()).padStart(2,'0') + '/' + String(today.getMonth()+1).padStart(2,'0');
+  const todayIdx = [...ds.options].findIndex(o => o.value === todayKey);
+  if(todayIdx !== -1) ds.selectedIndex = todayIdx;
+  else if(ds.options.length > 1) ds.selectedIndex = 1;
 }
 function openExpenseModal(id){
   populateModalSelects();
